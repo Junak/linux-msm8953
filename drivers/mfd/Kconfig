@@ -1155,6 +1155,17 @@ config MFD_SMSC
 	  To compile this driver as a module, choose M here: the
 	  module will be called smsc.
 
+config MFD_SM5708
+	bool "Siliconmitus SM5708 IFPM Support"
+	depends on I2C=y
+	select MFD_CORE
+	help
+	  Say yes here to support for Siliconmitus SM5708.
+	  This is a Power Management IC with USBLDO, RGB(SVC led), Dual Flash, Charger
+	  controls on chip.
+	  This driver provides common support for accessing the device;
+	  additional drivers
+
 config MFD_SC27XX_PMIC
 	tristate "Spreadtrum SC27xx PMICs"
 	depends on ARCH_SPRD || COMPILE_TEST
