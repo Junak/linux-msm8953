@@ -172,6 +172,17 @@ config EXTCON_SM5502
 	  Silicon Mitus SM5502. The SM5502 is a USB port accessory
 	  detector and switch.
 
+config EXTCON_SM5708
+	tristate "Silicon Mitus SM5708 EXTCON support"
+	depends on I2C
+	select IRQ_DOMAIN
+	select REGMAP_I2C
+	select REGMAP_IRQ
+	help
+	  If you say yes here you get support for the MUIC device of
+	  Silicon Mitus SM5708. The SM5708 is a USB port accessory
+	  detector and switch.
+
 config EXTCON_USB_GPIO
 	tristate "USB GPIO extcon support"
 	depends on GPIOLIB || COMPILE_TEST
