@@ -1,0 +1,89 @@
+
+/ {
+	compatible = "qcom,sdm450";
+	qcom,msm-id = <338 0>;
+
+	cpu_opp_table_c0: cpu-opp-table-c0 {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp-399999000 {
+			opp-hz = /bits/ 64 <399999000>;
+			opp-microvolt = <600000 600000 900000>;
+		};
+		opp-799999000 {
+			opp-hz = /bits/ 64 <799999000>;
+			opp-microvolt = <680000 680000 900000>;
+		};
+		opp-1190400000 {
+			opp-hz = /bits/ 64 <1190400000>;
+			opp-microvolt = <750000 750000 900000>;
+		};
+		opp-1785600000 {
+			opp-hz = /bits/ 64 <1785600000>;
+			opp-microvolt = <820000 820000 900000>;
+		};
+	};
+
+	cpu_opp_table_c1: cpu-opp-table-c1 {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp-399999000 {
+			opp-hz = /bits/ 64 <399999000>;
+			opp-microvolt = <600000 600000 900000>;
+		};
+		opp-799999000 {
+			opp-hz = /bits/ 64 <799999000>;
+			opp-microvolt = <680000 680000 900000>;
+		};
+		opp-1190400000 {
+			opp-hz = /bits/ 64 <1190400000>;
+			opp-microvolt = <750000 750000 900000>;
+		};
+		opp-1785600000 {
+			opp-hz = /bits/ 64 <1785600000>;
+			opp-microvolt = <820000 820000 900000>;
+		};
+	};
+};
+
+&CPU0 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c0>;
+};
+
+&CPU1 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c0>;
+};
+
+&CPU2 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c0>;
+};
+
+&CPU3 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c0>;
+};
+
+&CPU4 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c1>;
+};
+
+&CPU5 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c1>;
+};
+
+&CPU6 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c1>;
+};
+
+&CPU7 {
+	cpu-supply = <&pm8953_s5>;
+	operating-points-v2 = <&cpu_opp_table_c1>;
+};
