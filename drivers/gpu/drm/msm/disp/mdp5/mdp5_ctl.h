@@ -73,7 +73,6 @@ void mdp5_ctl_commit_finished(struct mdp5_ctl *ctl);
 u32 mdp5_ctl_commit(struct mdp5_ctl *ctl, struct mdp5_pipeline *pipeline,
 		    u32 flush_mask, bool start);
 u32 mdp5_ctl_get_commit_status(struct mdp5_ctl *ctl);
-
-
+void mdp5_ctl_disable(struct mdp5_ctl *ctl, struct mdp5_pipeline *pipeline);
 
 #endif /* __MDP5_CTL_H__ */

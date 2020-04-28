@@ -52,6 +52,13 @@ struct mdp5_ctl {
 	bool busy;
 
 	struct mdp5_ctl *pair; /* Paired CTL to be flushed together */
+
+	/*
+	 * The command mode panels are ran with autorefresh enabled. Only a
+	 * single START command can be sent so keep track on a per ping pong
+	 * basis.
+	 */
+	bool start_sent_by_pp[4];
 };
 
 struct mdp5_ctl_manager {
@@ -193,7 +200,8 @@ static bool start_signal_needed(struct mdp5_ctl *ctl,
 	case INTF_WB:
 		return true;
 	case INTF_DSI:
-		return intf->mode == MDP5_INTF_DSI_MODE_COMMAND;
+		return intf->mode == MDP5_INTF_DSI_MODE_COMMAND &&
+			!ctl->start_sent_by_pp[pipeline->mixer->pp];
 	default:
 		return false;
 	}
@@ -206,7 +214,8 @@ static bool start_signal_needed(struct mdp5_ctl *ctl,
  * executed in order to kick off operation and activate all layers.
  * e.g.: DSI command mode, Writeback
  */
-static void send_start_signal(struct mdp5_ctl *ctl)
+static void send_start_signal(struct mdp5_ctl *ctl,
+			      struct mdp5_pipeline *pipeline)
 {
 	unsigned long flags;
 
@@ -218,6 +227,9 @@ static void send_start_signal(struct mdp5_ctl *ctl)
 	ctl->busy = true;
 	ctl_write(ctl, REG_MDP5_CTL_START(ctl->id), 1);
 	spin_unlock_irqrestore(&ctl->hw_lock, flags);
+
+	if (pipeline->intf->mode == MDP5_INTF_DSI_MODE_COMMAND)
+		ctl->start_sent_by_pp[pipeline->mixer->pp] = true;
 }
 
 /**
@@ -241,7 +253,7 @@ int mdp5_ctl_set_encoder_state(struct mdp5_ctl *ctl,
 	DBG("intf_%d: %s", intf->num, enabled ? "on" : "off");
 
 	if (start_signal_needed(ctl, pipeline)) {
-		send_start_signal(ctl);
+		send_start_signal(ctl, pipeline);
 	}
 
 	return 0;
@@ -574,7 +586,7 @@ u32 mdp5_ctl_commit(struct mdp5_ctl *ctl,
 	}
 
 	if (start_signal_needed(ctl, pipeline)) {
-		send_start_signal(ctl);
+		send_start_signal(ctl, pipeline);
 	}
 
 	return curr_ctl_flush_mask;
@@ -764,4 +776,15 @@ fail:
 		mdp5_ctlm_destroy(ctl_mgr);
 
 	return ERR_PTR(ret);
+}
+
+void mdp5_ctl_disable(struct mdp5_ctl *ctl, struct mdp5_pipeline *pipeline)
+{
+	int i;
+
+	if (pipeline->intf->mode != MDP5_INTF_DSI_MODE_COMMAND)
+		return;
+
+	for (i = 0; i < ARRAY_SIZE(ctl->start_sent_by_pp); i++)
+		ctl->start_sent_by_pp[i] = false;
 }

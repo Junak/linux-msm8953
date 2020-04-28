@@ -518,6 +518,8 @@ static void mdp5_crtc_atomic_disable(struct drm_crtc *crtc,
 		spin_unlock_irqrestore(&mdp5_kms->dev->event_lock, flags);
 	}
 
+	mdp5_ctl_disable(mdp5_cstate->ctl, &mdp5_cstate->pipeline);
+
 	mdp5_crtc->enabled = false;
 }
 
@@ -538,6 +540,7 @@ static void mdp5_crtc_atomic_enable(struct drm_crtc *crtc,
 {
 	struct mdp5_crtc *mdp5_crtc = to_mdp5_crtc(crtc);
 	struct mdp5_crtc_state *mdp5_cstate = to_mdp5_crtc_state(crtc->state);
+	struct mdp5_pipeline *pipeline = &mdp5_cstate->pipeline;
 	struct mdp5_kms *mdp5_kms = get_kms(crtc);
 	struct device *dev = &mdp5_kms->pdev->dev;
 
@@ -575,8 +578,20 @@ static void mdp5_crtc_atomic_enable(struct drm_crtc *crtc,
 
 	mdp_irq_register(&mdp5_kms->base, &mdp5_crtc->err);
 
-	if (mdp5_cstate->cmd_mode)
+	if (mdp5_cstate->cmd_mode) {
 		mdp_irq_register(&mdp5_kms->base, &mdp5_crtc->pp_done);
+
+		/*
+		 * Enable autorefresh so we get regular ping/pong IRQs.
+		 * - Bit 31 is the enable bit
+		 * - Bits 0-15 represent the frame count, specifically how many
+		 *   TE events before the MDP sends a frame.
+		 */
+		mdp5_write(mdp5_kms,
+			   REG_MDP5_PP_AUTOREFRESH_CONFIG(pipeline->mixer->pp),
+			   BIT(31) | BIT(0));
+		crtc_flush_all(crtc);
+	}
 
 	mdp5_crtc->enabled = true;
 }
