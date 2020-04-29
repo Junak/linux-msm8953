@@ -786,9 +786,9 @@ static const struct rpm_regulator_data rpm_pm8953_regulators[] = {
 	{ "l15", QCOM_SMD_RPM_LDOA, 15, &pm8916_pldo, "vdd" },
 	{ "l16", QCOM_SMD_RPM_LDOA, 16, &pm8916_pldo, "vdd" },
 	{ "l17", QCOM_SMD_RPM_LDOA, 17, &pm8916_pldo, "vdd" },
-	{ "l19", QCOM_SMD_RPM_LDOA, 18, &pm8916_pldo, "vdd" },
-	{ "l22", QCOM_SMD_RPM_LDOA, 18, &pm8916_pldo, "vdd" },
-	{ "l23", QCOM_SMD_RPM_LDOA, 18, &pm8916_pldo, "vdd" },
+	{ "l19", QCOM_SMD_RPM_LDOA, 19, &pm8916_pldo, "vdd" },
+	{ "l22", QCOM_SMD_RPM_LDOA, 22, &pm8916_pldo, "vdd" },
+	{ "l23", QCOM_SMD_RPM_LDOA, 23, &pm8916_pldo, "vdd" },
 	{}
 };
 
