@@ -11,6 +11,8 @@
  * GNU General Public License for more details.
  */
 
+#define pr_fmt(fmt) "apcs-cpu-msm8953: " fmt
+
 #include <linux/bitops.h>
 #include <linux/clk-provider.h>
 #include <linux/err.h>
