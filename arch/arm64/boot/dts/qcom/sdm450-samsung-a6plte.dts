@@ -160,11 +160,15 @@
 };
 
 &framebuffer {
-	//status = "okay";
+	status = "okay";
 
 	width = <1080>;
 	height = <2220>;
 	stride = <(1080 * 3)>;
+
+	vdd-supply = <&pm8953_l17>;
+	vdda-supply = <&pm8953_s3>;
+	vddio-supply = <&pm8953_l6>;
 };
 
 &dsi0 {
@@ -359,35 +363,35 @@
 		};
 		config {
 			pins = "gpio44";
-			drive-strength = <2>;   /* 16 mA */
+			drive-strength = <2>;  /* 2 mA */
 			bias-disable;
 			input-enable;
 		};
 	};
 	pmx_mdss_default: pmx-mdss-default {
 		mux {
-			pins = "gpio50", "gpio35", "gpio93";
+			pins = "gpio35", "gpio93";
 			function = "gpio";
 		};
 
 		config {
-			pins = "gpio50", "gpio35", "gpio93";
+			pins = "gpio35", "gpio93";
 			drive-strength = <8>; /* 8 mA */
-			bias-disable = <0>; /* no pull */
+			bias-disable;
 			output-high;
 		};
 	};
 
 	pmx_mdss_sleep: pmx-mdss-sleep {
 		mux {
-			pins = "gpio50", "gpio35", "gpio93";
+			pins = "gpio35", "gpio93";
 			function = "gpio";
 		};
 
 		config {
-			pins = "gpio50", "gpio35", "gpio93";
+			pins = "gpio35", "gpio93";
 			drive-strength = <2>; /* 2 mA */
-			bias-pull-down; /* pull down */
+			bias-pull-down;
 		};
 	};
 };
