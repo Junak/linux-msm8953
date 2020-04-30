@@ -13,12 +13,12 @@
 
 #include "msm8953.dtsi"
 #include "pm8953.dtsi"
+#include "sdm625.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 
 / {
 	model = "potter";
 	compatible = "qcom,msm8953-potter", "qcom,msm8953-moto", "qcom,msm8953";
-	qcom,msm-id = <293 0>;
 	qcom,board-id = <0x46 0x83a0>;
 
 	chosen {
