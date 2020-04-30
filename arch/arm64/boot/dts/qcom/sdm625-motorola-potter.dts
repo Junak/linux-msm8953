@@ -76,6 +76,14 @@
 	};
 };
 
+&framebuffer {
+	status = "okay";
+
+	width = <1080>;
+	height = <1920>;
+	stride = <(1080 * 3)>;
+};
+
 &i2c_3 {
 	status = "okay";
 };
