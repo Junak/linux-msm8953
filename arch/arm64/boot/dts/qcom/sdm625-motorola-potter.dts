@@ -1,0 +1,331 @@
+/* Copyright (c) 2017,2020 The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/dts-v1/;
+
+#include "msm8953.dtsi"
+#include "pm8953.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "potter";
+	compatible = "qcom,msm8953-potter", "qcom,msm8953-moto", "qcom,msm8953";
+	qcom,msm-id = <293 0>;
+	qcom,board-id = <0x46 0x83a0>;
+
+	chosen {
+		bootargs = "clk_ignore_unused";
+	};
+
+	reserved-memory {
+		/delete-node/other_ext_region@85b00000;
+
+		other_ext_region@84300000 {
+			no-map;
+			reg = <0x00 0x84300000 0x00 0x2000000>;
+		};
+
+		ramoops@ef000000 {
+			compatible = "ramoops";
+			reg = <0x0 0xef000000 0x0 0x200000>;
+			console-size = <0x200000>;
+		};
+
+		tzlog_bck_region@eefe4000 {
+			no-map;
+			reg = <0x0 0xeefe4000 0x0 0x2000>;
+		};
+
+		wdog_cpuctx_region@eefe6000 {
+			no-map;
+			reg = <0x0 0xeefe6000 0x0 0x1a000>;
+		};
+	};
+
+	soc {
+		apps-iommu { // FIXME: Causes flood of context faults
+			status = "disabled";
+		};
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+		input-name = "gpio-keys";
+
+		pinctrl-names = "msmgpio_gpio_key_active","msmgpio_gpio_key_suspend";
+		pinctrl-0 = <&gpio_key_default>;
+		pinctrl-1 = <&gpio_key_default>;
+
+		label = "GPIO Button";
+
+		volume-up {
+			label = "Volume Up";
+			gpios = <&msmgpio 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+		};
+	};
+};
+
+&i2c_3 {
+	status = "okay";
+};
+
+&dsi0 {
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	vdd-supply = <&pm8953_l17>;
+	vdda-supply = <&pm8953_s3>;
+	vddio-supply = <&pm8953_l6>;
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&pmx_mdss_default>;
+	pinctrl-1 = <&pmx_mdss_sleep>;
+
+	panel@0 {
+		//compatible = "TODO";
+		reg = <0>;
+
+		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				panel_in: endpoint {
+					remote-endpoint = <&dsi0_out>;
+				};
+			};
+		};
+	};
+
+	ports {
+		port@1 {
+			endpoint {
+				remote-endpoint = <&panel_in>;
+				data-lanes = <0 1 2 3>;
+			};
+		};
+	};
+};
+
+
+&dsi_phy0 {
+	status = "okay";
+
+	vddio-supply = <&pm8953_l6>;
+	vcca-supply = <&pm8953_l3>;
+};
+
+&sdhc_1 {
+	status = "okay";
+
+	vmmc-supply = <&pm8953_l8>;
+	vqmmc-supply = <&pm8953_l5>;
+
+	mmc-hs200-1_8v;
+	mmc-hs400-1_8v;
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+
+	vmmc-supply = <&pm8953_l11>;
+	vqmmc-supply = <&pm8953_l12>;
+
+	cd-gpios = <&msmgpio 133 GPIO_ACTIVE_LOW>;
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+};
+
+&gpio_key_default {
+	mux {
+		pins = "gpio85";
+		function = "gpio";
+	};
+
+	config {
+		pins = "gpio85";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+};
+
+&usb3 {
+	status = "okay";
+	//extcon = <&muic>, <&muic>;
+};
+
+&usb3_dwc3 {
+	status = "okay";
+
+	dr_mode = "peripheral";
+	//extcon = <&muic>, <&muic>;
+
+};
+
+&hsusb_phy {
+	status = "okay";
+
+	phy-supply = <&pm8953_l3>;
+	vdda-pll-supply = <&pm8953_l7>;
+	vdda-phy-dpdm-supply = <&pm8953_l13>;
+
+};
+
+&ssusb_phy {
+	status = "okay";
+
+	vdda-phy-supply = <&pm8953_l3>;
+	vdda-pll-supply = <&pm8953_l7>;
+
+};
+
+&msmgpio {
+	gpio-reserved-ranges = <1 2>, <96 4>, <111 1>, <126 1>; //NOTE: Add Fingerprint
+
+	pmx_mdss_default: pmx-mdss-default {
+		mux {
+			pins = "gpio61";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio61";
+			drive-strength = <8>; /* 8 mA */
+			bias-disable;
+			output-high;
+		};
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep {
+		mux {
+			pins = "gpio61";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio61";
+			drive-strength = <2>; /* 2 mA */
+			bias-pull-down;
+		};
+	};
+};
+
+&pm8953_l2 {
+	regulator-min-microvolt = <1000000>;
+	regulator-max-microvolt = <1000000>;
+};
+
+&pm8953_l6 {
+	regulator-always-on;
+};
+
+&smd_rpm_regulators {
+	compatible = "qcom,rpm-pm8953-regulators";
+
+	s1 { // Modem
+		regulator-min-microvolt = <870000>;
+		regulator-max-microvolt = <1156000>;
+	};
+	s3 { // CSI
+		regulator-min-microvolt = <1225000>;
+		regulator-max-microvolt = <1225000>;
+	};
+	s4 { // Audio codec
+		regulator-min-microvolt = <1900000>;
+		regulator-max-microvolt = <2050000>;
+	};
+	l1 { // unused
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1100000>;
+	};
+	l2 { // unused
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1225000>;
+	};
+	l3 { // Usb, mdss phy
+		regulator-min-microvolt = <925000>;
+		regulator-max-microvolt = <925000>;
+		regulator-allow-set-load;
+	};
+	l5 { // wcnss, sdhci, codec
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l6 { // DSI
+		regulator-always-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l8 { // sdhci
+		regulator-min-microvolt = <2900000>;
+		regulator-max-microvolt = <2900000>;
+	};
+	l9 { // wcnss
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3300000>;
+	};
+	l10 { // unused
+		regulator-min-microvolt = <2850000>;
+		regulator-max-microvolt = <2850000>;
+	};
+	l11 { // sdhci
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l12 { // sdhci,
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l13 { // audio codec, usb phy
+		regulator-min-microvolt = <3075000>;
+		regulator-max-microvolt = <3125000>;
+	};
+	l15 { // unused
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l16 { // unused
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l17 { // dsi
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l19 { // wcnss
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1350000>;
+	};
+	l22 { // unused
+		regulator-always-on;
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2850000>;
+	};
+	l23 { // camera
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1225000>;
+	};
+};
