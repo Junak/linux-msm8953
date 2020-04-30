@@ -1,0 +1,505 @@
+/* Copyright (c) 2017,2020 The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/dts-v1/;
+
+#include "msm8953-pm8953.dtsi"
+#include "pmi8950.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "Motorola G5 Plus (potter)";
+	compatible = "qcom,msm8953-potter", "qcom,msm8953-moto", "qcom,msm8953";
+	qcom,msm-id = <293 0>;
+	qcom,board-id = <0x46 0x83a0>;
+
+	aliases {
+		panel = &panel;
+	};
+
+	reserved-memory {
+		/delete-node/other_ext_region@85b00000;
+
+		other_ext_region@84300000 {
+			no-map;
+			reg = <0x0 0x84300000 0x0 0x2000000>;
+		};
+
+		ramoops@ef000000 {
+			compatible = "ramoops";
+			reg = <0x0 0xef000000 0x0 0x200000>;
+			console-size = <0x200000>;
+		};
+
+		tzlog_bck_region@eefe4000 {
+			no-map;
+			reg = <0x0 0xeefe4000 0x0 0x2000>;
+		};
+
+		tzlog_bck_region@aefd2000 {
+			no-map;
+			reg = <0x0 0xaefd2000 0x0 0x2000>;
+		};
+
+		wdog_cpuctx_region@eefe6000 {
+			no-map;
+			reg = <0x0 0xeefe6000 0x0 0x1a000>;
+		};
+
+		wdog_cpuctx_region@aefd4000 {
+			no-map;
+			reg = <0x0 0xaefd4000 0x0 0x2c000>;
+		};
+
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_key_default>;
+
+		label = "GPIO Button";
+
+		volume-up {
+			label = "Volume Up";
+			gpios = <&msmgpio 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+	};
+
+	qcom,battery-data {
+		qcom,batt-id-range-pct = <100>;
+		serial-number = "SNN5982";
+		manufacturer = "ATL";
+		model = "HG40";
+
+		qcom,max-voltage-uv = <4400000>;
+		qcom,batt-id-kohm = <0>;
+		qcom,battery-beta = <0>;
+		qcom,battery-type = "HG40-ATL-3000mah";
+		qcom,chg-rslow-comp-c1 = <3073614>;
+		qcom,chg-rslow-comp-c2 = <3981400>;
+		qcom,chg-rs-to-rslow = <1280731>;
+		qcom,chg-rslow-comp-thr = <157>;
+		qcom,thermal-coefficients = [69 86 5d 4b 62 35];
+		qcom,fg-profile-data = [ E0 83 C3 7C
+					 0F 81 36 77
+					 65 83 4C 74
+					 5C 89 67 94
+					 3A 82 6D 99
+					 54 BC AA C8
+					 56 10 02 88
+					 A7 7D A8 81
+					 1F 7C 54 83
+					 34 6A B6 78
+					 21 86 4E 82
+					 B5 99 08 BD
+					 07 CA 59 0D
+					 DE 0B 7F 59
+					 14 70 B2 FD
+					 E0 35 52 3E
+					 FD 16 00 00
+					 17 46 56 23
+					 5F 28 00 00
+					 00 00 00 00
+					 00 00 00 00
+					 EC 70 41 70
+					 31 71 E9 83
+					 EF 6E 25 5A
+					 34 5A 39 7A
+					 A8 6E 4D 5B
+					 28 7F 6B 96
+					 17 A1 62 44
+					 64 A0 71 0C
+					 28 00 FF 36
+					 F0 11 30 03
+					 00 00 00 0C ];
+	};
+
+	cam_sensor_front_avdd: regulator-cam-front-ana {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_front_avdd";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+
+		gpio = <&msmgpio 47 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
+	cam_sensor_front_dvdd: regulator-cam-front-dig {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_front_dvdd";
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1000000>;
+
+		gpio = <&msmgpio 41 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
+	reg_ctp: regulator-ctp {
+		compatible = "regulator-fixed";
+		regulator-name = "ctp";
+
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+
+		gpio = <&msmgpio 64 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&ctp_pwr_en_default>;
+	};
+
+	soc {
+		sound {
+			status = "okay";
+
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act>;
+			pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_act>;
+
+			model = "msm8916";
+		};
+	};
+};
+
+&pmi8950_wled {
+	status = "okay";
+
+	/* Don't copy-paste! See pmi8950.dtsi */
+
+	qcom,current-limit-microamp = <25000>;
+	qcom,enabled-strings = <0 1 2>;
+	qcom,num-strings = <3>;
+
+	qcom,cabc;
+	qcom,eternal-pfet;
+};
+
+&wcd_codec {
+	qcom,micbias1-ext-cap;
+	qcom,micbias2-ext-cap;
+	qcom,hphl-jack-type-normally-open;
+	qcom,mbhc-vthreshold-low = <75 150 237 450 500>;
+	qcom,mbhc-vthreshold-high = <75 150 237 450 500>;
+};
+
+&cci {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cci0_default>;
+
+	status = "okay";
+};
+
+&cci_i2c0 {
+	front-camera-sensor@20 {
+		compatible = "ovti,ov5695";
+		reg = <0x20>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&camss_mclk1_default>;
+
+		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+		clock-names = "xvclk";
+
+
+		avdd-supply = <&cam_sensor_front_avdd>;
+		dovdd-supply = <&pm8953_l10>;
+		dvdd-supply = <&cam_sensor_front_dvdd>;
+		reset-gpios = <&msmgpio 129 GPIO_ACTIVE_LOW>;
+
+		port {
+			front_camera_ep: endpoint {
+				remote-endpoint = <&csiphy2_ep>;
+				data-lanes = <0 1>;
+			};
+		};
+	};
+};
+
+&camss {
+	status = "okay";
+
+	ports {
+		port@2 {
+			reg = <2>;
+			csiphy2_ep: endpoint {
+				clock-lanes = <7>;
+				data-lanes = <0 1>;
+				remote-endpoint = <&front_camera_ep>;
+			};
+		};
+	};
+};
+
+&i2c_3 {
+	status = "okay";
+
+	touchscreen@20 {
+		reg = <0x20>;
+		compatible = "syna,rmi4-i2c";
+		interrupts-parent = <&msmgpio>;
+		interrupts-extended = <&msmgpio 65 0x2008>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		vdd-supply = <&reg_ctp>;
+		vio-supply = <&pm8953_l22>;
+		gpios = <&msmgpio 65 0x2008>,
+			<&msmgpio 64 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-names = "init", "suspend";
+		pinctrl-0 = <&ts_reset &touch_int_default>;
+		pinctrl-1 = <&ts_reset &touch_int_suspend>;
+		syna,reset-delay-ms = <200>;
+		syna,startup-delay-ms = <500>;
+	};
+};
+
+&i2c_5 {
+	status = "okay";
+
+	nfc@28 {
+		compatible = "nxp,pn544-i2c";
+		reg = <0x28>;
+		interrupt-parent = <&msmgpio>;
+		interrupts = <17 0x00>;
+
+		enable-gpios = <&msmgpio 16 GPIO_ACTIVE_HIGH>; /* EN */
+		firmware-gpios = <&msmgpio 62 GPIO_ACTIVE_HIGH>; /* Firmware */
+
+		nxp,pnxx-discharge-delay = <100>;
+		nxp,pnxx-ven-inv-polarity = <0x00>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&nfc_irq_default &nfc_pwr_default &nfc_firm_default>;
+	};
+};
+
+&dsi0 {
+	panel: panel@0 {
+		compatible = "boe,bs052fhm-a00-6c01";
+		reg = <0>;
+
+		backlight = <&pmi8950_wled>;
+
+		supply-names = "vsp", "vsn";
+		vsp-supply = <&lab_vreg>;
+		vsn-supply = <&ibb_vreg>;
+
+		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default>;
+		pinctrl-1 = <&pmx_mdss_sleep>;
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				panel_in: endpoint {
+					remote-endpoint = <&dsi0_out>;
+				};
+			};
+		};
+	};
+
+	ports {
+		port@1 {
+			endpoint {
+				remote-endpoint = <&panel_in>;
+				data-lanes = <0 1 2 3>;
+			};
+		};
+	};
+};
+
+&sdhc_1 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+
+	// cd-gpios = <&msmgpio 133 GPIO_ACTIVE_HIGH>;
+	/* FIXME: triggers eject during modem initialization */
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_off>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+};
+
+&usb3 {
+	status = "okay";
+};
+
+&msmgpio {
+	gpio-reserved-ranges = <1 2>, <96 4>, <111 1>, <126 1>; //NOTE: Add Fingerprint
+
+	ctp_pwr_en_default: ctp-pwr-en-pins {
+		function = "gpio";
+		pins = "gpio64";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	ts_reset: ts-reset-pins {
+		pins = "gpio64";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+
+	touch_int_default: touch-int-default-pins {
+		pins = "gpio65";
+		function = "gpio";
+		bias-disable;
+	};
+
+	touch_int_suspend: touch-int-suspend-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+
+	pmx_mdss_default: pmx-mdss-default-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	nfc_irq_default: nfc-irq-pins {
+		pins = "gpio17";
+		bias-pull-down;
+		drive-strength = <2>;
+	};
+
+	nfc_pwr_default: nfc-pwr-pins {
+		pins = "gpio16";
+		bias-pull-down;
+		output-low;
+		drive-strength = <2>;
+	};
+
+	nfc_firm_default: nfc-firm-pins {
+		pins = "gpio62";
+		bias-pull-down;
+		output-low;
+		drive-strength = <2>;
+	};
+};
+
+&smd_rpm_regulators {
+	s1 {
+		regulator-min-microvolt = <863000>;
+		regulator-max-microvolt = <1152000>;
+	};
+	s3 {
+		regulator-min-microvolt = <1224000>;
+		regulator-max-microvolt = <1224000>;
+	};
+	s4 {
+		regulator-min-microvolt = <1896000>;
+		regulator-max-microvolt = <2048000>;
+	};
+	l1 {
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1100000>;
+	};
+	l2 {
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1000000>;
+	};
+	l3 {
+		regulator-min-microvolt = <925000>;
+		regulator-max-microvolt = <925000>;
+		regulator-allow-set-load;
+	};
+	l5 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l6 {
+		regulator-always-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l8 {
+		regulator-min-microvolt = <2900000>;
+		regulator-max-microvolt = <2900000>;
+	};
+	l9 {
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3300000>;
+	};
+	l10 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l11 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l12 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l13 {
+		regulator-min-microvolt = <3075000>;
+		regulator-max-microvolt = <3125000>;
+	};
+	l15 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l16 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l17 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l19 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1350000>;
+	};
+	l22 {
+		regulator-always-on;
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2850000>;
+	};
+	l23 {
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1225000>;
+	};
+};
