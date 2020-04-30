@@ -29,7 +29,6 @@
 #include <linux/memblock.h>
 #include <linux/acpi.h>
 #include <linux/bootconfig.h>
-#include <linux/delay.h>
 #include <linux/console.h>
 #include <linux/nmi.h>
 #include <linux/percpu.h>
@@ -1372,8 +1371,6 @@ static int __ref kernel_init(void *unused)
 	numa_default_policy();
 
 	rcu_end_inkernel_boot();
-
-	msleep(600);
 
 	if (ramdisk_execute_command) {
 		ret = run_init_process(ramdisk_execute_command);
