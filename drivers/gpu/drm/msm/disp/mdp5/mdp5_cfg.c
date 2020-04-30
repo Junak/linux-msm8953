@@ -712,8 +712,8 @@ static const struct mdp5_cfg_hw msm8953_config = {
 
 	},
 	.pp = {
-		.count = 3,
-		.base = { 0x70000 , 0x70800 , 0x73000 },
+		.count = 2,
+		.base = { 0x70000 , 0x70800 },
 	},
 	.cdm = {
 		.count = 1,

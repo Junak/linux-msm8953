@@ -629,6 +629,15 @@ struct msm_kms *mdp5_kms_init(struct drm_device *dev)
 
 		mdp5_write(mdp5_kms, REG_MDP5_INTF_FRAME_LINE_COUNT_EN(i), 0x3);
 	}
+
+	for (i = 0; i < MAX_BASES; i++) {
+		u32 regval;
+		if (!config->hw->pp.base[i])
+			break;
+		if (BIT(31) & mdp5_read(mdp5_kms, REG_MDP5_PP_AUTOREFRESH_CONFIG(i)))
+			mdp5_write(mdp5_kms, REG_MDP5_PP_AUTOREFRESH_CONFIG(i), 0x0);
+	}
+
 	mdelay(16);
 
 	if (config->platform.iommu) {
