@@ -54,6 +54,9 @@
 		apps-iommu { // FIXME: Causes flood of context faults
 			status = "disabled";
 		};
+		apps-smmu {
+			status = "disabled";
+		};
 	};
 
 	gpio-keys {
@@ -103,7 +106,7 @@
 	pinctrl-1 = <&pmx_mdss_sleep>;
 
 	panel@0 {
-		//compatible = "TODO";
+		compatible = "boe,bs052fhm-a00-6c01";
 		reg = <0>;
 
 		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
