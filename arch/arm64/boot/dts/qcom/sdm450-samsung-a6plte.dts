@@ -53,12 +53,6 @@
 			reg = <0x0 0x8f600000 0x0 0x300000>;
 		};
 
-		modem_mem: modem_region@86c00000 {
-			/delete-property/ no-map;
-			no-map-fixup;
-			reg = <0x0 0x86c00000 0x0 0x6a00000>;
-		};
-
 		ramoops_mem: ramoops@86100000 {
 			compatible = "ramoops";
 			reg = <0 0x86100000 0 0x100000>;
@@ -77,7 +71,8 @@
 			reg = <0x0 0x8d600000 0x0 0x1800000>;
 		};
 
-		wcnss_fw_mem: wcnss_fw_region@8e700000 {
+		/delete-node/wcnss_fw_region@8e700000;
+		wcnss_fw_mem: wcnss_fw_region@8ee00000 {
 			no-map;
 			reg = <0x0 0x8ee00000 0x0 0x700000>;
 		};
@@ -162,6 +157,14 @@
 	};
 
 */
+};
+
+&framebuffer {
+	//status = "okay";
+
+	width = <1080>;
+	height = <2220>;
+	stride = <(1080 * 3)>;
 };
 
 &dsi0 {
@@ -362,7 +365,7 @@
 		};
 	};
 	pmx_mdss_default: pmx-mdss-default {
-		mux { /* Reset and power */
+		mux {
 			pins = "gpio50", "gpio35", "gpio93";
 			function = "gpio";
 		};
@@ -408,26 +411,26 @@
 };
 
 &usb3_dwc3 {
+	status = "okay";
+
 	dr_mode = "peripheral";
 	//maximum-speed = "high-speed";
 	//extcon = <&muic>, <&muic>;
-	
-	status = "okay";
 };
 
 &hsusb_phy {
+	status = "okay";
+
 	phy-supply = <&pm8953_l3>;
 	vdda-pll-supply = <&pm8953_l7>;
 	vdda-phy-dpdm-supply = <&pm8953_l13>;
-
-	status = "okay";
 };
 
 &ssusb_phy {
+	status = "okay";
+
 	vdda-phy-supply = <&pm8953_l3>;
 	vdda-pll-supply = <&pm8953_l7>;
-
-	status = "okay";
 };
 
 &smd_rpm_regulators {
@@ -470,7 +473,7 @@
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1900000>;
 	};
-	l8 { // sdhci, .
+	l8 { // sdhci
 		regulator-min-microvolt = <2900000>;
 		regulator-max-microvolt = <2900000>;
 	};
