@@ -831,7 +831,7 @@ static int msm_gfxpd_mem_acc_init(struct msm_gfxpd *ldo_vreg)
 					rc);
 			return rc;
 		}
-	} 
+	}
 	return rc;
 }
 
@@ -915,16 +915,6 @@ static int msm_gfxpd_corner_config_init(struct msm_gfxpd *ldo_vreg,
 
 	ldo_vreg->corner = ldo_vreg->cfg->init_corner;
 
-	ldo_vreg->pd_vddcx = dev_pm_domain_attach_by_name(ldo_vreg->dev, 
-		"vddcx");
-	if (IS_ERR_OR_NULL(ldo_vreg->pd_vddcx))
-		return PTR_ERR(ldo_vreg->pd_vddcx) ? : -ENODATA;
-
-	ldo_vreg->pd_gdsc_gx = dev_pm_domain_attach_by_name(ldo_vreg->dev, 
-		"gdsc_gx");
-	if (IS_ERR_OR_NULL(ldo_vreg->pd_gdsc_gx))
-		return PTR_ERR(ldo_vreg->pd_gdsc_gx) ? : -ENODATA;
-
 	if (rc) {
 		pr_err("Unable to pasrse dt rc=%d\n", rc);
 		return rc;
@@ -947,6 +937,16 @@ static int msm_gfxpd_corner_config_init(struct msm_gfxpd *ldo_vreg,
 		pr_err("Unable to initialize mem_acc rc=%d\n", rc);
 		return rc;
 	}
+
+	ldo_vreg->pd_vddcx = dev_pm_domain_attach_by_name(ldo_vreg->dev,
+		"vddcx");
+	if (IS_ERR_OR_NULL(ldo_vreg->pd_vddcx))
+		return PTR_ERR(ldo_vreg->pd_vddcx) ? : -ENODATA;
+
+	ldo_vreg->pd_gdsc_gx = dev_pm_domain_attach_by_name(ldo_vreg->dev,
+		"gdsc_gx");
+	if (IS_ERR_OR_NULL(ldo_vreg->pd_gdsc_gx))
+		return PTR_ERR(ldo_vreg->pd_gdsc_gx) ? : -ENODATA;
 
 	return rc;
 };
@@ -1001,10 +1001,10 @@ static int msm_gfxpd_probe(struct platform_device *pdev)
 	if (!ldo_vreg->pd.name)
 		return -ENOMEM;
 
-	ldo_vreg->pd.power_on = msm_gfxpd_power_on; 
-	ldo_vreg->pd.power_off = msm_gfxpd_power_off; 
-	ldo_vreg->pd.set_performance_state = msm_gfxpd_set_performance_state; 
-	ldo_vreg->pd.opp_to_performance_state = msm_gfxpd_get_performance_state; 
+	ldo_vreg->pd.power_on = msm_gfxpd_power_on;
+	ldo_vreg->pd.power_off = msm_gfxpd_power_off;
+	ldo_vreg->pd.set_performance_state = msm_gfxpd_set_performance_state;
+	ldo_vreg->pd.opp_to_performance_state = msm_gfxpd_get_performance_state;
 
 	rc = pm_genpd_init(&ldo_vreg->pd, NULL, true);
 	if (rc)
