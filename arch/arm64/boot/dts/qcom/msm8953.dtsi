@@ -11,7 +11,26 @@
 	#address-cells = <2>;
 	#size-cells = <2>;
 
-	chosen { };
+	aliases {
+		display0 = &mdss;
+	};
+
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+		stdout-path = "display0";
+
+		status = "disabled";
+
+		framebuffer: fremebuffer@90001000 {
+			compatible = "simple-framebuffer";
+			reg = <0x0 0x90001000 0x0 0x13ff000>;
+			format = "r8g8b8";
+			power-domains = <&gcc MDSS_GDSC>;
+			display = &mdss;
+		};
+	};
 
 	memory {
 		device_type = "memory";
@@ -54,14 +73,14 @@
 			reg = <0x0 0x8e700000 0x0 0x700000>;
 		};
 
-		dfps_data_mem: dfps_data_mem@90000000 {
+		dfps_data_mem@90000000 {
+			no-map;
 			reg = <0 0x90000000 0 0x1000>;
-			label = "dfps_data_mem";
 		};
 
-		cont_splash_mem: splash_region@90001000 {
+		splash_region@90001000 {
+			no-map;
 			reg = <0x0 0x90001000 0x0 0x13ff000>;
-			label = "cont_splash_mem";
 		};
 
 		zap_shader_region: gpu@81800000 {
