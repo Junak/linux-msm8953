@@ -50,15 +50,6 @@
 		};
 	};
 
-	soc {
-		apps-iommu { // FIXME: Causes flood of context faults
-			status = "disabled";
-		};
-		apps-smmu {
-			status = "disabled";
-		};
-	};
-
 	gpio-keys {
 		compatible = "gpio-keys";
 		input-name = "gpio-keys";
@@ -185,6 +176,7 @@
 
 &usb3 {
 	status = "okay";
+	maximum-speed = "high-speed";
 	//extcon = <&muic>, <&muic>;
 };
 
@@ -251,6 +243,10 @@
 
 &pm8953_l6 {
 	regulator-always-on;
+};
+
+&spmi_regulators {
+	status = "okay";
 };
 
 &smd_rpm_regulators {
