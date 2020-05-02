@@ -21,8 +21,6 @@
 		ranges;
 		stdout-path = "display0";
 
-		status = "disabled";
-
 		framebuffer: fremebuffer@90001000 {
 			compatible = "simple-framebuffer";
 			reg = <0x0 0x90001000 0x0 0x13ff000>;
@@ -37,6 +35,8 @@
 				 // FIXME: crashes devices when disabled
 				 //<&gcc GCC_MDSS_BYTE0_CLK>,
 				 //<&gcc GCC_MDSS_PCLK0_CLK>,
+
+			status = "disabled";
 		};
 	};
 
