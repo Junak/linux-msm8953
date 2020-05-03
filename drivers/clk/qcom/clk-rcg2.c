@@ -597,6 +597,10 @@ static int clk_byte2_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 mask = BIT(rcg->hid_width) - 1;
 	u32 cfg;
 
+	if (clk_rcg2_is_enabled(hw) &&
+	    rate == clk_rcg2_recalc_rate(hw, parent_rate))
+		return 0;
+
 	div = DIV_ROUND_UP((2 * parent_rate), rate) - 1;
 	div = min_t(u32, div, mask);
 
@@ -676,6 +680,11 @@ static int clk_pixel_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 mask = BIT(rcg->hid_width) - 1;
 	u32 hid_div, cfg;
 	int i, num_parents = clk_hw_get_num_parents(hw);
+
+
+	if (clk_rcg2_is_enabled(hw) &&
+	    rate == clk_rcg2_recalc_rate(hw, parent_rate))
+		return 0;
 
 	regmap_read(rcg->clkr.regmap, rcg->cmd_rcgr + CFG_REG, &cfg);
 	cfg &= CFG_SRC_SEL_MASK;
