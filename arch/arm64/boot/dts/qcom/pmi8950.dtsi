@@ -1,0 +1,252 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/* Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ */
+#include <dt-bindings/iio/qcom,spmi-vadc.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/input/linux-event-codes.h>
+#include <dt-bindings/spmi/spmi.h>
+
+&spmi_bus {
+	pmic@2 {
+		compatible = "qcom,pmi8950", "qcom,spmi-pmic";
+		reg = <2 SPMI_USID>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,power-on@800 {
+			compatible = "qcom,pm8916-pon"; //FIXME is this the correct driver
+			reg = <0x800>;			//This pmic may be gen2 unlike 8916
+			//qcom,secondary-pon-reset;
+			//qcom,hard-reset-poweroff-type = <0x04>;
+			pon_pereph-reg {
+				//TODO:
+				regulator-name = "pon_spare_reg";
+			};
+		};
+
+		pmi8950_vadc: vadc@3100 {
+			compatible = "qcom,spmi-vadc";
+			reg = <0x3100>;
+			interrupts = <0x00 0x31 0x00 IRQ_TYPE_EDGE_RISING>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			#io-channel-cells = <1>;
+
+			usbin {
+				reg = <VADC_USBIN>;
+			};
+
+			dcin {
+				reg = <VADC_DCIN>;
+			};
+
+			vchg_sns {
+				reg = <VADC_VCHG_SNS>;
+			};
+
+			ref_625mv {
+				reg = <VADC_REF_625MV>;
+			};
+
+			ref_1250mv {
+				reg = <VADC_REF_1250MV>;
+			};
+
+			chg_temp {
+				reg = <VADC_CHG_TEMP>;
+			};
+
+			usb_dp {
+				//FIXME: Unsupported?
+				reg = <0x43>;
+			};
+
+			usb_dm {
+				//FIXME: Unsupported?
+				reg = <0x44>;
+			};
+
+			host_det {
+				//FIXME: Unsupported?
+				reg = <VADC_P_MUX1_1_1>;
+			};
+		};
+
+		pmi8950_gpio: gpios@c000 {
+			spmi-dev-container;
+			compatible = "qcom,pmi8950-gpio";
+			reg = <0xc000>;
+
+			gpio-controller;
+			#gpio-cells = <2>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		pmi8950_mpps: mpps@a000 {
+			compatible = "qcom,pm8950-mpp";
+			reg = <0xa000>;
+
+			gpio-controller;
+			#gpio-cells = <2>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+		};
+
+		qcom_smbcharger {
+			compatible = "qcom,pmi8950-charger";
+			status = "disabled";
+		};
+
+		charger@1000 {
+			reg = <0x1000>;
+			//FIXME: Add interrupts
+		};
+
+		otg@1100 {
+			reg = <0x1100>;
+			interrupts = <2 0x11 0 IRQ_TYPE_NONE>,
+				<2 0x11 1 IRQ_TYPE_NONE>,
+				<2 0x11 3 IRQ_TYPE_NONE>;
+			interrupts-names = "otg-fail", "otg-oc", "usbid-change";
+		};
+
+		bat_if@1200 {
+			reg = <0x1200>;
+			status = "disabled";
+		};
+
+		usb-chgpth@1300 {
+			reg = <0x1300>;
+			status = "disabled";
+		};
+
+		dc-chgpth@1400 {
+			reg = <0x1400>;
+			status = "disabled";
+		};
+
+		chgr-misc@1600 {
+			reg = <0x1600>;
+			status = "disabled";
+		};
+
+		fuel_guage {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			compatible = "qcom,pmi8950-fg";
+			//       soc    bat   memif
+			reg = <0x4000 0x4100 0x4400>;
+			qcom,cycle-counter-en;
+			qcom,capacity-learning-on;
+			qcom,batt-warm-temp = <250>;
+			qcom,batt-cool-temp = <0>;
+			qcom,batt-hot-temp= <600>;
+			qcom,batt-cold-temp = <0xffffff38>;
+
+			qcom,recharge-thr = <99>;
+			qcom,delta-soc-thr = <1>;
+			qcom,cutoff-volt-mv = <3200>;
+			qcom,empty-volt-mv = <3000>;
+			qcom,fg-vbat-estimate-diff-mv = <1000>;
+			qcom,bcl-lm-thr-ma = <126>;
+			qcom,bcl-mh-thr-ma = <400>;
+			qcom,term-current-ma = <150>;
+			qcom,chg-term-current-ma = <100>;
+			qcom,fg-cc-cv-thr-mv = <4390>;
+
+			qcom,cl-vbat-est-thr-uv = <300000>;
+
+			qcom,fg-max-soc = <100>;
+			qcom,fg-min-soc = <0>;
+			qcom,fg-reset-on-lockup;
+		};
+
+		bcl@4200 {
+			status = "disabled";
+		};
+
+		leds@1000 {
+			reg = <0x1243>;
+			compatible = "qcom,leds-atc";
+			label = "charging";
+		};
+	};
+
+	pmi8950@3 {
+		compatible = "qcom,pmi8950", "qcom,spmi-pmic";
+		reg = <3 SPMI_USID>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		pwm@b000 {
+			status = "disabled";
+		};
+
+		qcom-labibb-regulator {
+			compatible = "qcom,pmi8998-lab-ibb";
+			labibb-mode = "lcd";
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			ibb_vreg: ibb@dc00 {
+				reg = <0xdc00>;
+				regulator-name = "ibb";
+				interrupts = <0x03 0xde 0x0 IRQ_TYPE_EDGE_RISING>;
+				interrupt-names = "ibb-sc-err";
+			};
+
+			lab_vreg: lab@de00 {
+				reg = <0xde00>;
+				regulator-name = "lab";
+				interrupts = <0x03 0xde 0x2 IRQ_TYPE_EDGE_RISING>;
+				interrupt-names = "lab-sc-err";
+			};
+		};
+
+		pmi8950_wled: wled@d800 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			compatible = "qcom,pmi8998-wled";
+
+			reg = <0xd800>, <0xd900>;
+
+			interrupts = <3 0xd8 0x02 IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "short";
+
+			/*
+			 * See Documentation/devicetree/bindings/leds/backlight/qcom-wled.yaml
+			 * Corresponding CAF properties in comments.
+			 * Recheck if matches and override.
+			 */
+
+			/* this settings are also defaults in the driver */
+			qcom,current-boost-limit = <970>;	// qcom,ilim-ma
+			qcom,current-limit-microamp = <20000>;	// qcom,fs-curr-ua
+			qcom,ovp-millivolt = <29600>;		// qcom,ovp-mv
+			qcom,switching-freq = <800>;		// qcom,switch-freq-khz
+			qcom,enabled-strings = <0 1 2 3>;	// qcom,led-strings-list
+			qcom,num-strings = <4>;			// length of qcom,enabled-strings
+			// qcom,cabc;				// qcom,en-cabc
+			// qcom,eternal-pfet;			// qcom,en-ext-pfet-sc-pro;
+
+			status = "disabled";
+
+		};
+
+		flash_leds@d300 {
+			compatible = "qcom,flash-leds";
+			status = "disabled";
+		};
+
+		haptic@c000 {
+			compatible = "qcom,haptic";
+			status = "disabled";
+			reg = <0xc000>;
+			interrupts = <3 0xc0 0 IRQ_TYPE_NONE>,
+				<3 0xc0 1 IRQ_TYPE_NONE>;
+			interrupt-names = "sc-irq", "play-irq";
+		};
+	};
+};
