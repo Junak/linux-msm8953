@@ -107,6 +107,13 @@ config DRM_PANEL_BOE_BS052FHM_A00_6C01
 	  RGB per pixel. It provides a MIPI DSI interface to the host and has
 	  a built-in LED backlight.
 
+config DRM_PANEL_TIANMA_TL052VDXP02
+	tristate "Tianma TL052VDXP02 panel"
+	select DRM_PANEL_MIPI_DSI_COMMON
+	help
+	  Say Y here if you want to enable support for the Tianma TL052VDXP02
+	  1920x1080 5.2" panel (found on the Motorola Moto G5 variants)
+
 config DRM_PANEL_ELIDA_KD35T133
 	tristate "Elida KD35T133 panel driver"
 	depends on OF
