@@ -212,6 +212,7 @@ struct q6v5 {
 
 enum {
 	MSS_MSM8916,
+	MSS_MSM8953,
 	MSS_MSM8974,
 	MSS_MSM8996,
 	MSS_MSM8998,
@@ -658,12 +659,14 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 		}
 		goto pbl_wait;
 	} else if (qproc->version == MSS_MSM8996 ||
-		   qproc->version == MSS_MSM8998) {
+		   qproc->version == MSS_MSM8998 ||
+		   qproc->version == MSS_MSM8953) {
 		int mem_pwr_ctl;
 
 		/* Override the ACC value if required */
-		writel(QDSP6SS_ACC_OVERRIDE_VAL,
-		       qproc->reg_base + QDSP6SS_STRAP_ACC);
+		if (qproc->version != MSS_MSM8953)
+			writel(QDSP6SS_ACC_OVERRIDE_VAL,
+					qproc->reg_base + QDSP6SS_STRAP_ACC);
 
 		/* Assert resets, stop core */
 		val = readl(qproc->reg_base + QDSP6SS_RESET_REG);
@@ -705,7 +708,8 @@ static int q6v5proc_reset(struct q6v5 *qproc)
 		writel(val, qproc->reg_base + QDSP6SS_PWR_CTL_REG);
 
 		/* Turn on L1, L2, ETB and JU memories 1 at a time */
-		if (qproc->version == MSS_MSM8996) {
+		if (qproc->version == MSS_MSM8996 ||
+			qproc->version == MSS_MSM8953) {
 			mem_pwr_ctl = QDSP6SS_MEM_PWR_CTL;
 			i = 19;
 		} else {
@@ -1177,7 +1181,16 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 			max_addr = ALIGN(phdr->p_paddr + phdr->p_memsz, SZ_4K);
 	}
 
-	/*
+	if (qproc->version == MSS_MSM8953) {
+		ret = qcom_scm_pas_mem_setup(5, qproc->mpss_phys, qproc->mpss_size);
+		if (ret) {
+			dev_err(qproc->dev,
+					"setting up mpss memory failed: %d\n", ret);
+			goto release_firmware;
+		}
+	}
+
+	/**
 	 * In case of a modem subsystem restart on secure devices, the modem
 	 * memory can be reclaimed only after MBA is loaded.
 	 */
@@ -1258,7 +1271,6 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 			writel(RMB_CMD_LOAD_READY, qproc->rmb_base + RMB_MBA_COMMAND_REG);
 		}
 		writel(size, qproc->rmb_base + RMB_PMI_CODE_LENGTH_REG);
-
 		ret = readl(qproc->rmb_base + RMB_MBA_STATUS_REG);
 		if (ret < 0) {
 			dev_err(qproc->dev, "MPSS authentication failed: %d\n",
@@ -1266,6 +1278,7 @@ static int q6v5_mpss_load(struct q6v5 *qproc)
 			goto release_firmware;
 		}
 	}
+
 
 	/* Transfer ownership of modem ddr region to q6 */
 	ret = q6v5_xfer_mem_ownership(qproc, &qproc->mpss_perm, false, true,
@@ -1957,6 +1970,44 @@ static const struct rproc_hexagon_res msm8996_mss = {
 	.version = MSS_MSM8996,
 };
 
+static const struct rproc_hexagon_res msm8953_mss = {
+	.hexagon_mba_image = "mba.mbn",
+	.proxy_supply = (struct qcom_mss_reg_res[]) {
+		{
+			.supply = "pll",
+			.uA = 100000,
+		},
+		{}
+	},
+	.proxy_pd_names = (char*[]) {
+			"cx",
+			"mx",
+			NULL
+	},
+	.active_supply = (struct qcom_mss_reg_res[]) {
+		{
+			.supply = "mss",
+			.uV = 1050000,
+			.uA = 100000,
+		},
+		{}
+	},
+	.proxy_clk_names = (char*[]){
+			"xo",
+			NULL
+	},
+	.active_clk_names = (char*[]){
+			"iface",
+			"bus",
+			"mem",
+			NULL
+	},
+	.need_mem_protection = false,
+	.has_alt_reset = false,
+	.has_spare_reg = false,
+	.version = MSS_MSM8953,
+};
+
 static const struct rproc_hexagon_res msm8916_mss = {
 	.hexagon_mba_image = "mba.mbn",
 	.proxy_supply = (struct qcom_mss_reg_res[]) {
@@ -2054,6 +2105,7 @@ static const struct of_device_id q6v5_of_match[] = {
 	{ .compatible = "qcom,msm8916-mss-pil", .data = &msm8916_mss},
 	{ .compatible = "qcom,msm8974-mss-pil", .data = &msm8974_mss},
 	{ .compatible = "qcom,msm8996-mss-pil", .data = &msm8996_mss},
+	{ .compatible = "qcom,msm8953-mss-pil", .data = &msm8953_mss},
 	{ .compatible = "qcom,msm8998-mss-pil", .data = &msm8998_mss},
 	{ .compatible = "qcom,sc7180-mss-pil", .data = &sc7180_mss},
 	{ .compatible = "qcom,sdm845-mss-pil", .data = &sdm845_mss},
