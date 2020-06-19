@@ -409,6 +409,14 @@ config BATTERY_Z2
 	help
 	  Say Y to include support for the battery on the Zipit Z2.
 
+config FUEL_GAUGE_SM5708
+	tristate "Siliconmitus SM5708 Fuel Gauge support"
+	depends on I2C
+	help
+	  SM5708 is fuel-gauge systems for lithium-ion (Li+) batteries
+	  in handheld and portable equipment. The SM5708 is configured
+	  to operate with a single lithium cell
+
 config BATTERY_S3C_ADC
 	tristate "Battery driver for Samsung ADC based monitoring"
 	depends on S3C_ADC
