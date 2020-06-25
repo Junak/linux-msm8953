@@ -244,6 +244,39 @@ static int qcom_cpufreq_krait_name_version(struct device *cpu_dev,
 	return 0;
 }
 
+static int qcom_cpufreq_generic_name_version(struct device *cpu_dev,
+					   struct nvmem_cell *speedbin_nvmem,
+					   char **pvs_name,
+					   struct qcom_cpufreq_drv *drv)
+{
+	int speed = 0, pvs = 0, pvs_ver = 0;
+	u8 *speedbin;
+	size_t len;
+
+	speedbin = nvmem_cell_read(speedbin_nvmem, &len);
+
+	if (IS_ERR(speedbin))
+		return PTR_ERR(speedbin);
+
+	switch (len) {
+	case 1:
+		speed = (*speedbin) & 0x1f;
+		dev_dbg(cpu_dev, "Speed bin: %d\n", speed);
+		break;
+	default:
+		dev_err(cpu_dev, "Unable to read nvmem data. Defaulting to 0!\n");
+		return -ENODEV;
+	}
+
+	snprintf(*pvs_name, sizeof("speedXX-pvsXX-vXX"), "speed%d-pvs%d-v%d",
+		 speed, pvs, pvs_ver);
+
+	drv->versions = (1 << speed);
+
+	kfree(speedbin);
+	return 0;
+}
+
 static const struct qcom_cpufreq_match_data match_data_kryo = {
 	.get_version = qcom_cpufreq_kryo_name_version,
 };
@@ -255,6 +288,11 @@ static const struct qcom_cpufreq_match_data match_data_krait = {
 static const char *qcs404_genpd_names[] = { "cpr", NULL };
 
 static const struct qcom_cpufreq_match_data match_data_qcs404 = {
+	.genpd_names = qcs404_genpd_names,
+};
+
+static const struct qcom_cpufreq_match_data match_data_generic = {
+	.get_version = qcom_cpufreq_generic_name_version,
 	.genpd_names = qcs404_genpd_names,
 };
 
@@ -459,6 +497,7 @@ static const struct of_device_id qcom_cpufreq_match_list[] __initconst = {
 	{ .compatible = "qcom,apq8064", .data = &match_data_krait },
 	{ .compatible = "qcom,msm8974", .data = &match_data_krait },
 	{ .compatible = "qcom,msm8960", .data = &match_data_krait },
+	{ .compatible = "qcom,msm8953", .data = &match_data_generic },
 	{},
 };
 MODULE_DEVICE_TABLE(of, qcom_cpufreq_match_list);
