@@ -417,6 +417,12 @@ config FUEL_GAUGE_SM5708
 	  in handheld and portable equipment. The SM5708 is configured
 	  to operate with a single lithium cell
 
+config CHARGER_SM5708
+	tristate "Siliconmitus SM5708 Charger support"
+	depends on MFD_SM5708
+	help
+	  Say Y here to enable support for the SM5708 charger
+
 config BATTERY_S3C_ADC
 	tristate "Battery driver for Samsung ADC based monitoring"
 	depends on S3C_ADC

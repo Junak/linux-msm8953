@@ -101,4 +101,5 @@ obj-$(CONFIG_CHARGER_BD70528)	+= bd70528-charger.o
 obj-$(CONFIG_CHARGER_BD99954)	+= bd99954-charger.o
 obj-$(CONFIG_CHARGER_WILCO)	+= wilco-charger.o
 obj-$(CONFIG_RN5T618_POWER)	+= rn5t618_power.o
+obj-$(CONFIG_CHARGER_SM5708) += sm5708_charger.o
 obj-$(CONFIG_FUEL_GAUGE_SM5708) += sm5708_fuelgauge.o
