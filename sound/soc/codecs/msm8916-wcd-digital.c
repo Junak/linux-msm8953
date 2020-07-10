@@ -226,6 +226,7 @@ struct wcd_iir_filter_ctl {
 
 struct msm8916_wcd_digital_priv {
 	struct clk *ahbclk, *mclk;
+	unsigned long mclk_rate;
 };
 
 static const unsigned long rx_gain_reg[] = {
@@ -826,13 +827,13 @@ static int msm8916_wcd_digital_get_clks(struct platform_device *pdev,
 {
 	struct device *dev = &pdev->dev;
 
-	priv->ahbclk = devm_clk_get(dev, "ahbix-clk");
+	priv->ahbclk = devm_clk_get_optional(dev, "ahbix-clk");
 	if (IS_ERR(priv->ahbclk)) {
 		dev_err(dev, "failed to get ahbix clk\n");
 		return PTR_ERR(priv->ahbclk);
 	}
 
-	priv->mclk = devm_clk_get(dev, "mclk");
+	priv->mclk = devm_clk_get_optional(dev, "mclk");
 	if (IS_ERR(priv->mclk)) {
 		dev_err(dev, "failed to get mclk\n");
 		return PTR_ERR(priv->mclk);
@@ -856,7 +857,7 @@ static int msm8916_wcd_digital_component_set_sysclk(struct snd_soc_component *co
 {
 	struct msm8916_wcd_digital_priv *p = dev_get_drvdata(component->dev);
 
-	return clk_set_rate(p->mclk, freq);
+	return clk_set_rate(p->mclk, p->mclk_rate = freq);
 }
 
 static int msm8916_wcd_digital_hw_params(struct snd_pcm_substream *substream,
@@ -1084,7 +1085,7 @@ static int msm8916_wcd_digital_startup(struct snd_pcm_substream *substream,
 			    LPASS_CDC_CLK_PDM_CTL_PDM_CLK_SEL_MASK,
 			    LPASS_CDC_CLK_PDM_CTL_PDM_CLK_SEL_FB);
 
-	mclk_rate = clk_get_rate(msm8916_wcd->mclk);
+	mclk_rate = clk_get_rate(msm8916_wcd->mclk) ?: msm8916_wcd->mclk_rate;
 	switch (mclk_rate) {
 	case 12288000:
 		snd_soc_component_update_bits(component, LPASS_CDC_TOP_CTL,

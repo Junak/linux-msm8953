@@ -1355,7 +1355,7 @@ static int pm8916_wcd_analog_spmi_probe(struct platform_device *pdev)
 	if (ret < 0)
 		return ret;
 
-	priv->mclk = devm_clk_get(dev, "mclk");
+	priv->mclk = devm_clk_get_optional(dev, "mclk");
 	if (IS_ERR(priv->mclk)) {
 		dev_err(dev, "failed to get mclk\n");
 		return PTR_ERR(priv->mclk);
