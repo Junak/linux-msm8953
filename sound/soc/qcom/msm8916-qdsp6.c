@@ -7,7 +7,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/io.h>
-#include <linux/of.h>
+#include <linux/of_device.h>
 #include <linux/clk.h>
 #include <linux/platform_device.h>
 #include <sound/pcm.h>
@@ -34,6 +34,17 @@ struct msm8916_qdsp6_data {
 	struct snd_soc_jack jack;
 	bool jack_setup;
 	unsigned int mi2s_clk_count[MI2S_COUNT];
+	unsigned int mclk_count;
+};
+
+static struct {
+	int clk_id;
+	bool need_mclk;
+} msm8953_bitclk_map[MI2S_COUNT] = {
+	{ Q6AFE_LPASS_CLK_ID_PRI_MI2S_IBIT, true },
+	{ Q6AFE_LPASS_CLK_ID_SEC_MI2S_IBIT, false },
+	{ Q6AFE_LPASS_CLK_ID_TER_MI2S_IBIT, true },
+	{ Q6AFE_LPASS_CLK_ID_QUAD_MI2S_IBIT, false },
 };
 
 #define MIC_CTRL_TER_WS_SLAVE_SEL	BIT(21)
@@ -180,9 +191,74 @@ static void msm8916_qdsp6_shutdown(struct snd_pcm_substream *substream)
 		dev_err(card->dev, "Failed to disable LPAIF bit clk: %d\n", ret);
 }
 
+static int msm8953_qdsp6_startup(struct snd_pcm_substream *substream)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_card *card = rtd->card;
+	struct msm8916_qdsp6_data *data = snd_soc_card_get_drvdata(card);
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
+	int mi2s, ret, clk_id;
+
+	mi2s = msm8916_qdsp6_get_mi2s_id(rtd);
+	if (mi2s < 0)
+		return mi2s;
+
+	clk_id = msm8953_bitclk_map[mi2s].clk_id;
+
+	snd_soc_dai_set_sysclk(cpu_dai, clk_id,
+			MI2S_BCLK_RATE, SNDRV_PCM_STREAM_PLAYBACK);
+	if (ret) {
+		dev_err(card->dev, "Failed to enable bit clk (clk_id = %d): %d\n", clk_id, ret);
+		return ret;
+	}
+
+	if (!msm8953_bitclk_map[mi2s].need_mclk)
+		return 0;
+
+	if (data->mclk_count == 0) {
+		ret = snd_soc_dai_set_sysclk(cpu_dai,
+				Q6AFE_LPASS_CLK_ID_INTERNAL_DIGITAL_CODEC_CORE,
+				DEFAULT_MCLK_RATE, SNDRV_PCM_STREAM_PLAYBACK);
+		if (ret) {
+			dev_err(card->dev, "Failed to enable mclk: %d\n", ret);
+			return ret;
+		}
+	}
+
+	data->mclk_count ++;
+
+	return ret;
+}
+
+static void msm8953_qdsp6_shutdown(struct snd_pcm_substream *substream)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_card *card = rtd->card;
+	struct msm8916_qdsp6_data *data = snd_soc_card_get_drvdata(card);
+	struct snd_soc_dai *cpu_dai = asoc_rtd_to_cpu(rtd, 0);
+	int mi2s, ret, clk_id;
+
+	mi2s = msm8916_qdsp6_get_mi2s_id(rtd);
+	if (mi2s < 0)
+		return;
+
+	clk_id = msm8953_bitclk_map[mi2s].clk_id;
+
+	data->mclk_count--;
+
+	ret = snd_soc_dai_set_sysclk(cpu_dai, clk_id, 0, SNDRV_PCM_STREAM_PLAYBACK);
+	if (ret)
+		dev_err(card->dev, "Failed to disable bit clk (clk_id = %d): %d\n", clk_id, ret);
+}
+
 static const struct snd_soc_ops msm8916_qdsp6_be_ops = {
 	.startup = msm8916_qdsp6_startup,
 	.shutdown = msm8916_qdsp6_shutdown,
+};
+
+static const struct snd_soc_ops msm8953_qdsp6_be_ops = {
+	.startup = msm8953_qdsp6_startup,
+	.shutdown = msm8953_qdsp6_shutdown,
 };
 
 static int msm8916_qdsp6_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
@@ -193,15 +269,19 @@ static int msm8916_qdsp6_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 	struct snd_interval *channels = hw_param_interval(params,
 					SNDRV_PCM_HW_PARAM_CHANNELS);
 	struct snd_mask *fmt = hw_param_mask(params, SNDRV_PCM_HW_PARAM_FORMAT);
+	int mi2s = msm8916_qdsp6_get_mi2s_id(rtd);
+	if (mi2s < 0)
+		return mi2s;
 
 	rate->min = rate->max = 48000;
-	channels->min = channels->max = 2;
+	channels->min = (mi2s == MI2S_QUATERNARY) ? 1 : 2;
+	channels->max = 2;
 	snd_mask_set_format(fmt, SNDRV_PCM_FORMAT_S16_LE);
 
 	return 0;
 }
 
-static void msm8916_qdsp6_add_ops(struct snd_soc_card *card)
+static void msm8916_qdsp6_add_ops(struct snd_soc_card *card, const struct snd_soc_ops *be_ops)
 {
 	struct snd_soc_dai_link *link;
 	int i;
@@ -209,7 +289,7 @@ static void msm8916_qdsp6_add_ops(struct snd_soc_card *card)
 	for_each_card_prelinks(card, i, link) {
 		if (link->no_pcm) {
 			link->init = msm8916_qdsp6_dai_init;
-			link->ops = &msm8916_qdsp6_be_ops;
+			link->ops = be_ops;
 			link->be_hw_params_fixup = msm8916_qdsp6_hw_params_fixup;
 		}
 	}
@@ -221,7 +301,11 @@ static int msm8916_qdsp6_platform_probe(struct platform_device *pdev)
 	struct snd_soc_card *card;
 	struct msm8916_qdsp6_data *data;
 	struct resource *res;
+	const void *be_ops = of_device_get_match_data(&pdev->dev);
 	int ret;
+
+	if (!be_ops)
+		return -EINVAL;
 
 	card = devm_kzalloc(dev, sizeof(*card), GFP_KERNEL);
 	if (!card)
@@ -249,13 +333,14 @@ static int msm8916_qdsp6_platform_probe(struct platform_device *pdev)
 		return PTR_ERR(data->spkr_iomux);
 
 	snd_soc_card_set_drvdata(card, data);
-	msm8916_qdsp6_add_ops(card);
+	msm8916_qdsp6_add_ops(card, be_ops);
 
 	return devm_snd_soc_register_card(&pdev->dev, card);
 }
 
 static const struct of_device_id msm8916_qdsp6_device_id[]  = {
-	{ .compatible = "qcom,msm8916-qdsp6-sndcard" },
+	{ .compatible = "qcom,msm8916-qdsp6-sndcard" , .data = &msm8916_qdsp6_be_ops },
+	{ .compatible = "qcom,msm8953-qdsp6-sndcard" , .data = &msm8953_qdsp6_be_ops },
 	{},
 };
 MODULE_DEVICE_TABLE(of, msm8916_qdsp6_device_id);
