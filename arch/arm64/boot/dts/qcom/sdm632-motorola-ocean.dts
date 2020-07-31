@@ -1,0 +1,216 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+/dts-v1/;
+
+#include "sdm632-pm8953.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	qcom,msm-id = <349 0x00>;
+	qcom,board-id = <0x141 0xc100>;
+	qcom,pmic-id = <0x10016 0x25 0x00 0x00>;
+	qcom,msm-name = "SDM632";
+	model = "Motorola G7 Power (ocean)";
+	compatible = "qcom,sdm632", "qcom,msm8953";
+
+	aliases {
+		panel = &panel;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_key_default>;
+
+		label = "GPIO Button";
+
+		volume-up {
+			label = "Volume Up";
+			gpios = <&msmgpio 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/delete-node/other_ext_region@85b00000;
+
+		other_ext_region@84300000 {
+			no-map;
+			reg = <0x0 0x84300000 0x0 0x2000000>;
+		};
+
+		ramoops_mem {
+			compatible = "ramoops";
+			reg = <0x0 0xef000000 0x0 0xbf800>;
+			console-size = <0x40000>;
+			pmsg-size = <0x40000>;
+			record-size = <0x3f800>;
+		};
+
+		wdog_cpuctx_region {
+			no-map;
+			reg = <0x00 0xeefd2000 0x00 0x2e000>;
+		};
+
+		tzlog_dump_mem_region {
+			no-map;
+			reg = <0x00 0xeefa2000 0x00 0x30000>;
+		};
+
+		mmi_annotate_mem_region {
+			no-map;
+			reg = <0x00 0xeefa1800 0x00 0x800>;
+		};
+	};
+};
+
+&sdhc_1 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+};
+
+&usb3 {
+	status = "okay";
+};
+
+&msmgpio {
+	gpio-reserved-ranges = <96 4>;
+
+	pmx_mdss_default: pmx-mdss-default-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+};
+
+&dsi0 {
+	panel: panel@0 {
+		compatible = "tianma,622-v0";
+		reg = <0>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default>;
+		pinctrl-1 = <&pmx_mdss_sleep>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+/*&dsi_phy0 {
+	vddio-supply = <&pm8953_l6>;
+};*/
+
+&smd_rpm_regulators {
+	s3 {
+		regulator-min-microvolt = <984000>;
+		regulator-max-microvolt = <1240000>;
+	};
+	s4 {
+		regulator-min-microvolt = <1036000>;
+		regulator-max-microvolt = <2040000>;
+	};
+	l1 {
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1050000>;
+	};
+	l2 {
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1175000>;
+	};
+	l3 {
+		regulator-min-microvolt = <925000>;
+		regulator-max-microvolt = <925000>;
+		regulator-allow-set-load;
+	};
+	l5 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l6 { //WARNING: some ocean models use l22 instead
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l7 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1900000>;
+	};
+	l8 {
+		regulator-min-microvolt = <2900000>;
+		regulator-max-microvolt = <2900000>;
+	};
+	l9 {
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3300000>;
+	};
+	l10 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l11 {
+		regulator-min-microvolt = <2950000>;
+		regulator-max-microvolt = <2950000>;
+	};
+	l12 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <2950000>;
+	};
+	l13 {
+		regulator-min-microvolt = <3125000>;
+		regulator-max-microvolt = <3125000>;
+	};
+	l16 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l17 {
+		regulator-min-microvolt = <2850000>;
+		regulator-max-microvolt = <2850000>;
+	};
+	l19 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1350000>;
+	};
+	l22 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+	};
+	l23 {
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1225000>;
+	};
+};
