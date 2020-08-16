@@ -15,7 +15,7 @@ static int q6voice_dai_startup(struct snd_pcm_substream *substream,
 {
 	struct q6voice *v = snd_soc_dai_get_drvdata(dai);
 
-	return q6voice_start(v, Q6VOICE_PATH_VOICE, substream->stream);
+	return q6voice_start(v, Q6VOICE_PATH_VOICEMMODE1, substream->stream);
 }
 
 static void q6voice_dai_shutdown(struct snd_pcm_substream *substream,
@@ -23,7 +23,7 @@ static void q6voice_dai_shutdown(struct snd_pcm_substream *substream,
 {
 	struct q6voice *v = snd_soc_dai_get_drvdata(dai);
 
-	q6voice_stop(v, Q6VOICE_PATH_VOICE, substream->stream);
+	q6voice_stop(v, Q6VOICE_PATH_VOICEMMODE1, substream->stream);
 }
 
 static struct snd_soc_dai_ops q6voice_dai_ops = {
