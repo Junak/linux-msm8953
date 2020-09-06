@@ -42,6 +42,21 @@ config QCOM_CPR
 	  To compile this driver as a module, choose M here: the module will
 	  be called qcom-cpr
 
+config QCOM_CPR3PD
+	tristate "CPU Power domains for QCOM CPR3 HW"
+	depends on ARCH_QCOM && HAS_IOMEM
+	select PM_OPP
+	select REGMAP
+	help
+	  Say Y here to enable support for the CPR4 hardware found on Qualcomm
+	  SoCs like MSM8953, SDM450, SDM632.
+
+	  This driver populates CPU OPPs tables based on fuses specific to CPR
+	  hardware. If you want to do CPU frequency scaling say Y here.
+
+	  To compile this driver as a module, choose M here: the module will
+	  be called qcom-cpr3
+
 config QCOM_GENI_SE
 	tristate "QCOM GENI Serial Engine Driver"
 	depends on ARCH_QCOM || COMPILE_TEST
