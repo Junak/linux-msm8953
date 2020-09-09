@@ -1,0 +1,403 @@
+/* Copyright (c) 2017,2020 The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/dts-v1/;
+
+#include "msm8953-pm8953.dtsi"
+#include "pmi8950.dtsi"
+#include <dt-bindings/leds/common.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "Xiaomi Redmi Note 4X";
+	compatible = "qcom,msm8953-mido", "qcom,msm8953-xiaomi", "qcom,msm8953";
+
+	qcom,msm-id = <293 0>;
+	qcom,board-id= <11 0>;
+
+	aliases {
+		panel = &panel;
+	};
+
+	reserved-memory {
+		/delete-node/other_ext_region@85b00000;
+
+		other_ext_region@84A00000 {
+			no-map;
+			reg = <0x0 0x84A00000 0x0 0x1900000>;
+		};
+
+		ramoops@9ff00000 {
+			compatible = "ramoops";
+			reg = <0x0 0x9ff00000 0x0 0x00100000>;
+			console-size = <0x100000>;
+		};
+	};
+
+	speaker_amp: audio-amplifier {
+		compatible = "awinic,aw8738";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&spk_ext_pa_default>;
+
+		enable-gpios = <&msmgpio 96 GPIO_ACTIVE_HIGH>;
+		aw8738,mode = <5>;
+		sound-name-prefix = "Speaker Amp";
+	};
+
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_key_default>;
+
+		label = "GPIO Button";
+
+		volume-up {
+			label = "Volume Up";
+			gpios = <&msmgpio 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+	};
+
+	qcom,battery-data {
+		qcom,batt-id-range-pct = <5>;
+		qcom,max-voltage-uv = <4400000>;
+		qcom,batt-id-kohm = <40>;
+		qcom,battery-beta = <3435>;
+		qcom,battery-type = "qrd_msm8953_sunwoda_atl_4100mah";
+		qcom,chg-rslow-comp-c1 = <3159320>;
+		qcom,chg-rslow-comp-c2 = <4074348>;
+		qcom,chg-rs-to-rslow = <921524>;
+		qcom,chg-rslow-comp-thr = <0x9C>;
+		qcom,checksum = <0xDC57>;
+		qcom,thermal-coefficients = [c8 86 c1 50 d3 37];
+		qcom,fg-profile-data = [ DC 83 9E 7C
+					 CD 80 80 76
+					 60 83 FD 6E
+					 04 89 50 94
+					 38 82 24 99
+					 C7 B7 F4 C3
+					 56 0F 06 88
+					 F9 7D BA 81
+					 0F 7C 54 83
+					 B3 69 2B 7A
+					 FE 87 4B 82
+					 DA 99 33 BD
+					 45 CA 58 0D
+					 13 10 39 58
+					 14 70 DA FC
+					 3A 36 CF 46
+					 1E 42 00 00
+					 5D 46 C4 3B
+					 0A 44 00 00
+					 00 00 00 00
+					 00 00 00 00
+					 AD 72 EE 70
+					 73 58 12 88
+					 E9 75 4D 68
+					 47 61 B0 7A
+					 24 74 10 53
+					 19 74 5B AA
+					 23 44 69 3E
+					 67 A0 71 0C
+					 28 00 FF 36
+					 F0 11 30 03
+					 00 00 00 0C ];
+	};
+
+};
+
+&pmi8950_wled {
+	status = "okay";
+
+	/* Don't copy-paste! See pmi8950.dtsi */
+
+	qcom,current-limit-microamp = <20000>;
+	qcom,enabled-strings = <0 1>;
+	qcom,num-strings = <2>;
+	qcom,ovp-millivolt = <29600>;
+};
+
+&i2c_2 {
+	status = "okay";
+	led-controller@45 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		compatible = "awinic,aw2013";
+
+		reg = <0x45>;
+
+		vcc-supply = <&pm8953_l10>;
+
+		led@0 {
+			reg = <0>;
+			led-max-microamp = <5000>;
+			function = LED_FUNCTION_INDICATOR;
+			color = <LED_COLOR_ID_RED>;
+		};
+		led@1 {
+			reg = <1>;
+			led-max-microamp = <5000>;
+			function = LED_FUNCTION_INDICATOR;
+			color = <LED_COLOR_ID_GREEN>;
+		};
+		led@2 {
+			reg = <2>;
+			led-max-microamp = <5000>;
+			function = LED_FUNCTION_INDICATOR;
+			color = <LED_COLOR_ID_BLUE>;
+		};
+	};
+};
+
+&i2c_3 {
+	status = "okay";
+
+	touchscreen@38 {
+		compatible = "edt,edt-ft5406", "edt,edt-ft5x06";
+		reg = <0x38>;
+		vcc-supply = <&pm8953_l10>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;
+		interrupt-parent = <&msmgpio>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+		reset-gpios = <&msmgpio 64 GPIO_ACTIVE_LOW>;
+		touchscreen-size-x = <1080>;
+		touchscreen-size-y = <1920>;
+	};
+};
+
+&dsi0 {
+	panel: panel@0 {
+		compatible = "novatek,nt35596-tianma-fhd";
+		reg = <0>;
+
+		backlight = <&pmi8950_wled>;
+
+		supply-names = "vsp", "vsn";
+		vsp-supply = <&lab_vreg>;
+		vsn-supply = <&ibb_vreg>;
+
+		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default &mdss_te_default>;
+		pinctrl-1 = <&pmx_mdss_sleep &mdss_te_default>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&sdhc_1 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+	cd-gpios = <&msmgpio 133 GPIO_ACTIVE_LOW>;
+};
+
+&wcd_codec {
+	qcom,micbias1-ext-cap;
+	qcom,hphl-jack-type-normally-open;
+	qcom,mbhc-vthreshold-low = <75 150 237 450 500>;
+	qcom,mbhc-vthreshold-high = <75 150 237 450 500>;
+};
+
+&sound_card {
+	status = "okay";
+
+	model = "xiaomi-mido";
+
+	aux-devs = <&speaker_amp>;
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act>;
+	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_act>;
+
+	/delete-property/ audio-routing;
+	audio-routing =
+		"Speaker Amp IN", "LINEOUT_OUT",
+		"AMIC1", "MIC BIAS External1",
+		"AMIC2", "MIC BIAS Internal2",
+		"AMIC3", "MIC BIAS External1",
+		"MM_DL1", "MultiMedia1 Playback",
+		"MM_DL3", "MultiMedia3 Playback",
+		"MM_DL4", "MultiMedia4 Playback",
+		"MultiMedia2 Capture", "MM_UL2";
+};
+
+&usb3 {
+	status = "okay";
+};
+
+&msmgpio {
+
+	gpio-reserved-ranges = <0 4>, <135 4>;
+
+	spk_ext_pa_default: speaker-amp-pins {
+		pins = "gpio96";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+
+	ts_reset_active: ts-reset-active-pins {
+		pins = "gpio64";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+	};
+
+	ts_reset_suspend: ts-reset-suspend-pins {
+		pins = "gpio64";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+	ts_int_active: ts-int-active-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+	};
+
+	ts_int_suspend: ts-int-suspend-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	pmx_mdss_default: pmx-mdss-default-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+};
+
+&smd_rpm_regulators {
+	s1 {
+		regulator-min-microvolt = <863000>;
+		regulator-max-microvolt = <1152000>;
+	};
+	s3 {
+		regulator-min-microvolt = <1224000>;
+		regulator-max-microvolt = <1224000>;
+	};
+	s4 {
+		regulator-min-microvolt = <1896000>;
+		regulator-max-microvolt = <2048000>;
+	};
+	l1 {
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1100000>;
+	};
+	l2 {
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1000000>;
+	};
+	l3 {
+		regulator-min-microvolt = <925000>;
+		regulator-max-microvolt = <925000>;
+		regulator-allow-set-load;
+	};
+	l5 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l6 {
+		regulator-always-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l8 {
+		regulator-min-microvolt = <2900000>;
+		regulator-max-microvolt = <2900000>;
+	};
+	l9 {
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3300000>;
+	};
+	l10 {
+		regulator-always-on;
+		regulator-min-microvolt = <2850000>;
+		regulator-max-microvolt = <2850000>;
+	};
+	l11 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l12 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l13 {
+		regulator-min-microvolt = <3075000>;
+		regulator-max-microvolt = <3125000>;
+	};
+	l15 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l16 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+	l17 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <3000000>;
+	};
+	l19 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1350000>;
+	};
+	l22 {
+		regulator-always-on;
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2850000>;
+	};
+	l23 {
+		regulator-min-microvolt = <975000>;
+		regulator-max-microvolt = <1225000>;
+	};
+};
