@@ -1198,7 +1198,7 @@ static const struct ieee80211_ops wcn36xx_ops = {
 	.set_rts_threshold	= wcn36xx_set_rts_threshold,
 	.sta_add		= wcn36xx_sta_add,
 	.sta_remove		= wcn36xx_sta_remove,
-	.ampdu_action		= wcn36xx_ampdu_action,
+	//.ampdu_action		= wcn36xx_ampdu_action,
 
 	CFG80211_TESTMODE_CMD(wcn36xx_tm_cmd)
 };
