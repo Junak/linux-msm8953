@@ -5,6 +5,7 @@
 #include "sdm632.dtsi"
 #include "pm8953.dtsi"
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/display/mipi-dsi-generic.h>
 
 / {
 	qcom,msm-id = <0x15d 0x00>;
@@ -63,7 +64,6 @@
 			no-map;
 			reg = <0x00 0xeefa1800 0x00 0x800>;
 		};
-
 	};
 };
 
@@ -76,8 +76,6 @@
 
 &sdhc_2 {
 	status = "okay";
-	// cd-gpios = <&msmgpio 133 GPIO_ACTIVE_HIGH>;
-	/* TODO: test this */
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
 	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
@@ -89,15 +87,88 @@
 
 &msmgpio {
 	gpio-reserved-ranges = <96 4>;
+
+	pmx_mdss_default: pmx_mdss_default {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx_mdss_sleep {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
 };
 
-&framebuffer {
-	status = "okay";
+&dsi0 {
+	panel@0 {
+		compatible = "qcom,mdss_dsi_mot_tianma_622_720p_vid_v0", "panel-mipi-dsi-generic";
+		reg = <0>;
 
-	width = <720>;
-	height = <1520>;
-	stride = <(720 * 3)>;
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default>;
+		pinctrl-1 = <&pmx_mdss_sleep>;
+
+		dsi-on-commands = MIPI_CMD_DCS_WRITE(4, 0xff 0x98 0x81 0x00),
+		                  MIPI_CMD_DCS_WRITE(3, MIPI_CMD_DCS_SET_DISPLAY_BRIGHTNESS 0x0c 0xcc),
+		                  MIPI_CMD_DCS_WRITE(2, MIPI_CMD_DCS_WRITE_CONTROL_DISPLAY 0x24),
+		                  MIPI_CMD_DCS_WRITE(2, MIPI_CMD_DCS_WRITE_POWER_SAVE 0x01),
+		                  MIPI_CMD_DCS_WRITE(1, MIPI_CMD_DCS_EXIT_SLEEP_MODE),
+		                  MIPI_CMD_DELAY_MS(60),
+		                  MIPI_CMD_DCS_WRITE(1, MIPI_CMD_DCS_SET_DISPLAY_ON),
+		                  MIPI_CMD_DCS_WRITE(4, 0xff 0x98 0x81 0x03),
+		                  MIPI_CMD_DCS_WRITE(2, 0x83 0x20),
+		                  MIPI_CMD_DCS_WRITE(2, 0x84 0x02),
+		                  MIPI_CMD_DCS_WRITE(2, 0xbc 0x08),
+		                  MIPI_CMD_DCS_WRITE(4, 0xff 0x98 0x81 0x06),
+		                  MIPI_CMD_DCS_WRITE(2, 0x06 0xc4),
+		                  MIPI_CMD_DCS_WRITE(4, 0xff 0x98 0x81 0x00);
+		dsi-off-commands = MIPI_CMD_DCS_WRITE(1, MIPI_CMD_DCS_SET_DISPLAY_OFF),
+		                   MIPI_CMD_DELAY_MS(20),
+		                   MIPI_CMD_DCS_WRITE(1, MIPI_CMD_DCS_ENTER_SLEEP_MODE),
+		                   MIPI_CMD_DELAY_MS(120);
+		dsi-format = <MIPI_GENERIC_DSI_FMT_RGB888>;
+		dsi-lanes = <4>;
+		dsi-mode = <(MIPI_GENERIC_DSI_MODE_VIDEO|MIPI_GENERIC_DSI_MODE_VIDEO_BURST|MIPI_GENERIC_DSI_CLOCK_NON_CONTINUOUS|MIPI_GENERIC_DSI_MODE_LPM)>;
+
+		panel-refresh-rate = <60>;
+		panel-width-mm = <0>;
+		panel-height-mm = <0>;
+
+		panel-timing {
+			clock-frequency = <((720 + 52 + 28 + 48) * (1520 + 41 + 4 + 20) * 60)>;
+
+			hactive = <720>;
+			hfront-porch = <52>;
+			hback-porch = <48>;
+			hsync-len = <28>;
+
+			vactive = <1520>;
+			vfront-porch = <41>;
+			vback-porch = <20>;
+			vsync-len = <4>;
+		};
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
 };
+
+&dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+/*&dsi_phy0 {
+	vddio-supply = <&pm8953_l6>;
+};*/
 
 &spmi_regulators {
 	status = "okay";
@@ -107,46 +178,47 @@
 	compatible = "qcom,rpm-pm8953-regulators";
 
 #if 0
-	s1_level { // Modem
+	s1_level {
 		status = "okay";
 		regulator-min-microvolt = <0x10>;
 		regulator-max-microvolt = <0x180>;
 	};
 #endif
-	s3 { // CSI
+	s3 {
 		status = "okay";
 		regulator-min-microvolt = <984000>;
 		regulator-max-microvolt = <1240000>;
 	};
-	s4 { // Audio codec
+	s4 {
 		status = "okay";
 		regulator-min-microvolt = <1036000>;
 		regulator-max-microvolt = <2040000>;
 	};
-	l1 { // unused
+	l1 {
 		status = "okay";
 		regulator-min-microvolt = <975000>;
 		regulator-max-microvolt = <1050000>;
 	};
-	l2 { // Always-on
+	l2 {
 		status = "okay";
 		regulator-min-microvolt = <975000>;
 		regulator-max-microvolt = <1175000>;
 	};
-	l3 { // Usb, mdss phy
+	l3 {
 		status = "okay";
 		regulator-min-microvolt = <925000>;
 		regulator-max-microvolt = <925000>;
 		regulator-allow-set-load;
 	};
-	l5 { // wcnss, sdhci, codec
+	l5 {
 		status = "okay";
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1800000>;
 	};
-	l6 { // DSI
+	l6 { //WARNING: some ocean models use l22 instead
 		status = "okay";
 		regulator-always-on;
+		regulator-boot-on;
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1800000>;
 		};
@@ -155,57 +227,58 @@
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1900000>;
 	};
-	l8 { // sdhci
+	l8 {
 		status = "okay";
 		regulator-min-microvolt = <2900000>;
 		regulator-max-microvolt = <2900000>;
 	};
-	l9 { // wcnss
+	l9 {
 		status = "okay";
 		regulator-min-microvolt = <3000000>;
 		regulator-max-microvolt = <3300000>;
 	};
-	l10 { // unused
+	l10 {
 		status = "okay";
 		regulator-min-microvolt = <2800000>;
 		regulator-max-microvolt = <3000000>;
 	};
-	l11 { // sdhci
+	l11 {
 		status = "okay";
 		regulator-min-microvolt = <2950000>;
 		regulator-max-microvolt = <2950000>;
 	};
-	l12 { // sdhci
+	l12 {
 		status = "okay";
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <2950000>;
 	};
-	l13 { // audio codec, usb phy
+	l13 {
 		status = "okay";
 		regulator-min-microvolt = <3125000>;
 		regulator-max-microvolt = <3125000>;
 	};
-	l16 { // unused
+	l16 {
 		status = "okay";
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1800000>;
 	};
-	l17 { // dsi
+	l17 {
 		status = "okay";
 		regulator-min-microvolt = <2850000>;
 		regulator-max-microvolt = <2850000>;
 	};
-	l19 { // wcnss
+	l19 {
 		status = "okay";
 		regulator-min-microvolt = <1200000>;
 		regulator-max-microvolt = <1350000>;
 	};
-	l22 { // dsi
+	l22 {
 		status = "okay";
-		regulator-min-microvolt = <2800000>;
-		regulator-max-microvolt = <2800000>;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
 	};
-	l23 { // camera
+	l23 {
 		status = "okay";
 		regulator-min-microvolt = <975000>;
 		regulator-max-microvolt = <1225000>;
