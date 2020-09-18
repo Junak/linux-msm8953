@@ -108,6 +108,8 @@ struct s6sy761_data {
 
 	u8 data[S6SY761_EVENT_SIZE * S6SY761_EVENT_COUNT];
 
+	u32 touches;
+
 	u16 devid;
 	u8 tx_channel;
 };
@@ -144,6 +146,7 @@ static int s6sy761_read_events(struct s6sy761_data *sdata, u16 n_events)
 static void s6sy761_report_coordinates(struct s6sy761_data *sdata,
 				       u8 *event, u8 tid)
 {
+	u32 oldtouches = sdata->touches;
 	u8 major = event[4];
 	u8 minor = event[5];
 	u8 z = event[6] & S6SY761_MASK_Z;
@@ -161,6 +164,14 @@ static void s6sy761_report_coordinates(struct s6sy761_data *sdata,
 	input_report_abs(sdata->input, ABS_MT_TOUCH_MINOR, minor);
 	input_report_abs(sdata->input, ABS_MT_PRESSURE, z);
 
+	sdata->touches |= BIT(tid);
+
+	if (oldtouches != sdata->touches &&
+			hweight_long(sdata->touches) == 1) {
+		input_report_key(sdata->input, BTN_TOUCH, 1);
+		input_report_key(sdata->input, BTN_TOOL_FINGER, 1);
+	}
+
 	input_sync(sdata->input);
 }
 
@@ -169,6 +180,13 @@ static void s6sy761_report_release(struct s6sy761_data *sdata,
 {
 	input_mt_slot(sdata->input, tid);
 	input_mt_report_slot_state(sdata->input, MT_TOOL_FINGER, false);
+
+	sdata->touches &= ~BIT(tid);
+
+	if (hweight_long(sdata->touches) != 1) {
+		input_report_key(sdata->input, BTN_TOUCH, 0);
+		input_report_key(sdata->input, BTN_TOOL_FINGER, 0);
+	}
 
 	input_sync(sdata->input);
 }
@@ -436,6 +454,9 @@ static int s6sy761_probe(struct i2c_client *client,
 	sdata->input->id.bustype = BUS_I2C;
 	sdata->input->open = s6sy761_input_open;
 	sdata->input->close = s6sy761_input_close;
+
+	input_set_capability(sdata->input, EV_KEY, BTN_TOUCH);
+	input_set_capability(sdata->input, EV_KEY, BTN_TOOL_FINGER);
 
 	input_set_abs_params(sdata->input, ABS_MT_POSITION_X, 0, max_x, 0, 0);
 	input_set_abs_params(sdata->input, ABS_MT_POSITION_Y, 0, max_y, 0, 0);
