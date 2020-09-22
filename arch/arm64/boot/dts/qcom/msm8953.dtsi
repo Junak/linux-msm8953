@@ -276,6 +276,10 @@
 			reg = <0x1800000 0x80000>;
 		};
 
+		clock-debugger {
+			compatible = "qcom,gcc-msm8953-debug";
+		};
+
 		apcs: mailbox@b011000 {
 			compatible = "qcom,msm8953-apcs-kpss-global", "syscon";
 			reg = <0xb011000 0x1000>;

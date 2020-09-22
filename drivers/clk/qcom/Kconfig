@@ -602,4 +602,11 @@ config CLK_GFM_LPASS_SM8250
 	  Support for the Glitch Free Mux (GFM) Low power audio
           subsystem (LPASS) clocks found on SM8250 SoCs.
 
+config MSM_GCC_8953_DEBUG
+	tristate "MSM8953 GCC Debug"
+	depends on DEBUG_FS
+	depends on MSM_GCC_8953
+	help
+	  Support for the measuring clock rates on MSM8953 GCC.
+
 endif
