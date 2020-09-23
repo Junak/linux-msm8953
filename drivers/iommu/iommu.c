@@ -31,6 +31,8 @@ static DEFINE_IDA(iommu_group_ida);
 static unsigned int iommu_def_domain_type __read_mostly;
 static bool iommu_dma_strict __read_mostly = true;
 static u32 iommu_cmd_line __read_mostly;
+static bool iommu_is_attach_deferred(struct iommu_domain *domain,
+				     struct device *dev);
 
 struct iommu_group {
 	struct kobject kobj;
@@ -268,7 +270,8 @@ int iommu_probe_device(struct device *dev)
 	 */
 	iommu_alloc_default_domain(group, dev);
 
-	if (group->default_domain) {
+	if (group->default_domain &&
+		!iommu_is_attach_deferred(group->default_domain, dev)) {
 		ret = __iommu_attach_device(group->default_domain, dev);
 		if (ret) {
 			iommu_group_put(group);
