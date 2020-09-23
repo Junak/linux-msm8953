@@ -594,6 +594,16 @@ static int qcom_iommu_of_xlate(struct device *dev, struct of_phandle_args *args)
 
 	return iommu_fwspec_add_ids(dev, &asid, 1);
 }
+static bool qcom_iommu_is_attach_deferred(struct iommu_domain *domain,
+		struct device *dev)
+{
+	struct iommu_group *group = iommu_group_get(dev);
+	if (dev->of_node &&
+	    of_property_read_bool(dev->of_node, "iommu-defer-attach"))
+		return !iommu_group_get_iommudata(group);
+
+	return false;
+}
 
 static const struct iommu_ops qcom_iommu_ops = {
 	.capable	= qcom_iommu_capable,
@@ -610,6 +620,7 @@ static const struct iommu_ops qcom_iommu_ops = {
 	.release_device	= qcom_iommu_release_device,
 	.device_group	= generic_device_group,
 	.of_xlate	= qcom_iommu_of_xlate,
+	.is_attach_deferred = qcom_iommu_is_attach_deferred,
 	.pgsize_bitmap	= SZ_4K | SZ_64K | SZ_1M | SZ_16M,
 };
 

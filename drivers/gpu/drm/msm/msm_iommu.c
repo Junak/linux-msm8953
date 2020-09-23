@@ -284,6 +284,16 @@ struct msm_mmu *msm_iommu_new(struct device *dev, struct iommu_domain *domain)
 
 	atomic_set(&iommu->pagetables, 0);
 
+#ifdef CONFIG_IOMMU_API
+	// Make SMMU aware that we are ready for attach
+	if (dev->of_node && of_property_read_bool(dev->of_node,
+				"iommu-defer-attach")) {
+		struct iommu_group *group = iommu_group_get(dev);
+
+		if (group)
+			iommu_group_set_iommudata(group, (void*) 0x1, NULL);
+	}
+#endif
 	ret = iommu_attach_device(iommu->domain, dev);
 	if (ret) {
 		kfree(iommu);
