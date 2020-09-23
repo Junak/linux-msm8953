@@ -96,7 +96,7 @@ static struct qcom_iommu_ctx * to_ctx(struct qcom_iommu_domain *d, unsigned asid
 	struct qcom_iommu_dev *qcom_iommu = d->iommu;
 	if (!qcom_iommu)
 		return NULL;
-	return qcom_iommu->ctxs[asid - 1];
+	return qcom_iommu->ctxs[asid];
 }
 
 static inline void
@@ -575,9 +575,7 @@ static int qcom_iommu_of_xlate(struct device *dev, struct of_phandle_args *args)
 	 * to sanity check this elsewhere, since 'asid - 1' is used to
 	 * index into qcom_iommu->ctxs:
 	 */
-	if (WARN_ON(asid < 1) ||
-	    WARN_ON(asid > qcom_iommu->num_ctxs)) {
-		put_device(&iommu_pdev->dev);
+	if (WARN_ON(asid >= qcom_iommu->num_ctxs)) {
 		return -EINVAL;
 	}
 
@@ -722,7 +720,7 @@ static int qcom_iommu_ctx_probe(struct platform_device *pdev)
 
 	dev_dbg(dev, "found asid %u\n", ctx->asid);
 
-	qcom_iommu->ctxs[ctx->asid - 1] = ctx;
+	qcom_iommu->ctxs[ctx->asid] = ctx;
 
 	return 0;
 }
@@ -734,7 +732,7 @@ static int qcom_iommu_ctx_remove(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, NULL);
 
-	qcom_iommu->ctxs[ctx->asid - 1] = NULL;
+	qcom_iommu->ctxs[ctx->asid] = NULL;
 
 	return 0;
 }
@@ -774,17 +772,21 @@ static int qcom_iommu_device_probe(struct platform_device *pdev)
 	struct clk *clk;
 	int ret, max_asid = 0;
 
+	if (!qcom_scm_is_available())
+		return -EPROBE_DEFER;
+
+
 	/* find the max asid (which is 1:1 to ctx bank idx), so we know how
 	 * many child ctx devices we have:
 	 */
 	for_each_child_of_node(dev->of_node, child)
 		max_asid = max(max_asid, get_asid(child));
 
-	qcom_iommu = devm_kzalloc(dev, struct_size(qcom_iommu, ctxs, max_asid),
+	qcom_iommu = devm_kzalloc(dev, struct_size(qcom_iommu, ctxs, max_asid + 1),
 				  GFP_KERNEL);
 	if (!qcom_iommu)
 		return -ENOMEM;
-	qcom_iommu->num_ctxs = max_asid;
+	qcom_iommu->num_ctxs = max_asid + 1;
 	qcom_iommu->dev = dev;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -884,8 +886,16 @@ static int qcom_iommu_device_remove(struct platform_device *pdev)
 static int __maybe_unused qcom_iommu_resume(struct device *dev)
 {
 	struct qcom_iommu_dev *qcom_iommu = dev_get_drvdata(dev);
+	int ret;
 
-	return clk_bulk_prepare_enable(CLK_NUM, qcom_iommu->clks);
+	ret = clk_bulk_prepare_enable(CLK_NUM, qcom_iommu->clks);
+	if (ret < 0)
+		return ret;
+
+	if (of_device_is_compatible(dev->of_node, "qcom,msm8953-gpu-iommu"))
+		return qcom_scm_restore_sec_cfg(qcom_iommu->sec_id, 0);
+
+	return ret;
 }
 
 static int __maybe_unused qcom_iommu_suspend(struct device *dev)
