@@ -21,6 +21,13 @@ extern bool snapshot_debugbus;
 extern bool allow_vram_carveout;
 
 enum {
+	ADRENO_PM_DOMAIN_CX_OPP = 0,
+	ADRENO_PM_DOMAIN_CX = 1,
+	ADRENO_PM_DOMAIN_GX = 2,
+	ADRENO_PM_DOMAIN_MAX
+};
+
+enum {
 	ADRENO_FW_PM4 = 0,
 	ADRENO_FW_SQE = 0, /* a6xx */
 	ADRENO_FW_PFP = 1,
@@ -62,6 +69,7 @@ struct adreno_info {
 	uint32_t revn;
 	const char *name;
 	const char *fw[ADRENO_FW_MAX];
+	const char *pm_domains[ADRENO_PM_DOMAIN_MAX];
 	uint32_t gmem;
 	enum adreno_quirks quirks;
 	struct msm_gpu *(*init)(struct drm_device *dev);
@@ -103,6 +111,10 @@ struct adreno_gpu {
 		FW_LOCATION_LEGACY,    /* /lib/firmware/$fwfile */
 		FW_LOCATION_HELPER,
 	} fwloc;
+
+	struct device_link *pm_links[ADRENO_PM_DOMAIN_MAX];
+	struct device *pm_domains[ADRENO_PM_DOMAIN_MAX];
+	struct device **opp_pm_domains;
 
 	/* firmware: */
 	const struct firmware *fw[ADRENO_FW_MAX];

@@ -142,6 +142,11 @@ static const struct adreno_info gpulist[] = {
 			[ADRENO_FW_PFP] = "a530_pfp.fw",
 		},
 		.gmem = (SZ_128K + SZ_8K),
+		.pm_domains = {
+			[ADRENO_PM_DOMAIN_CX_OPP] = "cx-supply",
+			[ADRENO_PM_DOMAIN_CX] = "cx",
+			[ADRENO_PM_DOMAIN_GX] = "gx",
+		},
 		/*
 		 * Increase inactive period to 250 to avoid bouncing
 		 * the GDSC which appears to make it grumpy

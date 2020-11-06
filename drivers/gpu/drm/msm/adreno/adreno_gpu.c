@@ -12,6 +12,8 @@
 #include <linux/kernel.h>
 #include <linux/of_address.h>
 #include <linux/pm_opp.h>
+#include <linux/pm_runtime.h>
+#include <linux/pm_domain.h>
 #include <linux/slab.h>
 #include <linux/soc/qcom/mdt_loader.h>
 #include <soc/qcom/ocmem.h>
@@ -830,12 +832,17 @@ static int adreno_get_legacy_pwrlevels(struct device *dev)
 	return 0;
 }
 
-static void adreno_get_pwrlevels(struct device *dev,
-		struct msm_gpu *gpu)
+static int adreno_get_pwrlevels(struct device *dev,
+		struct adreno_gpu *adreno_gpu)
 {
 	unsigned long freq = ULONG_MAX;
+	struct msm_gpu *gpu = &adreno_gpu->base;
 	struct dev_pm_opp *opp;
-	int ret;
+	struct device **pds = adreno_gpu->pm_domains;
+	struct device_link **pm_links = adreno_gpu->pm_links;
+	const char * const *pd_names = adreno_gpu->info->pm_domains;
+	struct opp_table *opp_table;
+	int ret, i;
 
 	gpu->fast_rate = 0;
 
@@ -843,9 +850,45 @@ static void adreno_get_pwrlevels(struct device *dev,
 	if (!of_find_property(dev->of_node, "operating-points-v2", NULL))
 		ret = adreno_get_legacy_pwrlevels(dev);
 	else {
+		const char *opp_pd_names[] = { pd_names[0], NULL };
+
+		gpu->opp_table = dev_pm_opp_set_clkname(dev, "core");
+		if (IS_ERR(gpu->opp_table))
+			return PTR_ERR(gpu->opp_table);
+
 		ret = dev_pm_opp_of_add_table(dev);
-		if (ret)
+		if (ret) {
 			DRM_DEV_ERROR(dev, "Unable to set the OPP table\n");
+			return ret;
+		}
+
+		for (i = 1; i < ADRENO_PM_DOMAIN_MAX; i ++) {
+			if (!pd_names[i])
+				continue;
+
+			pds[i] = dev_pm_domain_attach_by_name(dev, pd_names[i]);
+			if (IS_ERR(pds[i]))
+				return PTR_ERR(pds[i]);
+
+			pm_links[i] = device_link_add(dev, pds[i], DL_FLAG_RPM_ACTIVE |
+								   DL_FLAG_PM_RUNTIME |
+								   DL_FLAG_STATELESS);
+			if (IS_ERR(pm_links[i]))
+				return PTR_ERR(pm_links[i]);
+		}
+
+		opp_table = dev_pm_opp_attach_genpd(dev, opp_pd_names,
+				&adreno_gpu->opp_pm_domains);
+		if (IS_ERR(opp_table))
+			return PTR_ERR(opp_table);
+
+		pm_links[0] = device_link_add(dev, adreno_gpu->opp_pm_domains[0],
+						DL_FLAG_RPM_ACTIVE |
+						DL_FLAG_PM_RUNTIME |
+						DL_FLAG_STATELESS);
+		if (IS_ERR(pm_links[0]))
+			return PTR_ERR(pm_links[0]);
+
 	}
 
 	if (!ret) {
@@ -865,6 +908,8 @@ static void adreno_get_pwrlevels(struct device *dev,
 	}
 
 	DBG("fast_rate=%u, slow_rate=27000000", gpu->fast_rate);
+
+	return 0;;
 }
 
 int adreno_gpu_ocmem_init(struct device *dev, struct adreno_gpu *adreno_gpu,
@@ -913,7 +958,7 @@ int adreno_gpu_init(struct drm_device *drm, struct platform_device *pdev,
 	struct device *dev = &pdev->dev;
 	struct adreno_platform_config *config = dev->platform_data;
 	struct msm_gpu_config adreno_gpu_config  = { 0 };
-	struct msm_gpu *gpu = &adreno_gpu->base;
+	int ret;
 
 	adreno_gpu->funcs = funcs;
 	adreno_gpu->info = adreno_info(config->rev);
@@ -925,12 +970,20 @@ int adreno_gpu_init(struct drm_device *drm, struct platform_device *pdev,
 
 	adreno_gpu_config.nr_rings = nr_rings;
 
-	adreno_get_pwrlevels(dev, gpu);
+	ret = adreno_get_pwrlevels(dev, adreno_gpu);
+	if (ret < 0)
+		return ret;
 
 	pm_runtime_set_autosuspend_delay(dev,
 		adreno_gpu->info->inactive_period);
 	pm_runtime_use_autosuspend(dev);
 	pm_runtime_enable(dev);
+
+	if (adreno_gpu->base.opp_table) {
+		ret = dev_pm_opp_of_find_icc_paths(dev, adreno_gpu->base.opp_table);
+		if (ret < 0)
+			return ret;
+	}
 
 	return msm_gpu_init(drm, pdev, &adreno_gpu->base, &funcs->base,
 			adreno_gpu->info->name, &adreno_gpu_config);
@@ -946,6 +999,19 @@ void adreno_gpu_cleanup(struct adreno_gpu *adreno_gpu)
 		release_firmware(adreno_gpu->fw[i]);
 
 	pm_runtime_disable(&priv->gpu_pdev->dev);
+
+	for (i = 0; i < ADRENO_PM_DOMAIN_MAX; i ++) {
+		if (!IS_ERR_OR_NULL(adreno_gpu->pm_links[i]))
+			device_link_del(adreno_gpu->pm_links[i]);
+
+		if (i > 0 && !IS_ERR_OR_NULL(adreno_gpu->pm_domains[i]))
+			dev_pm_domain_detach(adreno_gpu->pm_domains[i], true);
+	}
+
+	if (!IS_ERR_OR_NULL(gpu->opp_table)) {
+		dev_pm_opp_put_clkname(gpu->opp_table);
+		dev_pm_opp_detach_genpd(gpu->opp_table);
+	}
 
 	msm_gpu_cleanup(&adreno_gpu->base);
 
