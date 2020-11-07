@@ -24,6 +24,13 @@
 		l1-dcache { compatible = "cache"; };	\
 	}
 
+#define GPU_OPP(freq_khz, lvl, supp)			\
+	opp-##freq_khz##000 {				\
+		opp-hz = /bits/ 64 <freq_khz##000>;	\
+		opp-supported-hw = <supp>;		\
+		required-opps = <&lvl>;			\
+	}
+
 #define COMMON_THERMAL(n, s)				\
 	polling-delay-passive = <250>;			\
 	polling-delay = <1000>;				\
@@ -1234,6 +1241,54 @@
 						};
 					};
 				};
+			};
+		};
+
+		gpu: gpu@1c00000 {
+			compatible = "qcom,adreno-506.0", "qcom,adreno";
+
+			reg = <0x1c00000 0x40000>;
+			reg-names = "kgsl_3d0_reg_memory";
+
+			interrupts = <GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
+
+			clocks = <&gcc GCC_OXILI_GFX3D_CLK>,
+				 <&gcc GCC_OXILI_AHB_CLK>,
+				 <&gcc GCC_BIMC_GFX_CLK>,
+				 <&gcc GCC_BIMC_GPU_CLK>,
+				 <&gcc GCC_OXILI_TIMER_CLK>,
+				 <&gcc GCC_OXILI_AON_CLK>;
+
+			clock-names = "core",
+				      "iface",
+				      "mem",
+				      "mem_iface",
+				      "rbbmtimer",
+				      "alwayson";
+
+			power-domains = <&gcc OXILI_CX_GDSC>,
+					<&gcc OXILI_GX_GDSC>,
+					<&rpmpd MSM8953_VDDCX>;
+			power-domain-names = "cx", "gx", "cx-supply";
+
+			iommus = <&gpu_iommu 0>;
+
+			operating-points-v2 = <&gpu_opp_table>;
+
+			gpu_opp_table: opp-table {
+				compatible  ="operating-points-v2";
+
+				GPU_OPP(128000, rpmpd_opp_low_svs, 0xff);
+				GPU_OPP(230400, rpmpd_opp_svs, 0xff);
+				GPU_OPP(384000, rpmpd_opp_svs_plus, 0xff);
+				GPU_OPP(460800, rpmpd_opp_nom, 0xff);
+				GPU_OPP(576000, rpmpd_opp_nom_plus, 0xff);
+				GPU_OPP(652800, rpmpd_opp_turbo, 0xff);
+			};
+
+			zap-shader {
+				memory-region = <&zap_shader_region>;
+				firmware-name = "a506_zap.mdt";
 			};
 		};
 
