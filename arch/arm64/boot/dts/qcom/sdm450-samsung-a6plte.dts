@@ -131,6 +131,66 @@
 		enable-active-high;
 	};
 
+	cam_sensor_common_vdd: regulator-cam-common {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_rear_vdd";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		startup-delay-us = <1000>;
+
+		gpio = <&expander 12 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
+	cam_sensor_front_vdd_ana: regulator-cam-front-ana {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_front_vddana";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		startup-delay-us = <1000>;
+
+		gpio = <&expander 13 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
+	cam_sensor_rear_vdd_io: regulator-cam-rear-io {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_rear_vddio";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		startup-delay-us = <1000>;
+
+		gpio = <&msmgpio 92 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
+	cam_sensor_rear_vdd_af: regulator-cam-rear-af {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_rear_vddaf";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		startup-delay-us = <1000>;
+
+		gpio = <&msmgpio 89 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
+	cam_sensor_rear_aux_vddio: regulator-cam-aux-vddio {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_aux_vddio";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		startup-delay-us = <1000>;
+
+		gpio = <&msmgpio 94 GPIO_ACTIVE_HIGH>;
+
+		enable-active-high;
+	};
+
 	i2c-expander {
 		compatible = "i2c-gpio";
 		sda-gpios = <&msmgpio 21 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
@@ -429,6 +489,136 @@
 	};
 };
 
+&cci {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cci0_default>,
+		    <&cci1_default>,
+		    <&camss_mclk0_default>,
+		    <&camss_mclk1_default>;
+
+	status = "okay";
+};
+
+&cci_i2c0 {
+	camera-sensor@28 { // Secondary rear camera
+		compatible = "hynix,sr556";
+
+		reg = <0x28>;
+
+		clocks = <&gcc GCC_CAMSS_MCLK0_CLK>;
+		clock-frequency = <24000000>;
+
+		reset-gpios = <&msmgpio 41 GPIO_ACTIVE_LOW>;
+
+		dvdd-supply = <&cam_sensor_common_vdd>;
+		vio-supply = <&cam_sensor_rear_aux_vddio>;
+
+		rotation = <270>;
+		orientation = <1>;
+
+		status = "okay";
+
+		port {
+			aux_cam_ep: endpoint {
+				data-lanes = <0 1>;
+				remote-endpoint = <&csiphy2_ep>;
+				link-frequencies = /bits/ 64 <437000000>;
+			};
+		};
+	};
+
+	camera-sensor@10 { // Front camera
+		compatible = "samsung,s5k2x7sp";
+
+		reg = <0x10>;
+
+		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+		clock-frequency = <24000000>;
+
+		reset-gpios = <&msmgpio 129 GPIO_ACTIVE_LOW>;
+
+		dvdd-supply = <&pm8953_l23>;
+		avdd-supply = <&cam_sensor_front_vdd_ana>;
+		vio-supply = <&cam_sensor_common_vdd>;
+		aux-supply = <&cam_sensor_rear_aux_vddio>;
+
+		rotation = <90>;
+		orientation = <0>;
+
+		status = "okay";
+
+		port {
+			front_cam_ep: endpoint {
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&csiphy1_ep>;
+			};
+		};
+	};
+};
+
+&cci_i2c1 {
+	camera-sensor@2d { // Primary rear camera
+		compatible = "samsung,s5k2p6sx";
+
+		reg = <0x2d>;
+
+		clocks = <&gcc GCC_CAMSS_MCLK0_CLK>;
+		clock-frequency = <24000000>;
+
+		reset-gpios = <&msmgpio 40 GPIO_ACTIVE_LOW>;
+
+		dvdd-supply = <&cam_sensor_common_vdd>;
+		avdd-supply = <&cam_sensor_common_vdd>;
+		vio-supply = <&cam_sensor_rear_vdd_io>;
+		aux-supply = <&cam_sensor_rear_vdd_af>;
+
+		rotation = <270>;
+		orientation = <1>;
+
+		status = "okay";
+
+		port {
+			rear_cam_ep: endpoint {
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&csiphy0_ep>;
+			};
+		};
+	};
+};
+
+&camss {
+	status = "okay";
+	compatible = "qcom,sdm450-camss";
+	vdda-supply = <&pm8953_s3>;
+
+	ports {
+		port@0 {
+			reg = <0>;
+			csiphy0_ep: endpoint {
+				clock-lanes = <7>;
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&rear_cam_ep>;
+			};
+		};
+		port@1 {
+			reg = <1>;
+			csiphy1_ep: endpoint {
+				clock-lanes = <7>;
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&front_cam_ep>;
+			};
+		};
+		port@2 {
+			reg = <2>;
+			csiphy2_ep: endpoint {
+				clock-lanes = <7>;
+				data-lanes = <0 1>;
+				remote-endpoint = <&aux_cam_ep>;
+			};
+		};
+	};
+};
+
 &sdhc_1 {
 	status = "okay";
 
@@ -445,6 +635,22 @@
 	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
 
 	cd-gpios = <&msmgpio 133 GPIO_ACTIVE_LOW>;
+};
+
+&camss_mclk0_default {
+	drive-strength = <4>;
+};
+
+&camss_mclk1_default {
+	drive-strength = <4>;
+};
+
+&cci0_default {
+	drive-strength = <4>;
+};
+
+&cci1_default {
+	drive-strength = <4>;
 };
 
 &msmgpio {
