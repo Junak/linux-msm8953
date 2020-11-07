@@ -15,6 +15,11 @@
 		enable-method = "psci";			\
 		next-level-cache = <&L2_##cluster>;	\
 		#cooling-cells = <2>;			\
+		power-domains = <&cpr 0>;		\
+		power-domain-names = "cpr";		\
+		clocks = <&apcc cluster>;		\
+		clock-names = "cpu";			\
+		operating-points-v2 = <&cpu##cluster##_opp>;\
 		l1-icache { compatible = "cache"; };	\
 		l1-dcache { compatible = "cache"; };	\
 	}
@@ -215,6 +220,80 @@
 	pmu {
 		compatible = "arm,cortex-a53-pmu";
 		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(8)| IRQ_TYPE_LEVEL_HIGH)>;
+	};
+
+	cpu0_opp: cpu0-opp-table {
+		compatible = "operating-points-v2-qcom-cpu", "operating-points-v2-kryo-cpu";
+		nvmem-cells = <&cpu_speed_bin>;
+		opp-shared;
+
+		/*
+		 * Speed bin	    SoC
+		 * 2		    SDM625
+		 * 6		    SDM450
+		 * opp-supported-hw is bitmask of 1 << speed_bin
+		 * compatible of / node has to be "qcom,msm8953"
+		 */
+		OPP( 320000, cpr_opp1, 0x44, none);
+		OPP( 620000, cpr_opp2, 0x44, none);
+		OPP( 800000, cpr_opp3, 0x44, opp-suspend);
+		OPP( 930000, cpr_opp4, 0x44, none);
+		OPP(1203200, cpr_opp5, 0x40, none);
+		OPP(1344000, cpr_opp6, 0x04, none);
+		OPP(1804800, cpr_opp7, 0x40, none);
+		OPP(2016000, cpr_opp8, 0x04, none);
+
+	};
+
+	cpu1_opp: cpu1-opp-table {
+		compatible = "operating-points-v2-qcom-cpu", "operating-points-v2-kryo-cpu";
+		opp-shared;
+
+		OPP( 320000, cpr_opp1, 0x44, none);
+		OPP( 620000, cpr_opp2, 0x44, none);
+		OPP( 800000, cpr_opp3, 0x44, opp-suspend);
+		OPP( 930000, cpr_opp4, 0x44, none);
+		OPP(1203200, cpr_opp5, 0x40, none);
+		OPP(1344000, cpr_opp6, 0x04, none);
+		OPP(1804800, cpr_opp7, 0x40, none);
+		OPP(2016000, cpr_opp8, 0x04, none);
+	};
+
+	cpr_opp_table: cpr-opp-table {
+		compatible = "operating-points-v2-qcom-level";
+
+		cpr_opp1: opp1 {
+			opp-level = <1>;
+			opp-hz = /bits/ 64 <320000000>;
+		};
+		cpr_opp2: opp2 {
+			opp-level = <2>;
+			opp-hz = /bits/ 64 <320000000>;
+		};
+		cpr_opp3: opp3 {
+			opp-level = <3>;
+			opp-hz = /bits/ 64 <320000000>;
+		};
+		cpr_opp4: opp4 {
+			opp-level = <4>;
+			opp-hz = /bits/ 64 <372000000>;
+		};
+		cpr_opp5: opp5 {
+			opp-level = <5>;
+			opp-hz = /bits/ 64 <465000000>;
+		};
+		cpr_opp6: opp6 {
+			opp-level = <6>;
+			opp-hz = /bits/ 64 <533400000>;
+		};
+		cpr_opp7: opp7 {
+			opp-level = <7>;
+			opp-hz = /bits/ 64 <721920000>;
+		};
+		cpr_opp8: opp8 {
+			opp-level = <8>;
+			opp-hz = /bits/ 64 <806400000>;
+		};
 	};
 
 	timer {
@@ -752,6 +831,11 @@
 			reg = <0x19461d4 0x8>;
 		};
 
+		apm: syscon@b111000 {
+			compatible = "syscon";
+			reg = <0xb111000 0x1000>;
+		};
+
 		gfx_mem_acc_l1: syscon@194415c {
 			compatible = "syscon";
 			reg = <0x194415c 0x4>;
@@ -1151,6 +1235,59 @@
 					};
 				};
 			};
+		};
+
+		cpr: power-controller@b018000 {
+			compatible = "qcom,msm8953-cpr4";
+
+			nvmem-cells = <&cpr_efuse_quot_offset3>,
+				      <&cpr_efuse_quot_offset2>,
+				      <&cpr_efuse_quot_offset1>,
+				      <&cpr_efuse_init_voltage4>,
+				      <&cpr_efuse_init_voltage3>,
+				      <&cpr_efuse_init_voltage2>,
+				      <&cpr_efuse_init_voltage1>,
+				      <&cpr_efuse_quot4>,
+				      <&cpr_efuse_quot3>,
+				      <&cpr_efuse_quot2>,
+				      <&cpr_efuse_quot1>,
+				      <&cpr_efuse_ring4>,
+				      <&cpr_efuse_ring3>,
+				      <&cpr_efuse_ring2>,
+				      <&cpr_efuse_ring1>,
+				      <&cpr_efuse_revision>,
+				      <&cpu_speed_bin>;
+			nvmem-cell-names = "cpr_thread0_quotient_offset2",
+					   "cpr_thread0_quotient_offset3",
+					   "cpr_thread0_quotient_offset4",
+					   "cpr_thread0_init_voltage1",
+					   "cpr_thread0_init_voltage2",
+					   "cpr_thread0_init_voltage3",
+					   "cpr_thread0_init_voltage4",
+					   "cpr_thread0_quotient1",
+					   "cpr_thread0_quotient2",
+					   "cpr_thread0_quotient3",
+					   "cpr_thread0_quotient4",
+					   "cpr_thread0_ring_osc1",
+					   "cpr_thread0_ring_osc2",
+					   "cpr_thread0_ring_osc3",
+					   "cpr_thread0_ring_osc4",
+					   "cpr_fuse_revision",
+					   "cpr_speed_bin";
+
+			reg = <0x0b018000 0x4000>;
+			reg-names = "cpr-iomem";
+
+			interrupts = <GIC_SPI 15 IRQ_TYPE_EDGE_RISING>;
+
+			clocks = <&apcc 2>, <&xo_board>;
+			clock-names = "cci", "ref";
+
+			acc-syscon = <&apc_mem_acc>;
+			apm-syscon = <&apm>;
+
+			#power-domain-cells = <1>;
+			operating-points-v2 = <&cpr_opp_table>;
 		};
 
 		tsens0: thermal-sensor@4a8000 {
