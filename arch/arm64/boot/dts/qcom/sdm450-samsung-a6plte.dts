@@ -186,6 +186,87 @@
 	};
 };
 
+&i2c_5 {
+	status = "okay";
+
+	speaker_codec: audio-codec@34 {
+		compatible = "nxp,tfa9872";
+		reg = <0x34>;
+
+		dcdc-enable = <1>;
+		dpsa-enable = <0>;
+		first-boost-trip-lvl = <7>;
+		first-boost-voltage = <4>;
+		low-audio-hold-time = <27>;
+		low-noise-mode = <0>;
+		lpm-idle-bypass = <1>;
+		lpm1-hold-time = <0>;
+		lpm1-mode = <1>;
+		max-coil-current = <12>;
+		pdm-subsystem-enable = <0>;
+		pga-chop-clock-enable = <0>;
+		second-boost-trip-lvl = <5>;
+		second-boost-voltage = <5>;
+		tdm-slot-bits = <15>;
+		tdm-current-sense = <1>;
+		tdm-current-sense-slot = <0>;
+		tdm-fs-bit-clks = <0>;
+		tdm-sample-size = <15>;
+		tdm-sense-a-val = <1>;
+		tdm-sense-b-val = <2>;
+		tdm-slots = <1>;
+		tdm-source-mapping = <2>;
+		tdm-speaker-dcdc-slot = <0>;
+		tdm-speaker-gain = <6>;
+		tdm-voltage-sense = <1>;
+		tdm-voltage-sense-slot = <1>;
+
+		#sound-dai-cells = <0>;
+		status = "okay";
+	};
+};
+
+&sound_card {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act &quat_tlmm_default>;
+	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_act &quat_tlmm_default>;
+
+	model = "samsung-a2015";
+
+	quaternary-mi2s-dai-link {
+		link-name = "Quaternary MI2S";
+		cpu {
+			sound-dai = <&q6afedai QUATERNARY_MI2S_RX>;
+		};
+
+		platform {
+			sound-dai = <&q6routing>;
+		};
+
+		codec {
+			sound-dai = <&speaker_codec>;
+		};
+	};
+};
+
+&wcd_codec {
+	jack-gpios = <&msmgpio 48 GPIO_ACTIVE_LOW>;
+	qcom,micbias-lvl = <2800>;
+	qcom,micbias1-ext-cap;
+	qcom,micbias2-ext-cap;
+	qcom,mbhc-vthreshold-low = <150 237 450 500 600>;
+	qcom,mbhc-vthreshold-high = <150 237 450 500 600>;
+};
+
+&q6afedai {
+	dai@22 {
+		reg = <QUATERNARY_MI2S_RX>;
+		qcom,sd-lines = <0>;
+	};
+};
+
 &dsi0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&mdss_te_default>;
@@ -264,6 +345,13 @@
 
 &msmgpio {
 	gpio-reserved-ranges = <12 4>; // Fingerprint sensor (SPI)
+
+	quat_tlmm_default: quat-tlmm-pins {
+		pins = "gpio135", "gpio136", "gpio137", "gpio138";
+		function = "sec_mi2s";
+		drive-strength = <8>;
+		bias-disable;
+	};
 
 	gpio_hall_sensor_default: gpio-hall-sensor-pins {
 		pins = "gpio44";
