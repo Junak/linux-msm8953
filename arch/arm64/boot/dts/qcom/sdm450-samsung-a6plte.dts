@@ -179,6 +179,49 @@
 		};
 	};
 
+	i2c-proximity {
+		compatible = "i2c-gpio";
+		sda-gpios = <&msmgpio 16 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 17 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		i2c-gpio,delay-us = <2>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		proximity-sensor@60 {
+			compatible = "capella,cm36658";
+
+			reg = <0x60>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <43 IRQ_TYPE_EDGE_FALLING>;
+
+			vdd-supply = <&vdd_sensors>;
+			vled-supply = <&vdd_prox_led>;
+		};
+	};
+
+	i2c-grip {
+		compatible = "i2c-gpio";
+		sda-gpios = <&msmgpio 131 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 128 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		i2c-gpio,delay-us = <2>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		grip-sensor@20 {
+			compatible = "abov,a96t3x6";
+
+			reg = <0x20>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <86 IRQ_TYPE_EDGE_RISING>;
+
+			vdd-supply = <&vdd_grip>;
+		};
+	};
+
 	vibrator {
 		compatible = "gpio-vibrator";
 
