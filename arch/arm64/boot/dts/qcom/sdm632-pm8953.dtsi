@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: GPL-2.0-only
+// Copyright (c) 2020, The Linux Foundation. All rights reserved.
+
+#include "sdm632.dtsi"
+#include "pm8953.dtsi"
+
+&hsusb_phy {
+	phy-supply = <&pm8953_l3>;
+	vdda-pll-supply = <&pm8953_l7>;
+	vdda-phy-dpdm-supply = <&pm8953_l13>;
+};
+
+&camss {
+	vdda-supply = <&pm8953_s3>;
+};
+
+&dsi_phy0 {
+	vddio-supply = <&pm8953_l6>;
+	vcca-supply = <&pm8953_l3>;
+};
+
+&dsi0 {
+	vdda-supply = <&pm8953_s3>;
+	vddio-supply = <&pm8953_l6>;
+};
+
+&sdhc_1 {
+	vmmc-supply = <&pm8953_l8>;
+	vqmmc-supply = <&pm8953_l5>;
+};
+
+&sdhc_2 {
+	vmmc-supply = <&pm8953_l11>;
+	vqmmc-supply = <&pm8953_l12>;
+};
+
+&rpm_requests {
+	smd_rpm_regulators: pm8953-regulators {
+		compatible = "qcom,rpm-pm8953-regulators";
+
+		pm8953_s1: s1 {};
+		pm8953_s3: s3 {};
+		pm8953_s4: s4 {};
+
+		pm8953_l1: l1 {};
+		pm8953_l2: l2 {};
+		pm8953_l3: l3 {};
+		pm8953_l5: l5 {};
+		pm8953_l6: l6 {};
+		pm8953_l7: l7 {};
+		pm8953_l8: l8 {};
+		pm8953_l9: l9 {};
+		pm8953_l10: l10 {};
+		pm8953_l11: l11 {};
+		pm8953_l12: l12 {};
+		pm8953_l13: l13 {};
+		pm8953_l15: l15 {};
+		pm8953_l16: l16 {};
+		pm8953_l17: l17 {};
+		pm8953_l19: l19 {};
+		pm8953_l22: l22 {};
+		pm8953_l23: l23 {};
+	};
+};
