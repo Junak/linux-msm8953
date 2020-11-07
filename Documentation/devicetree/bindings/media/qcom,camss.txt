@@ -7,6 +7,7 @@ Qualcomm Camera Subsystem
 	Value type: <stringlist>
 	Definition: Should contain one of:
 		- "qcom,msm8916-camss"
+		- "qcom,msm8953-camss"
 		- "qcom,msm8996-camss"
 		- "qcom,sdm660-camss"
 - reg:
@@ -21,16 +22,16 @@ Qualcomm Camera Subsystem
 		- "csiphy0_clk_mux"
 		- "csiphy1"
 		- "csiphy1_clk_mux"
-		- "csiphy2"		(8996 only)
-		- "csiphy2_clk_mux"	(8996 only)
+		- "csiphy2"		(8953 and 8996 only)
+		- "csiphy2_clk_mux"	(8953 and 8996 only)
 		- "csid0"
 		- "csid1"
-		- "csid2"		(8996 only)
+		- "csid2"		(8953 and 8996 only)
 		- "csid3"		(8996 only)
 		- "ispif"
 		- "csi_clk_mux"
 		- "vfe0"
-		- "vfe1"		(8996 only)
+		- "vfe1"		(8953 and 8996 only)
 - interrupts:
 	Usage: required
 	Value type: <prop-encoded-array>
@@ -41,14 +42,14 @@ Qualcomm Camera Subsystem
 	Definition: Should contain the following entries:
 		- "csiphy0"
 		- "csiphy1"
-		- "csiphy2"		(8996 only)
+		- "csiphy2"		(8953 and 8996 only)
 		- "csid0"
 		- "csid1"
-		- "csid2"		(8996 only)
+		- "csid2"		(8953 and 8996 only)
 		- "csid3"		(8996 only)
 		- "ispif"
 		- "vfe0"
-		- "vfe1"		(8996 only)
+		- "vfe1"		(8953 and 8996 only)
 - power-domains:
 	Usage: required
 	Value type: <prop-encoded-array>
@@ -69,7 +70,7 @@ Qualcomm Camera Subsystem
 		- "ispif_ahb"
 		- "csiphy0_timer"
 		- "csiphy1_timer"
-		- "csiphy2_timer"	(8996 only)
+		- "csiphy2_timer"	(8953 and 8996 only)
 		- "csiphy_ahb2crif"	(660 only)
 		- "csi0_ahb"
 		- "csi0"
@@ -83,11 +84,11 @@ Qualcomm Camera Subsystem
 		- "csi1_pix"
 		- "csi1_rdi"
 		- "cphy_csid1"		(660 only)
-		- "csi2_ahb"		(8996 only)
-		- "csi2"		(8996 only)
-		- "csi2_phy"		(8996 only)
-		- "csi2_pix"		(8996 only)
-		- "csi2_rdi"		(8996 only)
+		- "csi2_ahb"		(8953 and 8996 only)
+		- "csi2"		(8953 and 8996 only)
+		- "csi2_phy"		(8953 and 8996 only)
+		- "csi2_pix"		(8953 and 8996 only)
+		- "csi2_rdi"		(8953 and 8996 only)
 		- "cphy_csid2"		(660 only)
 		- "csi3_ahb"		(8996 only)
 		- "csi3"		(8996 only)
@@ -98,11 +99,11 @@ Qualcomm Camera Subsystem
 		- "ahb"
 		- "vfe0"
 		- "csi_vfe0"
-		- "vfe0_ahb",		(8996 only)
+		- "vfe0_ahb",		(8953 and 8996 only)
 		- "vfe0_stream",	(8996 only)
-		- "vfe1",		(8996 only)
-		- "csi_vfe1",		(8996 only)
-		- "vfe1_ahb",		(8996 only)
+		- "vfe1",		(8953 and 8996 only)
+		- "csi_vfe1",		(8953 and 8996 only)
+		- "vfe1_ahb",		(8953 and 8996 only)
 		- "vfe1_stream",	(8996 only)
 		- "vfe_ahb"
 		- "vfe_axi"
@@ -125,7 +126,7 @@ Qualcomm Camera Subsystem
 			Usage: required
 			Value type: <u32>
 			Definition: Selects CSI2 PHY interface - PHY0, PHY1
-				    or PHY2 (8996 only)
+				    or PHY2 (8996 and 8953)
 	Endpoint node properties:
 		- clock-lanes:
 			Usage: required
