@@ -35,6 +35,11 @@
 	vqmmc-supply = <&pm8953_l12>;
 };
 
+&modem {
+	mss-supply = <&pm8953_s1>;
+	pll-supply = <&pm8953_l7>;
+};
+
 &cpr {
 	vdd-apc-supply = <&vreg_apc>;
 	vdd-apc-step-uv = <5000>;

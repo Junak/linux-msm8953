@@ -34,6 +34,15 @@
 	vqmmc-supply = <&pm8953_l12>;
 };
 
+&modem {
+	compatible = "qcom,sdm632-mss-pil";
+	power-domains = <&rpmpd MSM8953_VDDCX>,
+			<&rpmpd MSM8953_VDDMX>,
+			<&rpmpd MSM8953_VDDMSS>;
+	power-domain-names = "cx", "mx", "mss";
+	pll-supply = <&pm8953_l7>;
+};
+
 &cpr {
 	vdd-apc-supply = <&vreg_apc>;
 	vdd-apc-step-uv = <5000>;
