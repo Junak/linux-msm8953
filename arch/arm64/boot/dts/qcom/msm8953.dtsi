@@ -3,6 +3,7 @@
 
 #include <dt-bindings/clock/qcom,gcc-msm8953.h>
 #include <dt-bindings/clock/qcom,rpmcc.h>
+#include <dt-bindings/interconnect/qcom,msm8953.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/power/qcom-rpmpd.h>
 #include <dt-bindings/soc/qcom,apr.h>
@@ -23,15 +24,19 @@
 		power-domain-names = "cpr";		\
 		clocks = <&apcc cluster>;		\
 		clock-names = "cpu";			\
+		interconnects = <&bimc MAS_APPS_PROC	\
+				 &bimc SLV_EBI>;	\
 		operating-points-v2 = <&cpu##cluster##_opp>;\
 		l1-icache { compatible = "cache"; };	\
 		l1-dcache { compatible = "cache"; };	\
 	}
 
-#define GPU_OPP(freq_khz, lvl, supp)			\
+#define GPU_OPP(freq_khz, peakBW, lvl, supp)		\
 	opp-##freq_khz##000 {				\
 		opp-hz = /bits/ 64 <freq_khz##000>;	\
 		opp-supported-hw = <supp>;		\
+		opp-avg-kBps = <0>, <(peakBW/4)>;	\
+		opp-peak-kBps = <peakBW>, <(peakBW/2)>;	\
 		required-opps = <&lvl>;			\
 	}
 
@@ -63,10 +68,11 @@
 		};					\
 	}
 
-#define OPP(freqKhz, req, HW, extra)			    \
+#define OPP(freqKhz, req, HW, peakBW, extra)		    \
 	opp-freqKhz##000 {				    \
 		opp-hz = /bits/ 64 <freqKhz##000>;	    \
 		opp-supported-hw = <HW>;		    \
+		opp-peak-kBps = <peakBW>;		    \
 		required-opps = <&req>;			    \
 		extra; \
 	}
@@ -245,14 +251,14 @@
 		 * opp-supported-hw is bitmask of 1 << speed_bin
 		 * compatible of / node has to be "qcom,msm8953"
 		 */
-		OPP( 320000, cpr_opp1, 0x44, none);
-		OPP( 620000, cpr_opp2, 0x44, none);
-		OPP( 800000, cpr_opp3, 0x44, opp-suspend);
-		OPP( 930000, cpr_opp4, 0x44, none);
-		OPP(1203200, cpr_opp5, 0x40, none);
-		OPP(1344000, cpr_opp6, 0x04, none);
-		OPP(1804800, cpr_opp7, 0x40, none);
-		OPP(2016000, cpr_opp8, 0x04, none);
+		OPP( 320000, cpr_opp1, 0x44,  960000, none);
+		OPP( 620000, cpr_opp2, 0x44, 1860000, none);
+		OPP( 800000, cpr_opp3, 0x44, 2400000, opp-suspend);
+		OPP( 930000, cpr_opp4, 0x44, 2790000, none);
+		OPP(1203200, cpr_opp5, 0x40, 4942000, none);
+		OPP(1344000, cpr_opp6, 0x04, 5376000, none);
+		OPP(1804800, cpr_opp7, 0x40, 7104000, none);
+		OPP(2016000, cpr_opp8, 0x04, 7104000, none);
 
 	};
 
@@ -260,14 +266,14 @@
 		compatible = "operating-points-v2-qcom-cpu", "operating-points-v2-kryo-cpu";
 		opp-shared;
 
-		OPP( 320000, cpr_opp1, 0x44, none);
-		OPP( 620000, cpr_opp2, 0x44, none);
-		OPP( 800000, cpr_opp3, 0x44, opp-suspend);
-		OPP( 930000, cpr_opp4, 0x44, none);
-		OPP(1203200, cpr_opp5, 0x40, none);
-		OPP(1344000, cpr_opp6, 0x04, none);
-		OPP(1804800, cpr_opp7, 0x40, none);
-		OPP(2016000, cpr_opp8, 0x04, none);
+		OPP( 320000, cpr_opp1, 0x44,  960000, none);
+		OPP( 620000, cpr_opp2, 0x44, 1860000, none);
+		OPP( 800000, cpr_opp3, 0x44, 2400000, opp-suspend);
+		OPP( 930000, cpr_opp4, 0x44, 2790000, none);
+		OPP(1203200, cpr_opp5, 0x40, 4942000, none);
+		OPP(1344000, cpr_opp6, 0x04, 5376000, none);
+		OPP(1804800, cpr_opp7, 0x40, 7104000, none);
+		OPP(2016000, cpr_opp8, 0x04, 7104000, none);
 	};
 
 	cpr_opp_table: cpr-opp-table {
@@ -812,6 +818,10 @@
 
 			assigned-clock-rates = <19200000>, <133330000>;
 
+			interconnects = <&pcnoc MAS_USB3 &bimc SLV_EBI>,
+					<&bimc MAS_APPS_PROC &pcnoc SLV_USB3>;
+			interconnect-names = "usb-ddr", "apps-usb";
+
 			power-domains = <&gcc USB30_GDSC>;
 
 			qcom,select-utmi-as-pipe-clk;
@@ -1065,6 +1075,10 @@
 				      "bus",
 				      "vsync";
 
+			interconnects = <&sysmmnoc MAS_MDP &bimc SLV_EBI>,
+					<&bimc MAS_APPS_PROC &pcnoc SLV_DISP_SS_CFG>;
+			interconnect-names = "mdp-mem", "cpu-cfg";
+
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges;
@@ -1134,6 +1148,9 @@
 				phys = <&dsi_phy0>;
 				phy-names = "dsi-phy";
 
+				operating-points-v2 = <&dsi0_opp_table>;
+				power-domains = <&rpmpd MSM8953_VDDCX>;
+
 				#address-cells = <1>;
 				#size-cells = <0>;
 
@@ -1152,6 +1169,25 @@
 						reg = <1>;
 						dsi0_out: endpoint {
 						};
+					};
+				};
+
+				dsi0_opp_table: dsi-opp-table {
+					compatible = "operating-points-v2";
+
+					opp-131250000 {
+						opp-hz = /bits/ 64 <131250000>;
+						required-opps = <&rpmpd_opp_low_svs>;
+					};
+
+					opp-210000000 {
+						opp-hz = /bits/ 64 <210000000>;
+						required-opps = <&rpmpd_opp_svs>;
+					};
+
+					opp-262500000 {
+						opp-hz = /bits/ 64 <262500000>;
+						required-opps = <&rpmpd_opp_nom>;
 					};
 				};
 			};
@@ -1184,6 +1220,9 @@
 				phys = <&dsi_phy1>;
 				phy-names = "dsi-phy";
 
+				operating-points-v2 = <&dsi1_opp_table>;
+				power-domains = <&rpmpd MSM8953_VDDCX>;
+
 				status = "disabled";
 
 				ports {
@@ -1201,6 +1240,25 @@
 						reg = <1>;
 						dsi1_out: endpoint {
 						};
+					};
+				};
+
+				dsi1_opp_table: dsi-opp-table {
+					compatible = "operating-points-v2";
+
+					opp-131250000 {
+						opp-hz = /bits/ 64 <131250000>;
+						required-opps = <&rpmpd_opp_low_svs>;
+					};
+
+					opp-210000000 {
+						opp-hz = /bits/ 64 <210000000>;
+						required-opps = <&rpmpd_opp_svs>;
+					};
+
+					opp-262500000 {
+						opp-hz = /bits/ 64 <262500000>;
+						required-opps = <&rpmpd_opp_nom>;
 					};
 				};
 			};
@@ -1275,6 +1333,9 @@
 					<&rpmpd MSM8953_VDDCX>;
 			power-domain-names = "cx", "gx", "cx-supply";
 
+			interconnects = <&bimc MAS_OXILI &bimc SLV_EBI>,
+					<&bimc MAS_APPS_PROC &pcnoc SLV_GPU_CFG>; // Downstream doesn't handlde this,
+										  // so values are made up.
 			iommus = <&gpu_iommu 0>;
 
 			operating-points-v2 = <&gpu_opp_table>;
@@ -1282,12 +1343,12 @@
 			gpu_opp_table: opp-table {
 				compatible  ="operating-points-v2";
 
-				GPU_OPP(128000, rpmpd_opp_low_svs, 0xff);
-				GPU_OPP(230400, rpmpd_opp_svs, 0xff);
-				GPU_OPP(384000, rpmpd_opp_svs_plus, 0xff);
-				GPU_OPP(460800, rpmpd_opp_nom, 0xff);
-				GPU_OPP(576000, rpmpd_opp_nom_plus, 0xff);
-				GPU_OPP(652800, rpmpd_opp_turbo, 0xff);
+				GPU_OPP(128000, 1689600, rpmpd_opp_low_svs, 0xff);
+				GPU_OPP(230400, 2227200, rpmpd_opp_svs, 0xff);
+				GPU_OPP(384000, 4454400, rpmpd_opp_svs_plus, 0xff);
+				GPU_OPP(460800, 6451200, rpmpd_opp_nom, 0xff);
+				GPU_OPP(576000, 7449600, rpmpd_opp_nom_plus, 0xff);
+				GPU_OPP(652800, 7449600, rpmpd_opp_turbo, 0xff);
 			};
 
 			zap-shader {
@@ -1566,6 +1627,11 @@
 				      "vfe1_axi";
 			iommus = <&apps_iommu 0x14>;
 
+			interconnects = <&sysmmnoc MAS_VFE0 &bimc SLV_EBI>,
+					<&sysmmnoc MAS_VFE1 &bimc SLV_EBI>,
+					<&bimc MAS_APPS_PROC &pcnoc SLV_CAMERA_SS_CFG>;
+			interconnect-names = "vfe0-mem", "vfe1-mem", "cpu-cfg";
+
 			status = "disabled";
 
 			ports {
@@ -1642,6 +1708,9 @@
 				 <&xo_board>;
 			clock-names = "core", "iface", "xo";
 
+			interconnects = <&pcnoc MAS_SDCC_1 &bimc SLV_EBI>,
+					<&bimc MAS_APPS_PROC &pcnoc SLV_SDCC_1>;
+
 			power-domains = <&rpmpd MSM8953_VDDCX>;
 			operating-points-v2 = <&sdhc1_opp_table>;
 
@@ -1658,26 +1727,36 @@
 
 				opp-25000000 {
 					opp-hz = /bits/ 64 <25000000>;
+					opp-peak-kBps = <200000>, <100000>;
+					opp-avg-kBps = <65360>, <32768>;
 					required-opps = <&rpmpd_opp_low_svs>;
 				};
 
 				opp-50000000 {
 					opp-hz = /bits/ 64 <50000000>;
+					opp-peak-kBps = <400000>, <200000>;
+					opp-avg-kBps = <130718>, <65360>;
 					required-opps = <&rpmpd_opp_svs>;
 				};
 
 				opp-100000000 {
 					opp-hz = /bits/ 64 <100000000>;
+					opp-peak-kBps = <400000>, <400000>;
+					opp-avg-kBps = <130718>, <65360>;
 					required-opps = <&rpmpd_opp_svs>;
 				};
 
 				opp-192000000 {
 					opp-hz = /bits/ 64 <192000000>;
+					opp-peak-kBps = <800000>, <600000>;
+					opp-avg-kBps = <261438>, <130718>;
 					required-opps = <&rpmpd_opp_nom>;
 				};
 
 				opp-384000000 {
 					opp-hz = /bits/ 64 <384000000>;
+					opp-peak-kBps = <800000>, <800000>;
+					opp-avg-kBps = <261438>, <300000>;
 					required-opps = <&rpmpd_opp_nom>;
 				};
 			};
@@ -1697,6 +1776,9 @@
 				 <&xo_board>;
 			clock-names = "core", "iface", "xo";
 
+			interconnects = <&pcnoc MAS_SDCC_2 &bimc SLV_EBI>,
+					<&bimc MAS_APPS_PROC &pcnoc SLV_SDCC_2>;
+
 			power-domains = <&rpmpd MSM8953_VDDCX>;
 			operating-points-v2 = <&sdhc2_opp_table>;
 
@@ -1709,26 +1791,36 @@
 
 				opp-25000000 {
 					opp-hz = /bits/ 64 <25000000>;
+					opp-peak-kBps = <200000>, <100000>;
+					opp-avg-kBps = <65360>, <32768>;
 					required-opps = <&rpmpd_opp_low_svs>;
 				};
 
 				opp-50000000 {
 					opp-hz = /bits/ 64 <50000000>;
+					opp-peak-kBps = <400000>, <400000>;
+					opp-avg-kBps = <130718>, <65360>;
 					required-opps = <&rpmpd_opp_svs>;
 				};
 
 				opp-100000000 {
 					opp-hz = /bits/ 64 <100000000>;
+					opp-peak-kBps = <800000>, <400000>;
+					opp-avg-kBps = <130718>, <130718>;
 					required-opps = <&rpmpd_opp_svs>;
 				};
 
 				opp-177770000 {
 					opp-hz = /bits/ 64 <177770000>;
+					opp-peak-kBps = <600000>, <600000>;
+					opp-avg-kBps = <261438>, <130718>;
 					required-opps = <&rpmpd_opp_nom>;
 				};
 
 				opp-200000000 {
 					opp-hz = /bits/ 64 <200000000>;
+					opp-peak-kBps = <800000>, <800000>;
+					opp-avg-kBps = <261438>, <130718>;
 					required-opps = <&rpmpd_opp_nom>;
 				};
 			};
@@ -1978,6 +2070,51 @@
 					};
 				};
 			};
+		};
+
+		bimc: interconnect-bimc@400000 {
+			compatible = "qcom,msm8953-bimc";
+			reg = <0x400000 0x5A000>;
+
+			clock-names = "bus", "bus_a";
+			clocks = <&rpmcc RPM_SMD_BIMC_CLK>,
+				 <&rpmcc RPM_SMD_BIMC_A_CLK>;
+
+			#interconnect-cells = <1>;
+		};
+
+		pcnoc: interconnect-pcnoc@500000 {
+			compatible = "qcom,msm8953-pcnoc";
+			reg = <0x500000 0x12080>;
+
+			clock-names = "bus", "bus_a", "pcnoc_usb3_axi";
+			clocks = <&rpmcc RPM_SMD_PCNOC_CLK>,
+				 <&rpmcc RPM_SMD_PCNOC_A_CLK>,
+				 <&gcc GCC_PCNOC_USB3_AXI_CLK>;
+
+			#interconnect-cells = <1>;
+		};
+
+		snoc: interconnect-snoc@580000 {
+			compatible = "qcom,msm8953-snoc";
+			reg = <0x580000 0x16080>;
+
+			clock-names = "bus", "bus_a";
+			clocks = <&rpmcc RPM_SMD_SNOC_CLK>,
+				 <&rpmcc RPM_SMD_SNOC_A_CLK>;
+
+			#interconnect-cells = <1>;
+		};
+
+		sysmmnoc: interconnect-snoc-mm@580000 {
+			compatible = "qcom,msm8953-sysmmnoc";
+			reg = <0x580000 0x16080>;
+
+			clock-names = "bus", "bus_a";
+			clocks = <&rpmcc RPM_SMD_SYSMMNOC_CLK>,
+				 <&rpmcc RPM_SMD_SYSMMNOC_A_CLK>;
+
+			#interconnect-cells = <1>;
 		};
 
 		lpass_codec: codec {

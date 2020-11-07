@@ -10,28 +10,27 @@
 		nvmem-cells = <&cpu_speed_bin>;
 		opp-shared;
 
-		OPP( 614400, cpr_opp1, 0x45, none);
-		OPP( 883200, cpr_opp2, 0x45, none);
-		OPP(1036800, cpr_opp3, 0x45, none);
-		OPP(1363200, cpr_opp4, 0x45, none);
-		OPP(1536000, cpr_opp5, 0x45, none);
-		OPP(1670400, cpr_opp6, 0x45, none);
-		OPP(1804800, cpr_opp7, 0x45, none);
-
+		OPP( 614400, cpr_opp1, 0x45, 1611000, none);
+		OPP( 883200, cpr_opp2, 0x45, 2124000, none);
+		OPP(1036800, cpr_opp3, 0x45, 2518000, none);
+		OPP(1363200, cpr_opp4, 0x45, 3221000, none);
+		OPP(1536000, cpr_opp5, 0x45, 4253000, none);
+		OPP(1670400, cpr_opp6, 0x45, 5056000, none);
+		OPP(1804800, cpr_opp7, 0x45, 5859000, none);
 	};
 
 	cpu1_opp: cpu1-opp-table {
 		compatible = "operating-points-v2-qcom-cpu", "operating-points-v2-kryo-cpu";
 		opp-shared;
 
-		OPP( 633600, cpr_opp1, 0x45, none);
-		OPP( 902400, cpr_opp2, 0x45, none);
-		OPP(1094400, cpr_opp3, 0x45, none);
-		OPP(1401600, cpr_opp4, 0x45, none);
-		OPP(1555200, cpr_opp5, 0x45, none);
-		OPP(1804800, cpr_opp6, 0x45, none);
-		OPP(1996200, cpr_opp7, 0x04, none);
-		OPP(2016000, cpr_opp8, 0x04, none);
+		OPP( 633600, cpr_opp1, 0x45, 1611000, none);
+		OPP( 902400, cpr_opp2, 0x45, 1611000, none);
+		OPP(1094400, cpr_opp3, 0x45, 1611000, none);
+		OPP(1401600, cpr_opp4, 0x45, 3221000, none);
+		OPP(1555200, cpr_opp5, 0x45, 4225000, none);
+		OPP(1804800, cpr_opp6, 0x45, 5859000, none);
+		OPP(1996200, cpr_opp7, 0x04, 6987000, none);
+		OPP(2016000, cpr_opp8, 0x04, 7104000, none);
 	};
 
 	cpr_opp_table: cpr-opp-table {
