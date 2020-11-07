@@ -154,6 +154,67 @@
 		};
 	};
 
+	i2c-battery {
+		compatible = "i2c-gpio";
+		sda-gpios = <&msmgpio 39 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 38 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		fuelgauge@71 {
+			compatible = "sm5708-battery,a6plte";
+			reg = <0x71>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;
+
+			power-supplies = <&charger>;
+		};
+	};
+
+	i2c-pmic {
+		compatible = "i2c-gpio";
+		sda-gpios = <&msmgpio 98 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&msmgpio 99 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		muic: muic@25 {
+			compatible = "siliconmitus,sm5708-muic";
+			reg = <0x25>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <63 IRQ_TYPE_LEVEL_HIGH>;
+		};
+
+		pmic@49 {
+			compatible = "siliconmitus,sm5708";
+			reg = <0x49>;
+
+			interrupt-parent = <&msmgpio>;
+			interrupts = <60 IRQ_TYPE_EDGE_FALLING>;
+
+			pinctrl-names = "default";
+			pinctrl-0 = <&pmic_irq_default>;
+
+			charger: sm5708-charger {
+				compatible = "siliconmitus,sm5708-charger";
+				float-voltage = <4350>;
+				input-current = <1500>;
+				charge-current = <1800>;
+
+				extcon = <&muic>;
+
+				pinctrl-names = "default";
+				pinctrl-0 = <&chg_en_default>;
+
+				enable-gpios = <&msmgpio 34 GPIO_ACTIVE_HIGH>;
+			};
+		};
+	};
+
 	i2c-orientation {
 		compatible = "i2c-gpio";
 		sda-gpios = <&msmgpio 64 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
@@ -396,6 +457,21 @@
 		bias-disable;
 	};
 
+	pmic_irq_default: pmic-irq-pins {
+		pins = "gpio60";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	chg_en_default: chg-en-pins {
+		pins = "gpio34";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+		output-high;
+	};
+
 	gpio_hall_sensor_default: gpio-hall-sensor-pins {
 		pins = "gpio44";
 		function = "gpio";
@@ -429,6 +505,12 @@
 
 &usb3 {
 	status = "okay";
+	extcon = <&muic>, <&muic>;
+};
+
+&usb3_dwc3 {
+	dr_mode = "otg";
+	extcon = <&muic>, <&muic>;
 };
 
 &smd_rpm_regulators {
