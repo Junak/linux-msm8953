@@ -1,6 +1,76 @@
 #include "msm8953.dtsi"
 
 / {
+	/delete-node/cpu0-opp-table;
+	/delete-node/cpu1-opp-table;
+	/delete-node/cpr-opp-table;
+
+	cpu0_opp: cpu0-opp-table {
+		compatible = "operating-points-v2-qcom-cpu", "operating-points-v2-kryo-cpu";
+		nvmem-cells = <&cpu_speed_bin>;
+		opp-shared;
+
+		OPP( 614400, cpr_opp1, 0x45, none);
+		OPP( 883200, cpr_opp2, 0x45, none);
+		OPP(1036800, cpr_opp3, 0x45, none);
+		OPP(1363200, cpr_opp4, 0x45, none);
+		OPP(1536000, cpr_opp5, 0x45, none);
+		OPP(1670400, cpr_opp6, 0x45, none);
+		OPP(1804800, cpr_opp7, 0x45, none);
+
+	};
+
+	cpu1_opp: cpu1-opp-table {
+		compatible = "operating-points-v2-qcom-cpu", "operating-points-v2-kryo-cpu";
+		opp-shared;
+
+		OPP( 633600, cpr_opp1, 0x45, none);
+		OPP( 902400, cpr_opp2, 0x45, none);
+		OPP(1094400, cpr_opp3, 0x45, none);
+		OPP(1401600, cpr_opp4, 0x45, none);
+		OPP(1555200, cpr_opp5, 0x45, none);
+		OPP(1804800, cpr_opp6, 0x45, none);
+		OPP(1996200, cpr_opp7, 0x04, none);
+		OPP(2016000, cpr_opp8, 0x04, none);
+	};
+
+	cpr_opp_table: cpr-opp-table {
+		compatible = "operating-points-v2-qcom-level";
+
+		cpr_opp1: opp1 {
+			opp-level = <1>;
+			opp-hz = /bits/ 64 <307200000>;
+		};
+		cpr_opp2: opp2 {
+			opp-level = <2>;
+			opp-hz = /bits/ 64 <403200000>;
+		};
+		cpr_opp3: opp3 {
+			opp-level = <3>;
+			opp-hz = /bits/ 64 <499200000>;
+		};
+		cpr_opp4: opp4 {
+			opp-level = <4>;
+			opp-hz = /bits/ 64 <691200000>;
+		};
+		cpr_opp5: opp5 {
+			opp-level = <5>;
+			opp-hz = /bits/ 64 <768000000>;
+		};
+		cpr_opp6: opp6 {
+			opp-level = <6>;
+			opp-hz = /bits/ 64 <787200000>;
+		};
+		cpr_opp7: opp7 {
+			opp-level = <7>;
+			opp-hz = /bits/ 64 <787200000>;
+		};
+		cpr_opp8: opp8 {
+			opp-level = <8>;
+			opp-hz = /bits/ 64 <787200000>;
+		};
+	};
+
 	soc {
 		/delete-node/syscon@19461d4;
 		apc_mem_acc: syscon@b1d1360 {
@@ -29,3 +99,87 @@
 	compatible = "qcom,sdm632-apcc";
 };
 
+&cpr {
+	compatible = "qcom,sdm632-cpr4";
+
+	nvmem-cells = <&cpr_efuse_quot_offset3>,
+		      <&cpr_efuse_quot_offset5>,
+		      <&cpr_efuse_quot_offset4>,
+		      <&cpr_efuse_init_voltage7>,
+		      <&cpr_efuse_init_voltage4>,
+		      <&cpr_efuse_init_voltage6>,
+		      <&cpr_efuse_init_voltage5>,
+		      <&cpr_efuse_quot7>,
+		      <&cpr_efuse_quot4>,
+		      <&cpr_efuse_quot6>,
+		      <&cpr_efuse_quot5>,
+		      <&cpr_efuse_ring7>,
+		      <&cpr_efuse_ring6>,
+		      <&cpr_efuse_ring5>,
+		      <&cpr_efuse_ring4>,
+		      <&cpr_efuse_quot_offset6>,
+		      <&cpr_efuse_quot_offset2>,
+		      <&cpr_efuse_quot_offset1>,
+		      <&cpr_efuse_init_voltage7>,
+		      <&cpr_efuse_init_voltage3>,
+		      <&cpr_efuse_init_voltage2>,
+		      <&cpr_efuse_init_voltage1>,
+		      <&cpr_efuse_quot7>,
+		      <&cpr_efuse_quot3>,
+		      <&cpr_efuse_quot2>,
+		      <&cpr_efuse_quot1>,
+		      <&cpr_efuse_ring4>,
+		      <&cpr_efuse_ring3>,
+		      <&cpr_efuse_ring2>,
+		      <&cpr_efuse_ring1>,
+		      <&cpr_efuse_revision>,
+		      <&cpu_speed_bin>;
+	nvmem-cell-names = "cpr_thread0_quotient_offset2",
+			   "cpr_thread0_quotient_offset3",
+			   "cpr_thread0_quotient_offset4",
+			   "cpr_thread0_init_voltage1",
+			   "cpr_thread0_init_voltage2",
+			   "cpr_thread0_init_voltage3",
+			   "cpr_thread0_init_voltage4",
+			   "cpr_thread0_quotient1",
+			   "cpr_thread0_quotient2",
+			   "cpr_thread0_quotient3",
+			   "cpr_thread0_quotient4",
+			   "cpr_thread0_ring_osc1",
+			   "cpr_thread0_ring_osc2",
+			   "cpr_thread0_ring_osc3",
+			   "cpr_thread0_ring_osc4",
+			   "cpr_thread1_quotient_offset2",
+			   "cpr_thread1_quotient_offset3",
+			   "cpr_thread1_quotient_offset4",
+			   "cpr_thread1_init_voltage1",
+			   "cpr_thread1_init_voltage2",
+			   "cpr_thread1_init_voltage3",
+			   "cpr_thread1_init_voltage4",
+			   "cpr_thread1_quotient1",
+			   "cpr_thread1_quotient2",
+			   "cpr_thread1_quotient3",
+			   "cpr_thread1_quotient4",
+			   "cpr_thread1_ring_osc1",
+			   "cpr_thread1_ring_osc2",
+			   "cpr_thread1_ring_osc3",
+			   "cpr_thread1_ring_osc4",
+			   "cpr_fuse_revision",
+			   "cpr_speed_bin";
+};
+
+&CPU4 {
+	power-domains = <&cpr 1>;
+};
+
+&CPU5 {
+	power-domains = <&cpr 1>;
+};
+
+&CPU6 {
+	power-domains = <&cpr 1>;
+};
+
+&CPU7 {
+	power-domains = <&cpr 1>;
+};

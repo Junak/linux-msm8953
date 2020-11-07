@@ -34,6 +34,11 @@
 	vqmmc-supply = <&pm8953_l12>;
 };
 
+&cpr {
+	vdd-apc-supply = <&vreg_apc>;
+	vdd-apc-step-uv = <5000>;
+};
+
 &rpm_requests {
 	smd_rpm_regulators: pm8953-regulators {
 		compatible = "qcom,rpm-pm8953-regulators";
