@@ -7,6 +7,7 @@ PROPERTIES:
 	Value type: <string>
 	Definition: must be one of:
 		"qcom,msm8916-cci"
+		"qcom,msm8953-cci"
 		"qcom,msm8996-cci"
 		"qcom,sdm845-cci"
 
@@ -41,7 +42,7 @@ PROPERTIES:
 
 SUBNODES:
 
-The CCI provides I2C masters for one (msm8916) or two i2c busses (msm8996 and
+The CCI provides I2C masters for one (msm8916) or two i2c busses (msm8953, msm8996 and
 sdm845), described as subdevices named "i2c-bus@0" and "i2c-bus@1".
 
 PROPERTIES:
