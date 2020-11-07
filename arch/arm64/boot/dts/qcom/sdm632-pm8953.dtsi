@@ -43,6 +43,17 @@
 	pll-supply = <&pm8953_l7>;
 };
 
+&pronto {
+	vddpx-supply = <&pm8953_l5>;
+};
+
+&iris {
+	vddxo-supply = <&pm8953_l7>;
+	vddrfa-supply = <&pm8953_l19>;
+	vddpa-supply = <&pm8953_l9>;
+	vdddig-supply = <&pm8953_l5>;
+};
+
 &cpr {
 	vdd-apc-supply = <&vreg_apc>;
 	vdd-apc-step-uv = <5000>;
