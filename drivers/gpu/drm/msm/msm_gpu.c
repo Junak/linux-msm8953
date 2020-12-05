@@ -35,6 +35,8 @@ static int msm_devfreq_target(struct device *dev, unsigned long *freq,
 
 	trace_msm_gpu_freq_change(dev_pm_opp_get_freq(opp));
 
+	gpu->devfreq.busy_time += gpu->funcs->gpu_busy(gpu);
+
 	if (gpu->funcs->gpu_set_freq)
 		gpu->funcs->gpu_set_freq(gpu, opp);
 	else if (gpu->opp_table)
@@ -59,6 +61,8 @@ static int msm_devfreq_get_dev_status(struct device *dev,
 		status->current_frequency = clk_get_rate(gpu->core_clk);
 
 	status->busy_time = gpu->funcs->gpu_busy(gpu);
+	status->busy_time += gpu->devfreq.busy_time;
+	gpu->devfreq.busy_time = 0;
 
 	time = ktime_get();
 	status->total_time = ktime_us_delta(time, gpu->devfreq.time);
@@ -91,6 +95,8 @@ static void msm_devfreq_init(struct msm_gpu *gpu)
 	/* We need target support to do devfreq */
 	if (!gpu->funcs->gpu_busy)
 		return;
+
+	gpu->suspended = true;
 
 	msm_devfreq_profile.initial_freq = gpu->fast_rate;
 
@@ -208,6 +214,7 @@ void msm_gpu_resume_devfreq(struct msm_gpu *gpu)
 
 int msm_gpu_pm_resume(struct msm_gpu *gpu)
 {
+	unsigned long flags;
 	int ret;
 
 	DBG("%s", gpu->name);
@@ -229,15 +236,24 @@ int msm_gpu_pm_resume(struct msm_gpu *gpu)
 
 	gpu->needs_hw_init = true;
 
+	spin_lock_irqsave(&gpu->suspend_lock, flags);
+	gpu->suspended = false;
+	spin_unlock_irqrestore(&gpu->suspend_lock, flags);
+
 	return 0;
 }
 
 int msm_gpu_pm_suspend(struct msm_gpu *gpu)
 {
+	unsigned long flags;
 	int ret;
 
 	DBG("%s", gpu->name);
 	trace_msm_gpu_suspend(0);
+
+	spin_lock_irqsave(&gpu->suspend_lock, flags);
+	gpu->suspended = true;
+	spin_unlock_irqrestore(&gpu->suspend_lock, flags);
 
 	devfreq_suspend_device(gpu->devfreq.devfreq);
 
@@ -730,6 +746,8 @@ static void retire_submit(struct msm_gpu *gpu, struct msm_ringbuffer *ring,
 		drm_gem_object_put(obj);
 	}
 
+	gpu->devfreq.busy_time += gpu->funcs->gpu_busy(gpu);
+
 	pm_runtime_mark_last_busy(&gpu->pdev->dev);
 	pm_runtime_put_autosuspend(&gpu->pdev->dev);
 
@@ -926,6 +944,7 @@ int msm_gpu_init(struct drm_device *drm, struct platform_device *pdev,
 	timer_setup(&gpu->hangcheck_timer, hangcheck_handler, 0);
 
 	spin_lock_init(&gpu->perf_lock);
+	spin_lock_init(&gpu->suspend_lock);
 
 
 	/* Map registers: */

@@ -112,6 +112,9 @@ struct msm_gpu {
 	struct msm_gem_address_space *aspace;
 
 	/* Power Control: */
+	spinlock_t suspend_lock; // Protects suspended
+	bool suspended;
+
 	struct regulator *gpu_reg, *gpu_cx;
 	struct clk_bulk_data *grp_clks;
 	struct opp_table* opp_table;
@@ -150,6 +153,7 @@ struct msm_gpu {
 	struct {
 		struct devfreq *devfreq;
 		u64 busy_cycles;
+		u64 busy_time;
 		ktime_t time;
 	} devfreq;
 
