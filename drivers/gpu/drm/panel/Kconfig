@@ -94,6 +94,10 @@ config DRM_PANEL_MIPI_DSI_COMMON
 	depends on BACKLIGHT_CLASS_DEVICE
 	select VIDEOMODE_HELPERS
 
+config DRM_PANEL_SAMSUNG_S6E3FA7_AMS4604NL01
+	tristate "Samsung S6E3FA7 AMS604NL01 DSI command mode panel"
+	select DRM_PANEL_MIPI_DSI_COMMON
+
 config DRM_PANEL_ELIDA_KD35T133
 	tristate "Elida KD35T133 panel driver"
 	depends on OF
