@@ -87,6 +87,13 @@ config DRM_PANEL_SIMPLE
 	  that it can be automatically turned off when the panel goes into a
 	  low power state.
 
+config DRM_PANEL_MIPI_DSI_COMMON
+	tristate
+	depends on OF && GPIOLIB
+	depends on DRM_MIPI_DSI
+	depends on BACKLIGHT_CLASS_DEVICE
+	select VIDEOMODE_HELPERS
+
 config DRM_PANEL_ELIDA_KD35T133
 	tristate "Elida KD35T133 panel driver"
 	depends on OF
