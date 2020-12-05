@@ -114,6 +114,10 @@ config DRM_PANEL_TIANMA_TL052VDXP02
 	  Say Y here if you want to enable support for the Tianma TL052VDXP02
 	  1920x1080 5.2" panel (found on the Motorola Moto G5 variants)
 
+config DRM_PANEL_TIANMA_NT35596
+	tristate "Tianma panel with Novatek NT35596"
+	select DRM_PANEL_MIPI_DSI_COMMON
+
 config DRM_PANEL_ELIDA_KD35T133
 	tristate "Elida KD35T133 panel driver"
 	depends on OF
