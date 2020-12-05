@@ -118,6 +118,10 @@ config DRM_PANEL_TIANMA_NT35596
 	tristate "Tianma panel with Novatek NT35596"
 	select DRM_PANEL_MIPI_DSI_COMMON
 
+config DRM_PANEL_TIANMA_622_V0
+	tristate "Tianma 6.22\" inch panel"
+	select DRM_PANEL_MIPI_DSI_COMMON
+
 config DRM_PANEL_ELIDA_KD35T133
 	tristate "Elida KD35T133 panel driver"
 	depends on OF
