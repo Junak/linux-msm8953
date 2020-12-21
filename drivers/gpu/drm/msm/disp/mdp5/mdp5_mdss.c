@@ -3,11 +3,15 @@
  * Copyright (c) 2016, The Linux Foundation. All rights reserved.
  */
 
+#include <linux/interconnect.h>
 #include <linux/irqdomain.h>
 #include <linux/irq.h>
 
 #include "msm_drv.h"
 #include "mdp5_kms.h"
+
+/* Max BW */
+#define MAX_BW			MBps_to_icc(6400)
 
 #define to_mdp5_mdss(x) container_of(x, struct mdp5_mdss, base)
 
@@ -22,11 +26,43 @@ struct mdp5_mdss {
 	struct clk *axi_clk;
 	struct clk *vsync_clk;
 
+	struct icc_bulk_data paths[2];
+
 	struct {
 		volatile unsigned long enabled_mask;
 		struct irq_domain *domain;
 	} irqcontroller;
 };
+
+static int mdp5_mdss_parse_data_bus_icc_path(struct drm_device *dev,
+						struct mdp5_mdss *mdp5_mdss)
+{
+	int i, ret;
+	struct icc_bulk_data *paths = mdp5_mdss->paths;
+
+	paths[0] = (struct icc_bulk_data) {
+		.name = "mdp-mem",
+		.avg_bw = MAX_BW / 2,
+		.peak_bw = MAX_BW,
+	};
+
+	paths[1] = (struct icc_bulk_data) {
+		.name = "cpu-cfg",
+		.avg_bw = 0,
+		.peak_bw = kBps_to_icc(76800),
+	};
+
+	of_icc_bulk_set_defaults(dev->dev, ARRAY_SIZE(mdp5_mdss->paths),
+			mdp5_mdss->paths);
+
+	for (i = 0; i < ARRAY_SIZE(mdp5_mdss->paths); i++) {
+		ret = of_icc_bulk_get(dev->dev, 1, &paths[i]);
+		if (ret && i == 0)
+			return ret;
+	}
+
+	return 0;
+}
 
 static inline void mdss_write(struct mdp5_mdss *mdp5_mdss, u32 reg, u32 data)
 {
@@ -136,6 +172,8 @@ static int mdp5_mdss_enable(struct msm_mdss *mdss)
 	struct mdp5_mdss *mdp5_mdss = to_mdp5_mdss(mdss);
 	DBG("");
 
+	icc_bulk_enable(ARRAY_SIZE(mdp5_mdss->paths), mdp5_mdss->paths);
+
 	clk_prepare_enable(mdp5_mdss->ahb_clk);
 	if (mdp5_mdss->axi_clk)
 		clk_prepare_enable(mdp5_mdss->axi_clk);
@@ -155,6 +193,8 @@ static int mdp5_mdss_disable(struct msm_mdss *mdss)
 	if (mdp5_mdss->axi_clk)
 		clk_disable_unprepare(mdp5_mdss->axi_clk);
 	clk_disable_unprepare(mdp5_mdss->ahb_clk);
+
+	icc_bulk_disable(ARRAY_SIZE(mdp5_mdss->paths), mdp5_mdss->paths);
 
 	return 0;
 }
@@ -233,6 +273,10 @@ int mdp5_mdss_init(struct drm_device *dev)
 		goto fail;
 	}
 
+	ret = mdp5_mdss_parse_data_bus_icc_path(dev, mdp5_mdss);
+	if (ret)
+		return ret;
+
 	ret = msm_mdss_get_clocks(mdp5_mdss);
 	if (ret) {
 		DRM_DEV_ERROR(dev->dev, "failed to get clocks: %d\n", ret);
@@ -271,9 +315,12 @@ int mdp5_mdss_init(struct drm_device *dev)
 
 	pm_runtime_enable(dev->dev);
 
+	icc_bulk_set_bw(ARRAY_SIZE(mdp5_mdss->paths), mdp5_mdss->paths);
+
 	return 0;
 fail_irq:
 	regulator_disable(mdp5_mdss->vdd);
 fail:
+	icc_bulk_put(ARRAY_SIZE(mdp5_mdss->paths), mdp5_mdss->paths);
 	return ret;
 }
