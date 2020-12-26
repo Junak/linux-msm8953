@@ -1638,6 +1638,9 @@
 					<&bimc MAS_APPS_PROC &pcnoc SLV_CAMERA_SS_CFG>;
 			interconnect-names = "vfe0-mem", "vfe1-mem", "cpu-cfg";
 
+			assigned-peak-bw-kBps = <1200000>, <1200000>, <74000>;
+			assigned-peak-bw-names = "vfe0-mem", "vfe1-mem", "cpu-cfg";
+
 			status = "disabled";
 
 			ports {
