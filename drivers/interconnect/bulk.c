@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <linux/interconnect-provider.h>
+#include <linux/of.h>
 #include <linux/device.h>
 #include <linux/export.h>
 
@@ -115,3 +116,49 @@ void icc_bulk_disable(int num_paths, const struct icc_bulk_data *paths)
 		icc_disable(paths[num_paths].path);
 }
 EXPORT_SYMBOL_GPL(icc_bulk_disable);
+
+int of_icc_bulk_set_defaults(struct device *dev, int num_paths,
+			      struct icc_bulk_data *paths)
+{
+	struct property *prop;
+	const char *s;
+	u32 value;
+	int i, ret;
+
+	of_property_for_each_string(dev->of_node, "assigned-peak-bw-names", prop, s) {
+		for (i = 0; i < num_paths; i++) {
+			printk("%s: %s %s\n", __func__, s, paths[i].name);
+			if (strcmp(s, paths[i].name))
+				continue;
+
+			ret = of_property_read_u32_index(dev->of_node,
+					"assigned-peak-bw-kBps", i, &value);
+			printk("%s: ret=%d value=%d\n", __func__, ret, value);
+			if (ret)
+				return ret;
+
+			paths[i].peak_bw = kBps_to_icc(value);
+			break;
+		}
+	}
+
+	of_property_for_each_string(dev->of_node, "assigned-avg-bw-names", prop, s) {
+		for (i = 0; i < num_paths; i++) {
+			printk("%s: %s %s\n", __func__, s, paths[i].name);
+			if (strcmp(s, paths[i].name))
+				continue;
+
+			ret = of_property_read_u32_index(dev->of_node,
+					"assigned-avg-bw-kBps", i, &value);
+			printk("%s: ret=%d value=%d\n", __func__, ret, value);
+			if (ret)
+				return ret;
+
+			paths[i].avg_bw = kBps_to_icc(value);
+			break;
+		}
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_icc_bulk_set_defaults);
