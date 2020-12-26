@@ -10,6 +10,7 @@
 #ifndef QC_MSM_CAMSS_H
 #define QC_MSM_CAMSS_H
 
+#include <linux/interconnect.h>
 #include <linux/device.h>
 #include <linux/types.h>
 #include <media/v4l2-async.h>
@@ -62,6 +63,13 @@ enum pm_domain {
 	PM_DOMAIN_COUNT
 };
 
+enum camss_icc_path {
+	ICC_VFE0_MEM,
+	ICC_VFE1_MEM,
+	ICC_CPU_CAMSS,
+	ICC_COUNT
+};
+
 enum camss_version {
 	CAMSS_8x16,
 	CAMSS_8x53,
@@ -83,6 +91,7 @@ struct camss {
 	int vfe_num;
 	struct vfe_device *vfe;
 	atomic_t ref_count;
+	struct icc_bulk_data interconnect[ICC_COUNT];
 	struct device *genpd[PM_DOMAIN_COUNT];
 	struct device_link *genpd_link[PM_DOMAIN_COUNT];
 };

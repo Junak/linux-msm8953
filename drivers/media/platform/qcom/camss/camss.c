@@ -8,6 +8,7 @@
  * Copyright (C) 2015-2018 Linaro Ltd.
  */
 #include <linux/clk.h>
+#include <linux/interconnect.h>
 #include <linux/media-bus-format.h>
 #include <linux/media.h>
 #include <linux/module.h>
@@ -29,6 +30,12 @@
 
 #define CAMSS_CLOCK_MARGIN_NUMERATOR 105
 #define CAMSS_CLOCK_MARGIN_DENOMINATOR 100
+
+static const struct icc_bulk_data camss_interconnects[ICC_COUNT] = {
+	[ICC_VFE0_MEM] = { .name = "vfe0-mem", .peak_bw = MBps_to_icc(1024) },
+	[ICC_VFE1_MEM] = { .name = "vfe1-mem", .peak_bw = MBps_to_icc(1024) },
+	[ICC_CPU_CAMSS] = { .name = "cpu-cfg", .peak_bw = MBps_to_icc(64) },
+};
 
 static const struct resources csiphy_res_8x16[] = {
 	/* CSIPHY0 */
@@ -1173,6 +1180,7 @@ static int camss_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct camss *camss;
+	struct icc_path *path;
 	int num_subdevs, ret;
 
 	camss = kzalloc(sizeof(*camss), GFP_KERNEL);
@@ -1217,25 +1225,36 @@ static int camss_probe(struct platform_device *pdev)
 		goto err_free;
 	}
 
+	memcpy(camss->interconnect, camss_interconnects,
+			sizeof(camss->interconnect));
+
+	ret = of_icc_bulk_get(dev, camss->vfe_num, &camss->interconnect[0]);
+	if (ret < 0)
+		goto err_free;
+
+	path = of_icc_get(dev, camss->interconnect[ICC_CPU_CAMSS].name);
+	if (!IS_ERR(path))
+		camss->interconnect[ICC_CPU_CAMSS].path = path;
+
 	camss->csiphy = devm_kcalloc(dev, camss->csiphy_num,
 				     sizeof(*camss->csiphy), GFP_KERNEL);
 	if (!camss->csiphy) {
 		ret = -ENOMEM;
-		goto err_free;
+		goto err_icc_put;
 	}
 
 	camss->csid = devm_kcalloc(dev, camss->csid_num, sizeof(*camss->csid),
 				   GFP_KERNEL);
 	if (!camss->csid) {
 		ret = -ENOMEM;
-		goto err_free;
+		goto err_icc_put;
 	}
 
 	camss->vfe = devm_kcalloc(dev, camss->vfe_num, sizeof(*camss->vfe),
 				  GFP_KERNEL);
 	if (!camss->vfe) {
 		ret = -ENOMEM;
-		goto err_free;
+		goto err_icc_put;
 	}
 
 	v4l2_async_notifier_init(&camss->notifier);
@@ -1315,6 +1334,14 @@ static int camss_probe(struct platform_device *pdev)
 		}
 	}
 
+
+	ret = of_icc_bulk_set_defaults(camss->dev, ICC_COUNT, camss->interconnect);
+	if (ret)
+		dev_err(camss->dev, "Failed to parse default bw: %d\n", ret);
+
+	icc_bulk_set_bw(ICC_COUNT, camss->interconnect);
+	icc_bulk_disable(ICC_COUNT, camss->interconnect);
+
 	pm_runtime_enable(dev);
 
 	return 0;
@@ -1325,6 +1352,8 @@ err_register_entities:
 	v4l2_device_unregister(&camss->v4l2_dev);
 err_cleanup:
 	v4l2_async_notifier_cleanup(&camss->notifier);
+err_icc_put:
+	icc_bulk_put(ICC_COUNT, camss->interconnect);
 err_free:
 	kfree(camss);
 
@@ -1382,12 +1411,23 @@ MODULE_DEVICE_TABLE(of, camss_dt_match);
 
 static int __maybe_unused camss_runtime_suspend(struct device *dev)
 {
+	struct camss *camss = dev_get_drvdata(dev);
+
+	icc_bulk_disable(ICC_COUNT, camss->interconnect);
+
 	return 0;
 }
 
 static int __maybe_unused camss_runtime_resume(struct device *dev)
 {
-	return 0;
+	struct camss *camss = dev_get_drvdata(dev);
+	int ret;
+
+	ret = icc_bulk_enable(ICC_COUNT, camss->interconnect);
+	if (ret < 0)
+		dev_err(dev, "Failed to disable interconnect: %d\n", ret);
+
+	return ret;
 }
 
 static const struct dev_pm_ops camss_pm_ops = {
