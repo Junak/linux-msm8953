@@ -1079,6 +1079,12 @@
 					<&bimc MAS_APPS_PROC &pcnoc SLV_DISP_SS_CFG>;
 			interconnect-names = "mdp-mem", "cpu-cfg";
 
+			assigned-avg-bw-kBps = <640000>;
+			assigned-avg-bw-names = "mdp-mem";
+
+			assigned-peak-bw-kBps = <1024000>, <76800>;
+			assigned-peak-bw-names = "mdp-mem", "cpu-cfg";
+
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges;
