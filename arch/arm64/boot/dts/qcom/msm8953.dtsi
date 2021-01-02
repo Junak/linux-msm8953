@@ -20,6 +20,10 @@
 		enable-method = "psci";			\
 		next-level-cache = <&L2_##cluster>;	\
 		#cooling-cells = <2>;			\
+		cpu-idle-states = <&CPU_PC>,		\
+				  <&CLUSTER_RET>,	\
+				  <&CLUSTER_GDHS>,	\
+				  <&CLUSTER_PC>;	\
 		power-domains = <&cpr 0>;		\
 		power-domain-names = "cpr";		\
 		clocks = <&apcc cluster>;		\
@@ -209,6 +213,50 @@
 			};
 		};
 
+		idle-states {
+			entry-method = "psci";
+
+			CPU_PC: cpu-power-collapse {
+				compatible = "qcom,idle-state";
+				idle-state-name = "cpu-pc";
+				arm,psci-suspend-param = <0x40000003>;
+				entry-latency-us = <90>;
+				exit-latency-us = <180>;
+				min-residency-us = <400>;
+				local-timer-stop;
+			};
+
+			CLUSTER_RET: cluster-retention {
+				compatible = "qcom,idle-state";
+				idle-state-name = "cluster-ret";
+				arm,psci-suspend-param = <0x41000033>;
+				entry-latency-us = <120>;
+				exit-latency-us = <200>;
+				min-residency-us = <1200>;
+				local-timer-stop;
+			};
+
+			CLUSTER_GDHS: cluster-gdhs {
+				compatible = "qcom,idle-state";
+				idle-state-name = "cluster-gdhs";
+				arm,psci-suspend-param = <0x41000043>;
+				entry-latency-us = <150>;
+				exit-latency-us = <220>;
+				min-residency-us = <1800>;
+				local-timer-stop;
+			};
+
+			CLUSTER_PC: cluster-power-collapse {
+				compatible = "qcom,idle-state";
+				idle-state-name = "cluster-pc";
+				arm,psci-suspend-param = <0x41000053>;
+				entry-latency-us = <270>;
+				exit-latency-us = <430>;
+				min-residency-us = <2500>;
+				local-timer-stop;
+			};
+		};
+
 		CPU(0, 0, 0x000);
 		CPU(1, 0, 0x001);
 		CPU(2, 0, 0x002);
@@ -334,6 +382,7 @@
 			compatible = "fixed-clock";
 			#clock-cells = <0>;
 			clock-frequency = <32768>;
+			clock-output-names = "sleep";
 		};
 	};
 
