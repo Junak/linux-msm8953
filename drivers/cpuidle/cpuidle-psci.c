@@ -154,9 +154,33 @@ static int psci_enter_idle_state(struct cpuidle_device *dev,
 	return psci_enter_state(idx, state[idx]);
 }
 
+#define PSCI_AFFINITY_LEVEL(state) ((state >> 24) & 0x3)
+
+static int qcom_psci_enter_idle_state(struct cpuidle_device *dev,
+				struct cpuidle_driver *drv, int idx)
+{
+	u32 *state = __this_cpu_read(psci_cpuidle_data.psci_states);
+	int ret, afflvl;
+
+	ret = psci_enter_state(idx, state[idx]);
+	if (ret >= 0)
+		return ret;
+
+	afflvl = PSCI_AFFINITY_LEVEL(state[idx]);
+
+	while (--idx > 0) {
+		if (PSCI_AFFINITY_LEVEL(state[idx]) < afflvl)
+			return psci_enter_state(idx, state[idx]);
+	}
+
+	return ret;
+}
+
 static const struct of_device_id psci_idle_state_match[] = {
 	{ .compatible = "arm,idle-state",
 	  .data = psci_enter_idle_state },
+	{ .compatible = "qcom,idle-state",
+	  .data = qcom_psci_enter_idle_state },
 	{ },
 };
 
