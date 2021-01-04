@@ -1,0 +1,345 @@
+/* Copyright (c) 2017,2020 The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/dts-v1/;
+
+#include "msm8953-pm8953.dtsi"
+#include "pmi8950.dtsi"
+#include <dt-bindings/leds/common.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "Xiaomi Mi A2 Lite";
+	compatible = "qcom,msm8953-daisy", "qcom,msm8953-xiaomi", "qcom,msm8953";
+
+	qcom,msm-id = <293 0>;
+	qcom,board-id= <0x1000B 0x9>;
+
+	aliases {
+		panel = &panel;
+	};
+
+	reserved-memory {
+		/delete-node/other_ext_region@85b00000;
+
+		other_ext_region@84A00000 {
+			no-map;
+			reg = <0x0 0x84A00000 0x0 0x1900000>;
+		};
+
+		/delete-node/ adsp_fw_region@8d600000;
+		adsp_fw_mem: adsp_fw_region@8d600000 {
+			no-map;
+			reg = <0x0 0x8d600000 0x0 0x1200000>;
+		};
+
+		/delete-node/  wcnss_fw_region@8e700000;
+		wcnss_fw_mem: wcnss_fw_region@8e800000 {
+			no-map;
+			reg = <0x0 0x8e800000 0x0 0x700000>;
+		};
+
+		/*ramoops@9f00000 {
+			compatible = "ramoops";
+			reg = <0x0 0x9f00000 0x0 0x100000>;
+			record-size = <0x10000>;
+			console-size = <0x60000>;
+			ftrace-size = <0x10000>;
+			pmsg-size = <0x20000>;
+			status = "okay";
+		};*/
+	};
+};
+
+&usb3 {
+	status = "okay";
+};
+
+&uart_0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart_console_active>;
+};
+
+&smd_rpm_regulators {
+	l1 {
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1100000>;
+	};
+
+	l2 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1225000>;
+	};
+
+	l3 {
+		regulator-min-microvolt = <925000>;
+		regulator-max-microvolt = <925000>;
+	};
+
+	l5 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	l6 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	l7 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1900000>;
+	};
+
+	l8 {
+		regulator-min-microvolt = <2900000>;
+		regulator-max-microvolt = <2900000>;
+	};
+
+	l9 {
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	l10 {
+		regulator-min-microvolt = <2850000>;
+		regulator-max-microvolt = <2850000>;
+	};
+
+	l11 {
+		regulator-min-microvolt = <2950000>;
+		regulator-max-microvolt = <2950000>;
+	};
+
+	l12 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <2950000>;
+	};
+
+	l13 {
+		regulator-min-microvolt = <3125000>;
+		regulator-max-microvolt = <3125000>;
+	};
+
+	l16 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	l17 {
+		regulator-min-microvolt = <2750000>;
+		regulator-max-microvolt = <2850000>;
+	};
+
+	l19 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1380000>;
+	};
+
+	l22 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+	};
+
+	l23 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1225000>;
+	};
+};
+
+&pmi8950_wled {
+	status = "okay";
+
+	qcom,current-limit-microamp = <20000>;
+	qcom,enabled-strings = <0 1>;
+	qcom,num-strings = <2>;
+	qcom,ovp-milivolt = <29500>;
+};
+
+&dsi0 {
+	panel: panel@0 {
+		compatible = "himax,hx8399c-fhdplus";
+		reg = <0>;
+
+		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
+
+		backlight = <&pmi8950_wled>;
+
+		supply-names = "vsp", "vsn";
+		vsp-supply = <&lab_vreg>;
+		vsn-supply = <&ibb_vreg>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default &mdss_te_default>;
+		pinctrl-1 = <&pmx_mdss_sleep &mdss_te_default>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&i2c_3 {
+	status = "okay";
+
+	gt9xx@5d {
+		compatible = "goodix,gt917s";
+		reg = <0x5d>;
+
+		interrupt-parent = <&msmgpio>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+
+		pinctrl-names = "default"; //, "init","sleep", "idle";
+
+		// These are present in downstream dts but don't know if they are needed
+		// pinctrl-0 = <&ts_int_default>;
+		// pinctrl-1 = <&ts_int_output_low>;
+		// pinctrl-2 = <&ts_int_output_high>;
+		// pinctrl-3 = <&ts_int_input>;
+
+		reset-gpios = <&msmgpio 64 0x0>;
+		irq-gpios = <&msmgpio 65 0x2008>;
+		irq-flags = <1>;
+
+		AVDD28-supply = <&pm8953_l10>;
+		VDDIO-supply = <&pm8953_l6>;
+
+		touchscreen-size-x = <1080>;
+		touchscreen-size-y = <2280>;
+	};
+	focaltech@38 {
+		compatible = "edt,edt-ft5406", "edt,edt-ft5x06";
+		reg = <0x38>;
+		interrupt-parent = <&msmgpio>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+		vcc-supply = <&pm8953_l10>;
+
+		reset-gpios = <&msmgpio 64 GPIO_ACTIVE_LOW>;
+
+		/* pins used by touchscreen */
+		pinctrl-names = "default"; //,"sleep", "pmx_ts_release";
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;
+
+		// Same as goodix touchscreen, don't know if this is needed
+		// pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+		// pinctrl-2 = <&ts_release>;
+
+		touchscreen-size-x = <1080>;
+		touchscreen-size-y = <2280>;
+	};
+};
+
+&dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&sdhc_1 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+	cd-gpios = <&msmgpio 133 GPIO_ACTIVE_LOW>;
+};
+
+&msmgpio {
+	gpio-reserved-ranges = <0 4>, <16 4>, <135 4>;
+
+	pmx_mdss_default: pmx-mdss-default-pins {
+		pins = "gpio61", "gpio59";
+		function = "gpio";
+		drive-strenght = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+		pins = "gpio61", "gpio59";
+		function = "gpio";
+		drive-strenght = <2>;
+		bias-pull-down;
+	};
+
+	ts_int_default: ts-int-default-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <16>;
+		input-enable;
+		bias-disable;
+	};
+
+	ts_int_output_high: ts-int-output-high-pins {
+		pins = "gpio65";
+		function = "gpio";
+		output-high;
+	};
+
+	ts_int_output_low: ts-int-output-low-pins {
+		pins = "gpio65";
+		function = "gpio";
+		output-low;
+	};
+
+	ts_int_input: ts-int-input-pins {
+		pins = "gpio65";
+		function = "gpio";
+		input-enable;
+		bias-disable;
+	};
+
+	ts_int_active: ts-int-active-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+	};
+
+	ts_int_suspend: ts-int-suspend-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	ts_reset_active: ts-reset-active-pins {
+		pins = "gpio64";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+	};
+
+	ts_reset_suspend: ts-reset-suspend-pins {
+		pins = "gpio64";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	ts_release: ts-release-pins {
+		pins = "gpio64", "gpio65";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+};
