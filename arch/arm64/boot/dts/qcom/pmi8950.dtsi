@@ -72,49 +72,55 @@
 			};
 		};
 
-		gpios {
+		gpios@c000 {
 			spmi-dev-container;
 			compatible = "qcom,pmi8950-gpio";
+
+            reg = <0xc000 0x100>;
+
 			gpio-controller;
 			#gpio-cells = <2>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 
 			gpios@c000 {
-				reg = <0xc000>;
+				//reg = <0xc000>;
 				status = "okay";
 			};
 
 			gpios@c100 {
-				reg = <0xc100>;
+				//reg = <0xc100>;
 				status = "okay";
 			};
 		};
 
-		pmi8950_mpps: mpps {
+		pmi8950_mpps: mpps@a000 {
 			compatible = "qcom,pm8950-mpp";
+
+            reg = <0xa000 0x100>;
+
 			gpio-controller;
 			#gpio-cells = <2>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			mpp@a00 {
-				reg = <0xa000>;
+			mpp@a000 {
+				//reg = <0xa000>;
 				status = "okay";
 			};
 
 			mpp@a100 {
-				reg = <0xa100>;
+				//reg = <0xa100>;
 				status = "okay";
 			};
 
 			mpp@a200 {
-				reg = <0xa200>;
+				//reg = <0xa200>;
 				status = "okay";
 			};
 
 			mpp@a300 {
-				reg = <0xa300>;
+				//reg = <0xa300>;
 				status = "okay";
 			};
 		};
