@@ -209,6 +209,50 @@
     };
 };
 
+&i2c_3 {
+    status = "okay";
+
+    gt9xx@5d {
+        compatible = "goodix,gt917s";
+        reg = <0x5d>;
+
+        interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+
+        pinctrl-names = "default"; //, "init","sleep", "idle";
+        // pinctrl-0 = <&ts_int_default>;
+        // pinctrl-1 = <&ts_int_output_low>;
+        // pinctrl-2 = <&ts_int_output_high>;
+        // pinctrl-3 = <&ts_int_input>;
+
+        reset-gpios = <&msmgpio 64 0x0>;
+        irq-gpios = <&msmgpio 65 0x2008>;
+        irq-flags = <1>;
+
+        AVDD28-supply = <&pm8953_l10>;
+        VDDIO-supply = <&pm8953_l6>;
+
+        touchscreen-size-x = <1080>;
+        touchscreen-size-y = <2280>;
+    };
+    focaltech@38 {
+        compatible = "edt,edt-ft5406", "edt,edt-ft5x06";
+        reg = <0x38>;
+        interrupt-parent = <&msmgpio>;
+        interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+        vcc-supply = <&pm8953_l10>;
+
+        reset-gpios = <&msmgpio 64 GPIO_ACTIVE_LOW>;
+
+        /* pins used by touchscreen */
+        pinctrl-names = "default"; //,"sleep", "pmx_ts_release";
+        pinctrl-0 = <&ts_int_active &ts_reset_active>;
+        // pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+        // pinctrl-2 = <&ts_release>;
+        touchscreen-size-x = <1080>;
+        touchscreen-size-y = <2280>;
+    };
+};
+
 &dsi0_out {
     data-lanes = <0 1 2 3>;
     remote-endpoint = <&panel_in>;
@@ -247,6 +291,70 @@
         pins = "gpio61", "gpio59";
         function = "gpio";
         drive-strenght = <2>;
+        bias-pull-down;
+    };
+
+    ts_int_default: ts_int_default {
+        pins = "gpio65";
+        function = "gpio";
+        drive-strength = <16>;
+        input-enable;
+        bias-disable;
+    };
+
+    ts_int_output_high: ts_int_output_high {
+        pins = "gpio65";
+        function = "gpio";
+        output-high;
+    };
+
+    ts_int_output_low: ts_int_output_low {
+        pins = "gpio65";
+        function = "gpio";
+        output-low;
+    };
+
+    ts_int_input: ts_int_input {
+        pins = "gpio65";
+        function = "gpio";
+        input-enable;
+        bias-disable;
+    };
+
+
+
+    ts_int_active: ts_int_active {
+        pins = "gpio65";
+        function = "gpio";
+        drive-strength = <8>;
+        bias-pull-up;
+    };
+
+    ts_int_suspend: ts_int_suspend {
+        pins = "gpio65";
+        function = "gpio";
+        drive-strength = <2>;
+        bias-pull-down;
+    };
+
+    ts_reset_active: ts_reset_active {
+        pins = "gpio64";
+        function = "gpio";
+        drive-strength = <8>;
+        bias-pull-up;
+    };
+
+    ts_reset_suspend: ts_reset_suspend {
+        pins = "gpio64";
+        function = "gpio";
+        drive-strength = <2>;
+        bias-pull-down;
+    };
+
+    ts_release: ts_release {
+        pins = "gpio64", "gpio65";
+        function = "gpio";
+        drive-strength = <2>;
         bias-pull-down;
     };
 };
