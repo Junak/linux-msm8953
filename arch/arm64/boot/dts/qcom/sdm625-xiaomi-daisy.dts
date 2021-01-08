@@ -284,7 +284,7 @@
         bias-pull-down;
     };
 
-    ts_int_default: ts_int_default {
+	ts_int_default: ts-int-default-pins {
         pins = "gpio65";
         function = "gpio";
         drive-strength = <16>;
@@ -292,19 +292,19 @@
         bias-disable;
     };
 
-    ts_int_output_high: ts_int_output_high {
+	ts_int_output_high: ts-int-output-high-pins {
         pins = "gpio65";
         function = "gpio";
         output-high;
     };
 
-    ts_int_output_low: ts_int_output_low {
+	ts_int_output_low: ts-int-output-low-pins {
         pins = "gpio65";
         function = "gpio";
         output-low;
     };
 
-    ts_int_input: ts_int_input {
+	ts_int_input: ts-int-input-pins {
         pins = "gpio65";
         function = "gpio";
         input-enable;
@@ -313,35 +313,35 @@
 
 
 
-    ts_int_active: ts_int_active {
+	ts_int_active: ts-int-active-pins {
         pins = "gpio65";
         function = "gpio";
         drive-strength = <8>;
         bias-pull-up;
     };
 
-    ts_int_suspend: ts_int_suspend {
+	ts_int_suspend: ts-int-suspend-pins {
         pins = "gpio65";
         function = "gpio";
         drive-strength = <2>;
         bias-pull-down;
     };
 
-    ts_reset_active: ts_reset_active {
+	ts_reset_active: ts-reset-active-pins {
         pins = "gpio64";
         function = "gpio";
         drive-strength = <8>;
         bias-pull-up;
     };
 
-    ts_reset_suspend: ts_reset_suspend {
+	ts_reset_suspend: ts-reset-suspend-pins {
         pins = "gpio64";
         function = "gpio";
         drive-strength = <2>;
         bias-pull-down;
     };
 
-    ts_release: ts_release {
+	ts_release: ts-release-pins {
         pins = "gpio64", "gpio65";
         function = "gpio";
         drive-strength = <2>;
