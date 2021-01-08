@@ -200,9 +200,12 @@
         compatible = "goodix,gt917s";
         reg = <0x5d>;
 
+		interrupt-parent = <&msmgpio>;
         interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
 
         pinctrl-names = "default"; //, "init","sleep", "idle";
+
+		// These are present in downstream dts but don't know if they are needed
         // pinctrl-0 = <&ts_int_default>;
         // pinctrl-1 = <&ts_int_output_low>;
         // pinctrl-2 = <&ts_int_output_high>;
@@ -230,8 +233,11 @@
         /* pins used by touchscreen */
         pinctrl-names = "default"; //,"sleep", "pmx_ts_release";
         pinctrl-0 = <&ts_int_active &ts_reset_active>;
+
+		// Same as goodix touchscreen, don't know if this is needed
         // pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
         // pinctrl-2 = <&ts_release>;
+
         touchscreen-size-x = <1080>;
         touchscreen-size-y = <2280>;
     };
