@@ -27,10 +27,6 @@
         panel = &panel;
     };
 
-    chosen {
-        bootargs = "earlycon=ttyMSM0 console=ttyMSM0 PMOS_NO_OUTPUT_REDIRECT";
-    };
-    
 	reserved-memory {
 		/delete-node/other_ext_region@85b00000;
 
