@@ -149,15 +149,68 @@ static bool venus_is_valid_state(struct venus_hfi_device *hdev)
 	return hdev->state != VENUS_STATE_DEINIT;
 }
 
-static void venus_dump_packet(struct venus_hfi_device *hdev, const void *packet)
+static const char *hfi_debug_type_to_kern_lvl(unsigned int type)
+{
+	switch (type) {
+	case HFI_DEBUG_MSG_ERROR:
+		return KERN_ERR;
+	case HFI_DEBUG_MSG_FATAL:
+		return KERN_ALERT;
+	case HFI_DEBUG_MSG_LOW:
+	case HFI_DEBUG_MSG_MEDIUM:
+	case HFI_DEBUG_MSG_HIGH:
+	case HFI_DEBUG_MSG_PERF:
+		return KERN_DEBUG;
+	default:
+		return NULL;
+	}
+}
+
+static bool hfi_sys_debug(struct venus_hfi_device *hdev,
+			  const void *packet)
+{
+	const struct hfi_msg_sys_debug_pkt *pkt = packet;
+	const char *message, *end, *level;
+
+	if (pkt->hdr.pkt_type != HFI_MSG_SYS_DEBUG)
+		return false;
+
+	message = &pkt->msg_data[1];
+
+	end = message + pkt->msg_size - 1;
+
+	if ((void*) end > packet + pkt->hdr.size)
+		end = packet + pkt->hdr.size;
+
+	for (end--; end >= message; end--)
+		if (!*end)
+			break;
+
+	if (*end)
+		return false;
+
+	level = hfi_debug_type_to_kern_lvl(pkt->msg_type);
+
+	if (level)
+		dev_printk(level, hdev->core->dev, "FW: %s", message);
+
+	return true;
+}
+
+static void venus_dump_packet(struct venus_hfi_device *hdev,
+		const void *packet, const char *prefix)
 {
 	size_t pkt_size = *(u32 *)packet;
+
+	if (hfi_sys_debug(hdev, packet))
+		return;
 
 	if (!venus_pkt_debug)
 		return;
 
-	print_hex_dump(KERN_DEBUG, "", DUMP_PREFIX_OFFSET, 16, 1, packet,
-		       pkt_size, true);
+	print_hex_dump(KERN_DEBUG, prefix, DUMP_PREFIX_OFFSET, 16,
+			(pkt_size & 3) ? 1 : 4, packet,
+			pkt_size, false);
 }
 
 static int venus_write_queue(struct venus_hfi_device *hdev,
@@ -176,7 +229,7 @@ static int venus_write_queue(struct venus_hfi_device *hdev,
 	if (!qhdr)
 		return -EINVAL;
 
-	venus_dump_packet(hdev, packet);
+	venus_dump_packet(hdev, packet, "OUT ");
 
 	dwords = (*(u32 *)packet) >> 2;
 	if (!dwords)
@@ -317,7 +370,7 @@ static int venus_read_queue(struct venus_hfi_device *hdev,
 	/* ensure rx_req is stored to memory and tx_req is loaded from memory */
 	mb();
 
-	venus_dump_packet(hdev, pkt);
+	venus_dump_packet(hdev, pkt, "IN ");
 
 	return ret;
 }
