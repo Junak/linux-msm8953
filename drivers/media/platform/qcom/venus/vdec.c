@@ -165,8 +165,7 @@ vdec_try_fmt_common(struct venus_inst *inst, struct v4l2_format *f)
 	pixmp->height = clamp(pixmp->height, frame_height_min(inst),
 			      frame_height_max(inst));
 
-	if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
-		pixmp->height = ALIGN(pixmp->height, 32);
+	pixmp->height = ALIGN(pixmp->height, 32);
 
 	if (pixmp->field == V4L2_FIELD_ANY)
 		pixmp->field = V4L2_FIELD_NONE;
@@ -307,7 +306,7 @@ static int vdec_s_fmt(struct file *file, void *fh, struct v4l2_format *f)
 
 	if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
 		inst->out_width = format.fmt.pix_mp.width;
-		inst->out_height = format.fmt.pix_mp.height;
+		inst->out_height = ALIGN(format.fmt.pix_mp.height, 32);
 		inst->colorspace = pixmp->colorspace;
 		inst->ycbcr_enc = pixmp->ycbcr_enc;
 		inst->quantization = pixmp->quantization;
@@ -324,7 +323,7 @@ static int vdec_s_fmt(struct file *file, void *fh, struct v4l2_format *f)
 	vdec_try_fmt_common(inst, &format);
 
 	inst->width = format.fmt.pix_mp.width;
-	inst->height = format.fmt.pix_mp.height;
+	inst->height = ALIGN(format.fmt.pix_mp.height, 32);
 	inst->crop.top = 0;
 	inst->crop.left = 0;
 	inst->crop.width = inst->width;
@@ -1337,6 +1336,7 @@ static void vdec_event_change(struct venus_inst *inst,
 		.u.src_change.changes = V4L2_EVENT_SRC_CH_RESOLUTION };
 	struct device *dev = inst->core->dev_dec;
 	struct v4l2_format format = {};
+	bool changed = false;
 
 	mutex_lock(&inst->lock);
 
@@ -1347,8 +1347,12 @@ static void vdec_event_change(struct venus_inst *inst,
 
 	vdec_try_fmt_common(inst, &format);
 
-	inst->width = format.fmt.pix_mp.width;
-	inst->height = format.fmt.pix_mp.height;
+	if (inst->width != format.fmt.pix_mp.width ||
+	    inst->height != format.fmt.pix_mp.height ||
+	    inst->out_width != ev_data->width ||
+	    inst->out_height != ev_data->height)
+		changed = true;
+
 	/*
 	 * Some versions of the firmware do not report crop information for
 	 * all codecs. For these cases, set the crop to the coded resolution.
@@ -1383,7 +1387,10 @@ static void vdec_event_change(struct venus_inst *inst,
 		break;
 	case VENUS_DEC_STATE_DECODING:
 	case VENUS_DEC_STATE_DRAIN:
-		inst->codec_state = VENUS_DEC_STATE_DRC;
+		if (sufficient)
+			hfi_session_continue(inst);
+		else
+			inst->codec_state = VENUS_DEC_STATE_DRC;
 		break;
 	default:
 		break;
@@ -1405,10 +1412,12 @@ static void vdec_event_change(struct venus_inst *inst,
 			dev_dbg(dev, VDBGH "flush output error %d\n", ret);
 	}
 
-	inst->next_buf_last = true;
-	inst->reconfig = true;
-	v4l2_event_queue_fh(&inst->fh, &ev);
-	wake_up(&inst->reconf_wait);
+	if (changed) {
+		inst->next_buf_last = true;
+		inst->reconfig = true;
+		v4l2_event_queue_fh(&inst->fh, &ev);
+		wake_up(&inst->reconf_wait);
+	}
 
 	mutex_unlock(&inst->lock);
 }
@@ -1469,7 +1478,7 @@ static void vdec_inst_init(struct venus_inst *inst)
 	inst->crop.width = inst->width;
 	inst->crop.height = inst->height;
 	inst->out_width = frame_width_min(inst);
-	inst->out_height = frame_height_min(inst);
+	inst->out_height = ALIGN(frame_height_min(inst), 32);
 	inst->fps = 30;
 	inst->timeperframe.numerator = 1;
 	inst->timeperframe.denominator = 30;

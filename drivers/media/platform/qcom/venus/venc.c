@@ -192,8 +192,9 @@ venc_try_fmt_common(struct venus_inst *inst, struct v4l2_format *f)
 
 	if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
 		pixmp->width = ALIGN(pixmp->width, 128);
-		pixmp->height = ALIGN(pixmp->height, 32);
 	}
+
+	pixmp->height = ALIGN(pixmp->height, 32);
 
 	pixmp->width = ALIGN(pixmp->width, 2);
 	pixmp->height = ALIGN(pixmp->height, 2);
@@ -1123,7 +1124,7 @@ static void venc_inst_init(struct venus_inst *inst)
 	inst->width = 1280;
 	inst->height = ALIGN(720, 32);
 	inst->out_width = 1280;
-	inst->out_height = 720;
+	inst->out_height = ALIGN(720, 32);
 	inst->fps = 15;
 	inst->timeperframe.numerator = 1;
 	inst->timeperframe.denominator = 15;
