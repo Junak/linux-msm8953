@@ -463,13 +463,19 @@ static irqreturn_t csid_isr(int irq, void *dev)
 static int csid_set_clock_rates(struct csid_device *csid)
 {
 	struct device *dev = csid->camss->dev;
-	u32 pixel_clock;
+	s64 link_freq;
 	int i, j;
 	int ret;
 
-	ret = camss_get_pixel_clock(&csid->subdev.entity, &pixel_clock);
-	if (ret)
-		pixel_clock = 0;
+	const struct csid_format *f = csid_get_fmt_entry(
+		csid->formats,
+		csid->nformats,
+		csid->fmt[MSM_CSIPHY_PAD_SINK].code);
+	u8 num_lanes = csid->phy.lane_cnt;
+	link_freq = camss_get_link_freq(&csid->subdev.entity, f->bpp,
+					2 * num_lanes);
+	if (link_freq < 0)
+		link_freq = 0;
 
 	for (i = 0; i < csid->nclocks; i++) {
 		struct camss_clock *clock = &csid->clock[i];
@@ -478,13 +484,7 @@ static int csid_set_clock_rates(struct csid_device *csid)
 		    !strcmp(clock->name, "csi1") ||
 		    !strcmp(clock->name, "csi2") ||
 		    !strcmp(clock->name, "csi3")) {
-			const struct csid_format *f = csid_get_fmt_entry(
-				csid->formats,
-				csid->nformats,
-				csid->fmt[MSM_CSIPHY_PAD_SINK].code);
-			u8 num_lanes = csid->phy.lane_cnt;
-			u64 min_rate = pixel_clock * f->bpp /
-							(2 * num_lanes * 4);
+			u64 min_rate = link_freq / 4;
 			long rate;
 
 			camss_add_clock_margin(&min_rate);
