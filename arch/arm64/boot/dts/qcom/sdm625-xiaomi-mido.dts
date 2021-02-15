@@ -180,7 +180,7 @@
 
 &dsi0 {
 	panel: panel@0 {
-		compatible = "novatek,nt35596-tianma-fhd";
+		compatible = "xiaomi,mido-panel";
 		reg = <0>;
 
 		backlight = <&pmi8950_wled>;
@@ -223,7 +223,7 @@
 	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
 	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
 
-	cd-gpios = <&msmgpio 133 GPIO_ACTIVE_LOW>;
+	// cd-gpios = <&msmgpio 133 GPIO_ACTIVE_LOW>;
 };
 
 &wcd_codec {
