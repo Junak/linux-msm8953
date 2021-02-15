@@ -208,6 +208,62 @@
 	remote-endpoint = <&panel_in>;
 };
 
+&cci {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cci0_default>,
+		    <&cci1_default>,
+		    <&camss_mclk0_default>,
+		    <&camss_mclk1_default>;
+
+	status = "okay";
+};
+
+&cci_i2c0 {
+		camera-sensor@10 { // Primary rear camera
+		compatible = "samsung,s5k3l8";
+
+		reg = <0x10>;
+
+		clocks = <&gcc GCC_CAMSS_MCLK0_CLK>;
+		clock-frequency = <24000000>;
+
+		reset-gpios = <&msmgpio 40 GPIO_ACTIVE_LOW>;
+
+		avdd-supply= <&pm8953_l22>;
+		dvdd-supply = <&pm8953_l2>;
+		vio-supply = <&pm8953_l6>;
+		aux-supply = <&pm8953_l17>;
+		status = "okay";
+
+		rotation = <270>;
+		orientation = <1>;
+
+		port {
+			rear_cam_ep: endpoint {
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&csiphy0_ep>;
+			};
+		};
+	};
+};
+
+&camss {
+	status = "okay";
+	compatible = "qcom,msm8953-camss";
+	vdda-supply = <&pm8953_s3>;
+
+	ports {
+		port@0 {
+			reg = <0>;
+			csiphy0_ep: endpoint {
+				clock-lanes = <7>;
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&rear_cam_ep>;
+			};
+		};
+	};
+};
+
 &sdhc_1 {
 	status = "okay";
 
@@ -333,8 +389,9 @@
 		regulator-max-microvolt = <1100000>;
 	};
 	l2 {
-		regulator-min-microvolt = <1000000>;
-		regulator-max-microvolt = <1000000>;
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
+		regulator-always-on;
 	};
 	l3 {
 		regulator-min-microvolt = <925000>;
@@ -389,8 +446,9 @@
 		regulator-max-microvolt = <1800000>;
 	};
 	l17 {
-		regulator-min-microvolt = <2800000>;
-		regulator-max-microvolt = <3000000>;
+		regulator-min-microvolt = <2850000>;
+		regulator-max-microvolt = <2850000>;
+		regulator-always-on;
 	};
 	l19 {
 		regulator-min-microvolt = <1200000>;
@@ -402,7 +460,7 @@
 		regulator-max-microvolt = <2850000>;
 	};
 	l23 {
-		regulator-min-microvolt = <975000>;
-		regulator-max-microvolt = <1225000>;
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
 	};
 };
