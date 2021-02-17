@@ -119,13 +119,18 @@ static int csiphy_set_clock_rates(struct csiphy_device *csiphy)
 
 		if (csiphy->rate_set[i]) {
 			u64 min_rate = link_freq / 4;
+			u64 max_rate = clock->freq[clock->nfreqs - 1];
 			long round_rate;
 
 			camss_add_clock_margin(&min_rate);
+			camss_add_clock_margin(&max_rate);
 
 			for (j = 0; j < clock->nfreqs; j++)
 				if (min_rate < clock->freq[j])
 					break;
+
+			if (j == clock->nfreqs && min_rate < max_rate)
+				j = clock->nfreqs - 1;
 
 			if (j == clock->nfreqs) {
 				dev_err(dev,

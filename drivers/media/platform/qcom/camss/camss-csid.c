@@ -485,13 +485,18 @@ static int csid_set_clock_rates(struct csid_device *csid)
 		    !strcmp(clock->name, "csi2") ||
 		    !strcmp(clock->name, "csi3")) {
 			u64 min_rate = link_freq / 4;
+			u64 max_rate = clock->freq[clock->nfreqs - 1];
 			long rate;
 
 			camss_add_clock_margin(&min_rate);
+			camss_add_clock_margin(&max_rate);
 
 			for (j = 0; j < clock->nfreqs; j++)
 				if (min_rate < clock->freq[j])
 					break;
+
+			if (j == clock->nfreqs && min_rate < max_rate)
+				j = clock->nfreqs - 1;
 
 			if (j == clock->nfreqs) {
 				dev_err(dev,
