@@ -5,6 +5,7 @@
 #include "sdm632-pm8953.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/leds/common.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 
 / {
 	qcom,msm-id = <349 0x00>;
@@ -132,6 +133,18 @@
 /*&dsi_phy0 {
 	vddio-supply = <&pm8953_l6>;
 };*/
+
+&i2c_3 {
+	status = "okay";
+
+	touchscreen@41 {
+		compatible = "ili2117";
+		reg = <0x41>;
+		interrupt-parent = <&msmgpio>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+		touchscreen-inverted-x;
+	};
+};
 
 &i2c_5 {
 	status = "okay";
