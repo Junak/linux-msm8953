@@ -69,6 +69,11 @@
 			reg = <0x00 0xeefa1800 0x00 0x800>;
 		};
 	};
+
+	backlight: backlight {
+		compatible = "led-backlight";
+		leds = <&led>;
+	};
 };
 
 &sdhc_1 {
@@ -117,6 +122,8 @@
 		pinctrl-0 = <&pmx_mdss_default>;
 		pinctrl-1 = <&pmx_mdss_sleep>;
 
+		backlight = <&backlight>;
+
 		port {
 			panel_in: endpoint {
 				remote-endpoint = <&dsi0_out>;
@@ -155,11 +162,10 @@
 		#size-cells = <0>;
 		reg = <0x36>;
 
-		led@1 {
+		led: led@1 {
 			reg = <1>;
 			led-sources = <0 1 2>;
 			function = LED_FUNCTION_BACKLIGHT;
-			color = <LED_COLOR_ID_WHITE>;
 			linux,default-trigger = "backlight";
 		};
 	};
