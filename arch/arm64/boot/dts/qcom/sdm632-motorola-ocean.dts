@@ -8,15 +8,21 @@
 #include <dt-bindings/interrupt-controller/irq.h>
 
 / {
-	qcom,msm-id = <349 0x00>;
-	qcom,board-id = <0x141 0xc100>;
-	qcom,pmic-id = <0x10016 0x25 0x00 0x00>;
-	qcom,msm-name = "SDM632";
 	model = "Motorola G7 Power (ocean)";
 	compatible = "qcom,sdm632", "qcom,msm8953";
 
+	qcom,board-id = <0x141 0xc100>;
+	qcom,msm-id = <349 0x00>;
+	qcom,msm-name = "SDM632";
+	qcom,pmic-id = <0x10016 0x25 0x00 0x00>;
+
 	aliases {
 		panel = &panel;
+	};
+
+	backlight: backlight {
+		compatible = "led-backlight";
+		leds = <&led>;
 	};
 
 	gpio-keys {
@@ -39,6 +45,11 @@
 		#size-cells = <2>;
 		ranges;
 
+		mmi_annotate_mem_region {
+			no-map;
+			reg = <0x00 0xeefa1800 0x00 0x800>;
+		};
+
 		/delete-node/other_ext_region@85b00000;
 
 		other_ext_region@84300000 {
@@ -54,63 +65,18 @@
 			record-size = <0x3f800>;
 		};
 
-		wdog_cpuctx_region {
-			no-map;
-			reg = <0x00 0xeefd2000 0x00 0x2e000>;
-		};
-
 		tzlog_dump_mem_region {
 			no-map;
 			reg = <0x00 0xeefa2000 0x00 0x30000>;
 		};
 
-		mmi_annotate_mem_region {
+		wdog_cpuctx_region {
 			no-map;
-			reg = <0x00 0xeefa1800 0x00 0x800>;
+			reg = <0x00 0xeefd2000 0x00 0x2e000>;
 		};
+
 	};
 
-	backlight: backlight {
-		compatible = "led-backlight";
-		leds = <&led>;
-	};
-};
-
-&sdhc_1 {
-	status = "okay";
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
-	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
-};
-
-&sdhc_2 {
-	status = "okay";
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
-	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
-};
-
-&usb3 {
-	status = "okay";
-};
-
-&msmgpio {
-	gpio-reserved-ranges = <96 4>;
-
-	pmx_mdss_default: pmx-mdss-default-pins {
-		pins = "gpio61";
-		function = "gpio";
-		drive-strength = <8>;
-		bias-disable;
-		output-high;
-	};
-
-	pmx_mdss_sleep: pmx-mdss-sleep-pins {
-		pins = "gpio61";
-		function = "gpio";
-		drive-strength = <2>;
-		bias-pull-down;
-	};
 };
 
 &dsi0 {
@@ -137,15 +103,11 @@
 	remote-endpoint = <&panel_in>;
 };
 
-/*&dsi_phy0 {
-	vddio-supply = <&pm8953_l6>;
-};*/
-
 &i2c_3 {
 	status = "okay";
 
 	touchscreen@41 {
-		compatible = "ili2117";
+		compatible = "ilitek,ili2117";
 		reg = <0x41>;
 		interrupt-parent = <&msmgpio>;
 		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
@@ -169,6 +131,39 @@
 			linux,default-trigger = "backlight";
 		};
 	};
+};
+
+&msmgpio {
+	gpio-reserved-ranges = <96 4>;
+
+	pmx_mdss_default: pmx-mdss-default-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+};
+
+&sdhc_1 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on  &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
 };
 
 &smd_rpm_regulators {
@@ -253,3 +248,8 @@
 		regulator-max-microvolt = <1225000>;
 	};
 };
+
+&usb3 {
+	status = "okay";
+};
+
