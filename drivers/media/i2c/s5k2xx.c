@@ -1415,7 +1415,7 @@ static int s5k2xx_probe(struct i2c_client *client)
 		goto probe_error_v4l2_ctrl_handler_free;
 	}
 
-	ret = v4l2_async_register_subdev_sensor_common(&s5k2xx->sd);
+	ret = v4l2_async_register_subdev_sensor(&s5k2xx->sd);
 	if (ret < 0) {
 		dev_err(&client->dev, "failed to register V4L2 subdev: %d",
 			ret);
