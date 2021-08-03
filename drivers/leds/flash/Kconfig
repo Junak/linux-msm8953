@@ -77,4 +77,12 @@ config LEDS_SGM3140
 	  This option enables support for the SGM3140 500mA Buck/Boost Charge
 	  Pump LED Driver.
 
+config LEDS_QCOM_SPMI_FLASH
+	tristate "Support for QCOM SPMI Flash LEDs"
+	depends on REGMAP_SPMI
+	depends on OF
+	help
+	  This option enables support for the flash/torch LEDs present in
+	  Qualcomm's PM8941 PMIC.
+
 endif # LEDS_CLASS_FLASH
