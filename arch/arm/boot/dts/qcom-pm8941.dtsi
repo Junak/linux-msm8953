@@ -2,6 +2,7 @@
 #include <dt-bindings/iio/qcom,spmi-vadc.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/leds/common.h>
 
 &spmi_bus {
 
@@ -187,6 +188,30 @@
 				qcom,ocp-retry-delay = <30>;
 				qcom,vs-soft-start-strength = <0>;
 				regulator-initial-mode = <1>;
+			};
+		};
+
+		spmi-flash-leds@d300 {
+			status = "disabled";
+
+			compatible = "qcom,spmi-flash-leds";
+			reg = <0xd300 0x100>;
+			flash-boost-supply = <&pm8941_5vs1>;
+			torch-boost-supply = <&pm8941_5v>;
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			pm8941_flash0: led@0 {
+				reg = <0>;
+				function = LED_FUNCTION_FLASH;
+				color = <LED_COLOR_ID_WHITE>;
+			};
+
+			pm8941_flash1: led@1 {
+				reg = <1>;
+				function = LED_FUNCTION_FLASH;
+				color = <LED_COLOR_ID_WHITE>;
 			};
 		};
 	};
