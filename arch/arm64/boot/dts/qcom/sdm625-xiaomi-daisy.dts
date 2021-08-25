@@ -229,8 +229,7 @@
 		interleave_mode = <0>;
 		#sound-dai-cells = <0>;
 
-		pinctrl-names = "reset";
-		pinctrl-0 = <&spk_ext_pa_reset>;
+		reset-gpios = <&msmgpio 89 0>;
 	};
 };
 
@@ -239,7 +238,9 @@
 
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act &pri_tlmm_default>;
-	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_act &pri_tlmm_default>;
+	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_sus &pri_tlmm_default>;
+
+	model = "xiaomi-daisy";
 
 	model = "xiaomi-mi-a2-lite";
 
@@ -260,9 +261,9 @@
 };
 
 &q6afedai {
-	dai@127 {
+	dai@22 {
 		reg = <QUINARY_MI2S_RX>;
-		qcom,sd-lines = <0>;
+		qcom,sd-lines = <1>;
 	};
 };
 
@@ -275,14 +276,6 @@
 
 		interrupt-parent = <&msmgpio>;
 		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
-
-		pinctrl-names = "default"; //, "init","sleep", "idle";
-
-		// These are present in downstream dts but don't know if they are needed
-		// pinctrl-0 = <&ts_int_default>;
-		// pinctrl-1 = <&ts_int_output_low>;
-		// pinctrl-2 = <&ts_int_output_high>;
-		// pinctrl-3 = <&ts_int_input>;
 
 		reset-gpios = <&msmgpio 64 0x0>;
 		irq-gpios = <&msmgpio 65 0x2008>;
@@ -302,14 +295,6 @@
 		vcc-supply = <&pm8953_l10>;
 
 		reset-gpios = <&msmgpio 64 GPIO_ACTIVE_LOW>;
-
-		/* pins used by touchscreen */
-		pinctrl-names = "default"; //,"sleep", "pmx_ts_release";
-		pinctrl-0 = <&ts_int_active &ts_reset_active>;
-
-		// Same as goodix touchscreen, don't know if this is needed
-		// pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
-		// pinctrl-2 = <&ts_release>;
 
 		touchscreen-size-x = <1080>;
 		touchscreen-size-y = <2280>;
@@ -362,81 +347,5 @@
 		function = "gpio";
 		drive-strenght = <2>;
 		bias-pull-down;
-	};
-
-	ts_int_default: ts-int-default-pins {
-		pins = "gpio65";
-		function = "gpio";
-		drive-strength = <16>;
-		input-enable;
-		bias-disable;
-	};
-
-	ts_int_output_high: ts-int-output-high-pins {
-		pins = "gpio65";
-		function = "gpio";
-		output-high;
-	};
-
-	ts_int_output_low: ts-int-output-low-pins {
-		pins = "gpio65";
-		function = "gpio";
-		output-low;
-	};
-
-	ts_int_input: ts-int-input-pins {
-		pins = "gpio65";
-		function = "gpio";
-		input-enable;
-		bias-disable;
-	};
-
-	ts_int_active: ts-int-active-pins {
-		pins = "gpio65";
-		function = "gpio";
-		drive-strength = <8>;
-		bias-pull-up;
-	};
-
-	ts_int_suspend: ts-int-suspend-pins {
-		pins = "gpio65";
-		function = "gpio";
-		drive-strength = <2>;
-		bias-pull-down;
-	};
-
-	ts_reset_active: ts-reset-active-pins {
-		pins = "gpio64";
-		function = "gpio";
-		drive-strength = <8>;
-		bias-pull-up;
-	};
-
-	ts_reset_suspend: ts-reset-suspend-pins {
-		pins = "gpio64";
-		function = "gpio";
-		drive-strength = <2>;
-		bias-pull-down;
-	};
-
-	ts_release: ts-release-pins {
-		pins = "gpio64", "gpio65";
-		function = "gpio";
-		drive-strength = <2>;
-		bias-pull-down;
-	};
-
-	spk_ext_pa_default: speaker-amp-pins {
-		pins = "gpio89";
-		function = "gpio";
-		drive-strength = <2>;
-		bias-disable;
-	};
-
-	spk_ext_pa_reset: speaker-amp-pins {
-		pins = "gpio89";
-		function = "gpio";
-		drive-strength = <0>;
-		bias-disable;
 	};
 };
