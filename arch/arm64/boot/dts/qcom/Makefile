@@ -58,6 +58,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= sdm450-samsung-a6plte.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm625-motorola-potter.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm625-xiaomi-daisy.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm625-xiaomi-mido.dtb
+dtb-$(CONFIG_ARCH_QCOM)	+= sdm625-xiaomi-tissot.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm630-sony-xperia-ganges-kirin.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm630-sony-xperia-nile-discovery.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm630-sony-xperia-nile-pioneer.dtb

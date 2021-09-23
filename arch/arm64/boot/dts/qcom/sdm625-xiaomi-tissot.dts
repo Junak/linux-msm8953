@@ -1,0 +1,496 @@
+/* Copyright (c) 2017,2021 The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/dts-v1/;
+
+#include "msm8953-pm8953.dtsi"
+#include "pmi8950.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	model = "Xiaomi Mi A1 (tissot)";
+	compatible = "qcom,msm8953-tissot", "qcom,msm8953-xiaomi", "qcom,msm8953";
+	
+	qcom,msm-id = <0x125 0x00>;
+	qcom,board-id = <0x1000b 0x00>;
+
+	aliases {
+		panel = &panel;
+	};
+
+	reserved-memory {
+		/delete-node/other_ext_region@85b00000;
+		other_ext_region@84A00000 {
+			reg = <0x0 0x84A00000 0x0 0x1900000>;
+			no-map;
+		};
+
+		adsp_fw_region@8d600000 {
+			reg = <0x0 0x8d600000 0x0 0x1200000>;
+		};
+
+		/delete-node/wcnss_fw_region@8e700000;
+		wcnss_fw_mem: wcnss_fw_region@8e800000 {
+			reg = <0x0 0x8e800000 0x0 0x700000>;
+			no-map;
+		};
+
+		ramoops@9ff00000 {
+			compatible = "ramoops";
+			reg = <0x0 0x9ff00000 0x0 0x00100000>;
+			record-size = <0x1000>;
+			console-size = <0x80000>;
+			ftrace-size = <0x1000>;
+			pmsg-size = <0x8000>;
+		};
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_key_default>;
+
+		label = "GPIO Button";
+
+		volume-up {
+			label = "Volume Up";
+			gpios = <&msmgpio 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+	};
+
+	gpio-hall-sensor {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_hall_sensor_default>;
+
+		label = "GPIO Hall Effect Sensor";
+
+		hall-sensor {
+			label = "Hall Effect Sensor";
+			gpios = <&msmgpio 44 GPIO_ACTIVE_LOW>;
+			linux,input-type = <EV_SW>;
+			linux,code = <SW_LID>;
+			linux,can-disable;
+		};
+	};
+
+	qcom,battery-data {
+		qcom,batt-id-range-pct = <5>;
+		qcom,max-voltage-uv = <4380000>;
+		qcom,nom-batt-capacity-mah = <3080>;
+		qcom,batt-id-kohm = <50>;
+		qcom,battery-beta = <3380>;
+		qcom,battery-type = "battey_qrd_coslight_3080mah";
+		qcom,chg-rslow-comp-c1 = <3969816>;
+		qcom,chg-rslow-comp-c2 = <7140145>;
+		qcom,chg-rs-to-rslow = <997019>;
+		qcom,chg-rslow-comp-thr = <0xB8>;
+		qcom,checksum = <0x5DAD>;
+		qcom,thermal-coefficients = [c8 86 c1 50 d3 37];
+		qcom,fg-profile-data = [E2 83 DF 7C
+					10 81 12 77
+					65 83 51 74
+					74 89 94 94
+					33 82 B0 99
+					A5 BC 1D C9
+					55 10 02 88
+					9A 7D 74 81
+					8D 77 4E 83
+					CD 70 15 61
+					CD 7E 4F 82
+					9D 99 DF BC
+					B5 C9 59 0C
+					24 0C 15 59
+					14 70 B2 FD
+					A4 3F 23 3D
+					6E 33 00 00
+					35 46 01 38
+					FE 12 00 00
+					00 00 00 00
+					00 00 00 00
+					97 6B B4 6A
+					EF 60 0B 81
+					92 6E 72 60
+					3E 59 C0 79
+					5B 6D 56 5B
+					18 7F 64 9A
+					18 E9 61 55
+					5F A0 71 0C
+					28 00 FF 36
+					F0 11 30 03
+					00 00 00 0C];
+	};
+};
+
+&pmi8950_fg {
+	qcom,cutoff-volt-mv = <3400>;
+	qcom,empty-volt-mv = <3100>;
+	qcom,term-current-ma = <300>;
+	qcom,chg-term-current-ma = <200>;
+	qcom,fg-cc-cv-thr-mv = <4370>;
+	qcom,fg-vbat-estimate-diff-mv = <250>;
+	qcom,bcl-lm-thr-ma = <127>;
+	qcom,bcl-mh-thr-ma = <405>;
+};
+
+&pmi8950_wled {
+	status = "okay";
+
+	qcom,enabled-strings = <0 1>;
+	qcom,num-strings = <2>;
+	qcom,cabc;
+	qcom,eternal-pfet;
+};
+
+&i2c_2 {
+	status = "okay";
+
+	led-controller@45 {
+		compatible = "awinic,aw2013";
+		reg = <0x45>;
+		
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		vcc-supply = <&pm8953_l10>;
+
+		led@0 {
+			reg = <0>;
+			led-max-microamp = <5000>;
+			function = LED_FUNCTION_INDICATOR;
+			color = <LED_COLOR_ID_WHITE>;
+		};
+	};
+
+	max98927_codec: max98927@3a {
+		#sound-dai-cells = <1>;
+		compatible = "maxim,max98927";
+		reg = <0x3a>;
+		vmon-slot-no = <1>;
+		imon-slot-no = <1>;
+
+		reset-gpios = <&msmgpio 86 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&spk_codec_default>;
+	};
+};
+
+&i2c_3 {
+	status = "okay";
+
+	touchscreen@38 {
+		compatible = "edt,edt-ft5x06";
+		reg = <0x38>;
+		interrupt-parent = <&msmgpio>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+
+		vcc-supply = <&pm8953_l10>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ts_int_default &ts_reset_default>;
+
+		reset-gpios = <&msmgpio 64 GPIO_ACTIVE_LOW>;
+		touchscreen-size-x = <1080>;
+		touchscreen-size-y = <1920>;
+	};
+};
+
+&dsi0 {
+	panel: panel@0 {
+		compatible = "xiaomi,tissot-panel";
+		reg = <0>;
+
+		backlight = <&pmi8950_wled>;
+		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default &mdss_te_default>;
+		pinctrl-1 = <&pmx_mdss_sleep &mdss_te_default>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&sound_card {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act &pri_lines_default &pri_ws_lines_default &ext_pa_power_on>;
+	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_sus &pri_lines_sleep &pri_ws_lines_sleep &ext_pa_power_off>;
+
+	model = "msm8916";
+
+	/*quaternary-mi2s-dai-link {
+		link-name = "Quaternary MI2S";
+		cpu {
+			sound-dai = <&q6afedai QUATERNARY_MI2S_RX>;
+		};
+
+		platform {
+			sound-dai = <&q6routing>;
+		};
+
+		codec {
+			sound-dai = <&max98927_codec>;
+		};
+	};*/
+};
+
+&q6afedai {
+	dai@22 {
+		reg = <QUATERNARY_MI2S_RX>;
+		qcom,sd-lines = <0>;
+	};
+};
+
+&sdhc_1 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+};
+
+&sdhc_2 {
+	status = "okay";
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+	cd-gpios = <&msmgpio 133 GPIO_ACTIVE_HIGH>;
+};
+
+&usb3 {
+	status = "okay";
+};
+
+&uart_0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart_console_active>;
+};
+
+&msmgpio {
+	gpio-reserved-ranges = <0 4>, <16 4>, <135 4>;
+
+	gpio_hall_sensor_default: gpio-hall-sensor-pins {
+		pins = "gpio44";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+
+	pmx_mdss_default: pmx-mdss-default-pins {
+		pins = "gpio61", "gpio59";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable = <0>;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+		pins = "gpio61", "gpio59";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	ts_reset_default: ts-reset-default-pins {
+		pins = "gpio64";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	ts_int_default: ts-int-default-pins {
+		pins = "gpio65";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+
+	cdc_mclk2_default: cdc-mclk2-default-pins {
+		pins = "gpio66";
+		function = "pri_mi2s";
+		drive-strength = <8>;
+		bias-disable;
+	};
+
+	cdc_mclk2_sleep: cdc-mclk2-sleep-pins {
+		pins = "gpio66";
+		function = "pri_mi2s";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	spk_codec_default: spk-codec-default {
+		pins = "gpio86";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	pri_lines_default: pri-lines-default-pins {
+		pins = "gpio88", "gpio91", "gpio93";
+		function = "pri_mi2s";
+		drive-strength = <8>;
+	};
+
+	pri_lines_sleep: pri-lines-sleep-pins {
+		pins = "gpio88", "gpio91", "gpio93";
+		function = "pri_mi2s";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	pri_ws_lines_default: pri-ws-default-pins {
+		pins = "gpio92";
+		function = "pri_mi2s_ws";
+		drive-strength = <8>;
+	};
+
+	pri_ws_lines_sleep: pri-ws-sleep-pins {
+		pins = "gpio92";
+		function = "pri_mi2s_ws";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	ext_pa_power_on: ext-pa-power-on-pins {
+		pins = "gpio141";
+		function = "gpio";
+		drive-strength = <16>;
+		bias-disable;
+		output-high;
+	};
+
+	ext_pa_power_off: ext-pa-power-off-pins {
+		pins = "gpio141";
+		function = "gpio";
+		drive-strength = <16>;
+		bias-disable;
+		output-low;
+	};
+};
+
+&smd_rpm_regulators {
+	s1 {
+		regulator-min-microvolt = <870000>;
+		regulator-max-microvolt = <1156000>;
+	};
+
+	s3 {
+		regulator-min-microvolt = <1224000>;
+		regulator-max-microvolt = <1224000>;
+	};
+
+	s4 {
+		regulator-min-microvolt = <1900000>;
+		regulator-max-microvolt = <2050000>;
+	};
+
+	l1 {
+		regulator-min-microvolt = <1000000>;
+		regulator-max-microvolt = <1000000>;
+	};
+
+	l2 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1225000>;
+	};
+
+	l3 {
+		regulator-min-microvolt = <925000>;
+		regulator-max-microvolt = <925000>;
+	};
+
+	l5 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	l6 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	l7 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1900000>;
+	};
+
+	l8 {
+		regulator-min-microvolt = <2900000>;
+		regulator-max-microvolt = <2900000>;
+	};
+
+	l9 {
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	l10 {
+		regulator-min-microvolt = <2850000>;
+		regulator-max-microvolt = <2850000>;
+	};
+
+	l11 {
+		regulator-min-microvolt = <2950000>;
+		regulator-max-microvolt = <2950000>;
+	};
+
+	l12 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <2950000>;
+	};
+
+	l13 {
+		regulator-min-microvolt = <3125000>;
+		regulator-max-microvolt = <3125000>;
+	};
+
+	l16 {
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	l17 {
+		regulator-min-microvolt = <2750000>;
+		regulator-max-microvolt = <2850000>;
+	};
+
+	l19 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1350000>;
+	};
+
+	l22 {
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+	};
+
+	l23 {
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1225000>;
+	};
+};
