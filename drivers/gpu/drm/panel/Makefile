@@ -67,3 +67,4 @@ obj-$(CONFIG_DRM_PANEL_XINPENG_XPP055C272) += panel-xinpeng-xpp055c272.o
 obj-$(CONFIG_DRM_PANEL_HIMAX_HX8399C_FHDPLUS) += panel-himax-hx8399c-fhdplus.o
 obj-$(CONFIG_DRM_PANELS_XIAOMI_MIDO) +=panels-xiaomi-mido.o
 obj-$(CONFIG_DRM_PANEL_ILI7807_FHD) += panel-ili7807-fhd.o
+obj-$(CONFIG_DRM_PANEL_OTM1911_FHD) += panel-otm1911-fhd.o

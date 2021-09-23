@@ -620,4 +620,13 @@ config DRM_PANEL_ILI7807_FHD
 	help
 	  Say Y here if you want to enable support for the ILITEK
 	  ILI7807 controller for 1080x1920 LCD panels (found on Xiaomi Mi A1).
+
+config DRM_PANEL_OTM1911_FHD
+	tristate "Tianma otm1911(focal) panel driver"
+	depends on OF
+	depends on DRM_MIPI_DSI
+	depends on BACKLIGHT_CLASS_DEVICE
+	help
+	  Say Y here if you want to enable support for the FOCAL
+	  OTM1911 controller for 1080x1920 LCD panels (found on Xiaomi Mi A1).
 endmenu
