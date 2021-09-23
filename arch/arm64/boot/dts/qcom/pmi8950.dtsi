@@ -131,7 +131,7 @@
 			status = "disabled";
 		};
 
-		fuel_guage {
+		pmi8950_fg: fuel_guage {
 			#address-cells = <1>;
 			#size-cells = <0>;
 			compatible = "qcom,pmi8950-fg";
