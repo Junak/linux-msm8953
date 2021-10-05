@@ -195,7 +195,7 @@
 
 &dsi0 {
 	panel: panel@0 {
-		compatible = "himax,hx8399c-fhdplus";
+		compatible = "xiaomi,daisy-panel";
 		reg = <0>;
 
 		reset-gpios = <&msmgpio 61 GPIO_ACTIVE_LOW>;
