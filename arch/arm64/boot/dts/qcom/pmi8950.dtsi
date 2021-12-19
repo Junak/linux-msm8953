@@ -184,6 +184,14 @@
 			status = "disabled";
 		};
 
+		flash_leds: flash_leds@d300 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			compatible = "qcom,spmi-flash-leds";
+			reg = <0xd300>;
+			status = "disabled";
+		};
+
 		pmi8950_wled: wled@d800 {
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -213,11 +221,6 @@
 
 			status = "disabled";
 
-		};
-
-		flash_leds@d300 {
-			compatible = "qcom,flash-leds";
-			status = "disabled";
 		};
 
 		haptic@c000 {
