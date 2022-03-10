@@ -16,6 +16,7 @@ description: |
 
 properties:
   compatible:
+    const: bosch,bmi120
     const: bosch,bmi160
 
   reg:
