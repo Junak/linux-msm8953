@@ -22,9 +22,6 @@
 #include "hfi_platform.h"
 
 static bool legacy_binding;
-static int core_get_v4(struct venus_core *core);
-static void core_put_v4(struct venus_core *core);
-static int core_power_v4(struct venus_core *core, int on);
 
 static int core_clks_get(struct venus_core *core)
 {
@@ -400,10 +397,12 @@ static int venc_power_v3(struct device *dev, int on)
 }
 
 static const struct venus_pm_ops pm_ops_v3 = {
-	.core_get = core_get_v4,
-	.core_put = core_put_v4,
-	.core_power = core_power_v4,
+	.core_get = core_get_v1,
+	.core_put = core_put_v1,
+	.core_power = core_power_v1,
+	.vdec_get = vdec_get_v3,
 	.vdec_power = vdec_power_v3,
+	.venc_get = venc_get_v3,
 	.venc_power = venc_power_v3,
 	.load_scale = load_scale_v1,
 };
