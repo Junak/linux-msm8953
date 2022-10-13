@@ -25,6 +25,39 @@
 	qcom,msm-id = <293 0>;
 	qcom,board-id = <0x1000b 0x00>;
 
+	battery: battery {
+		compatible = "simple-battery";
+		charge-full-design-microamp-hours = <3000000>;
+		voltage-min-design-microvolt = <3400000>;
+		voltage-max-design-microvolt = <4400000>;
+	};
+
+	chosen {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		framebuffer0: framebuffer@90001000 {
+			compatible = "simple-framebuffer";
+			reg = <0 0x90001000 0 (1920 * 1080 * 3)>;
+
+			width = <1080>;
+			height = <1920>;
+			stride = <(1080 * 3)>;
+			format = "r8g8b8";
+
+			power-domains = <&gcc MDSS_GDSC>;
+
+			clocks = <&gcc GCC_MDSS_AHB_CLK>,
+				 <&gcc GCC_MDSS_AXI_CLK>,
+				 <&gcc GCC_MDSS_VSYNC_CLK>,
+				 <&gcc GCC_MDSS_MDP_CLK>,
+				 <&gcc GCC_MDSS_BYTE0_CLK>,
+				 <&gcc GCC_MDSS_PCLK0_CLK>,
+				 <&gcc GCC_MDSS_ESC0_CLK>;
+		};
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 
@@ -44,53 +77,6 @@
 			gpios = <&tlmm 85 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_VOLUMEUP>;
 		};
-	};
-
-	qcom,battery-data {
-		qcom,batt-id-range-pct = <5>;
-		qcom,max-voltage-uv = <4380000>;
-		qcom,nom-batt-capacity-mah = <3080>;
-		qcom,batt-id-kohm = <50>;
-		qcom,battery-beta = <3380>;
-		qcom,battery-type = "battey_qrd_coslight_3080mah";
-		qcom,chg-rslow-comp-c1 = <3969816>;
-		qcom,chg-rslow-comp-c2 = <7140145>;
-		qcom,chg-rs-to-rslow = <997019>;
-		qcom,chg-rslow-comp-thr = <0xB8>;
-		qcom,checksum = <0x5DAD>;
-		qcom,thermal-coefficients = [c8 86 c1 50 d3 37];
-		qcom,fg-profile-data = [E2 83 DF 7C
-					10 81 12 77
-					65 83 51 74
-					74 89 94 94
-					33 82 B0 99
-					A5 BC 1D C9
-					55 10 02 88
-					9A 7D 74 81
-					8D 77 4E 83
-					CD 70 15 61
-					CD 7E 4F 82
-					9D 99 DF BC
-					B5 C9 59 0C
-					24 0C 15 59
-					14 70 B2 FD
-					A4 3F 23 3D
-					6E 33 00 00
-					35 46 01 38
-					FE 12 00 00
-					00 00 00 00
-					00 00 00 00
-					97 6B B4 6A
-					EF 60 0B 81
-					92 6E 72 60
-					3E 59 C0 79
-					5B 6D 56 5B
-					18 7F 64 9A
-					18 E9 61 55
-					5F A0 71 0C
-					28 00 FF 36
-					F0 11 30 03
-					00 00 00 0C];
 	};
 
 	reserved-memory {
@@ -151,6 +137,11 @@
 	};
 };
 
+&cpr {
+	vdd-apc-supply = <&vreg_apc>;
+	vdd-apc-step-uv = <5000>;
+};
+
 &dsi0 {
 	panel: panel@0 {
 		compatible = "xiaomi,tissot-panel";
@@ -177,6 +168,11 @@
 	remote-endpoint = <&panel_in>;
 };
 
+&dsi_phy0 {
+        vddio-supply = <&pm8953_l6>;
+        vcca-supply = <&pm8953_l3>;
+};
+
 &hsusb_phy {
 	status = "okay";
 };
@@ -184,7 +180,7 @@
 &i2c_2 {
 	status = "okay";
 
-	max98927_codec: max98927@3a {
+	codec: max98927@3a {
 		compatible = "maxim,max98927";
 		reg = <0x3a>;
 
@@ -192,8 +188,9 @@
 
 		vmon-slot-no = <1>;
 		imon-slot-no = <1>;
+		interleave_mode = <0>;
 
-		#sound-dai-cells = <1>;
+		#sound-dai-cells = <0>;
 	};
 
 	led-controller@45 {
@@ -236,50 +233,57 @@
 	};
 };
 
+&iris {
+	vddxo-supply = <&pm8953_l7>;
+	vddrfa-supply = <&pm8953_l19>;
+	vddpa-supply = <&pm8953_l9>;
+	vdddig-supply = <&pm8953_l5>;
+};
+
+&lpass {
+	status = "okay";
+};
+
+&modem {
+	status = "okay";
+
+	mss-supply = <&pm8953_s1>;
+	pll-supply = <&pm8953_l7>;
+};
+
 &pm8953_resin {
 	status = "okay";
 	linux,code = <KEY_VOLUMEDOWN>;
 };
 
 &pmi8950_fg {
-	qcom,cutoff-volt-mv = <3400>;
-	qcom,empty-volt-mv = <3100>;
-	qcom,term-current-ma = <300>;
-	qcom,chg-term-current-ma = <200>;
-	qcom,fg-cc-cv-thr-mv = <4370>;
-	qcom,fg-vbat-estimate-diff-mv = <250>;
-	qcom,bcl-lm-thr-ma = <127>;
-	qcom,bcl-mh-thr-ma = <405>;
+	monitored-battery = <&battery>;
+};
+
+&pmi8950_smbcharger {
+	status = "okay";
+	monitored-battery = <&battery>;
 };
 
 &pmi8950_wled {
 	status = "okay";
 
-	qcom,cabc;
+	qcom,current-limit-microamp = <20000>;
 	qcom,enabled-strings = <0 1>;
-	qcom,external-pfet;
 	qcom,num-strings = <2>;
+	qcom,ovp-milivolt = <29500>;
+};
+
+&pronto {
+	status = "okay";
+	vddpx-supply = <&pm8953_l5>;
 };
 
 &q6afedai {
-	dai@22 {
-		reg = <QUATERNARY_MI2S_RX>;
+	dai@127 {
+		reg = <QUINARY_MI2S_RX>;
 		qcom,sd-lines = <0>;
 	};
-};
-
-&sdhc_1 {
-	status = "okay";
-};
-
-&sdhc_2 {
-	status = "okay";
-
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
-	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
-
-	cd-gpios = <&tlmm 133 GPIO_ACTIVE_HIGH>;
 };
 
 &rpm_requests {
@@ -401,6 +405,20 @@
 	};
 };
 
+&sdhc_1 {
+	status = "okay";
+};
+
+&sdhc_2 {
+	status = "okay";
+
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_on>;
+	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+
+	cd-gpios = <&tlmm 133 GPIO_ACTIVE_HIGH>;
+};
+
 &sound_card {
 	status = "okay";
 
@@ -410,10 +428,10 @@
 	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act &pri_lines_default &pri_ws_lines_default &ext_pa_power_on>;
 	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_sus &pri_lines_sleep &pri_ws_lines_sleep &ext_pa_power_off>;
 
-	/*quaternary-mi2s-dai-link {
-		link-name = "Quaternary MI2S";
+	quinary-mi2s-dai-link {
+		link-name = "Quinary MI2S";
 		cpu {
-			sound-dai = <&q6afedai QUATERNARY_MI2S_RX>;
+			sound-dai = <&q6afedai QUINARY_MI2S_RX>;
 		};
 
 		platform {
@@ -421,9 +439,9 @@
 		};
 
 		codec {
-			sound-dai = <&max98927_codec>;
+			sound-dai = <&codec>;
 		};
-	};*/
+	};
 };
 
 &tlmm {
