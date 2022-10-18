@@ -27,6 +27,7 @@
 
 #define BMI160_REG_CHIP_ID	0x00
 #define BMI160_CHIP_ID_VAL	0xD1
+#define BMI120_CHIP_ID_VAL	0xD3
 
 #define BMI160_REG_PMU_STATUS	0x03
 
@@ -737,9 +738,9 @@ static int bmi160_chip_init(struct bmi160_data *data, bool use_spi)
 		dev_err(dev, "Error reading chip id\n");
 		goto disable_regulator;
 	}
-	if (val != BMI160_CHIP_ID_VAL) {
-		dev_err(dev, "Wrong chip id, got %x expected %x\n",
-			val, BMI160_CHIP_ID_VAL);
+	if (val != BMI160_CHIP_ID_VAL && val != BMI120_CHIP_ID_VAL) {
+		dev_err(dev, "Wrong chip id, got %x expected %x or %x\n",
+			val, BMI160_CHIP_ID_VAL, BMI120_CHIP_ID_VAL);
 		ret = -ENODEV;
 		goto disable_regulator;
 	}
