@@ -173,7 +173,7 @@
 	vddio-supply = <&pm8953_l6>;
 
 	panel: panel@0 {
-		compatible = "boe,bs052fhm-a00-6c01";
+		compatible = "motorola,potter-panel";
 		reg = <0>;
 
 		backlight = <&pmi8950_wled>;
