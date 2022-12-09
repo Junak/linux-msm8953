@@ -114,6 +114,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= sc7280-crd-r3.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sc8280xp-crd.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sc8280xp-lenovo-thinkpad-x13s.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sda660-inforce-ifc6560.dtb
+dtb-$(CONFIG_ARCH_QCOM)	+= sdm450-motorola-ali.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm450-samsung-a6plte-r4.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm625-motorola-potter.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= sdm625-xiaomi-daisy.dtb
