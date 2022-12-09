@@ -254,7 +254,7 @@ static int tianma_520_v0_remove(struct mipi_dsi_device *dsi)
 }
 
 static const struct of_device_id tianma_520_v0_of_match[] = {
-	{ .compatible = "tianma,tl052vdpx02" }, // FIXME
+	{ .compatible = "tianma,tl052vdxp02" }, // FIXME
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, tianma_520_v0_of_match);
