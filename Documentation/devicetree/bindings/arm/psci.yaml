@@ -98,6 +98,12 @@ properties:
       [1] Kernel documentation - ARM idle states bindings
         Documentation/devicetree/bindings/cpu/idle-states.yaml
 
+  skip-set-osi-mode:
+    $ref: /schemas/types.yaml#/definitions/flag
+    description: |
+      Skip setting OSI mode. Relevant for some Qualcomm SoCs where it's already
+      enabled and can't be changed.
+
 patternProperties:
   "^power-domain-":
     $ref: "../power/power-domain.yaml#"

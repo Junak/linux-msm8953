@@ -158,7 +158,8 @@ static int psci_cpuidle_domain_probe(struct platform_device *pdev)
 		return -ENODEV;
 
 	/* If OSI mode is supported, let's try to enable it. */
-	use_osi = psci_pd_try_set_osi_mode();
+	if (!of_property_read_bool(np, "skip-set-osi-mode"))
+		use_osi = psci_pd_try_set_osi_mode();
 
 	/*
 	 * Parse child nodes for the "#power-domain-cells" property and

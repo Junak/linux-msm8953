@@ -730,6 +730,10 @@ static int __init psci_1_0_init(const struct device_node *np)
 	if (err)
 		return err;
 
+	/* Skip OSI mode init for qcom SoCs */
+	if (of_property_read_bool(np, "skip-set-osi-mode"))
+		return 0;
+
 	if (psci_has_osi_support()) {
 		pr_info("OSI mode supported.\n");
 
