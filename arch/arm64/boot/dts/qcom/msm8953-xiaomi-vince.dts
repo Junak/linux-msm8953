@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: GPL-2.0-only
-
+// SPDX-License-Identifier: BSD-3-Clause
+/*
+ * Copyright (c) 2022, Eugene Lepshy <fekz115@gmail.com>
+ * Copyright (c) 2022, Gianluca Boiano <morf3089@gmail.com>
+ */
 /dts-v1/;
 
 #include "msm8953.dtsi"
 #include "pm8953.dtsi"
 #include "pmi8950.dtsi"
-
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/leds/common.h>
@@ -44,12 +46,12 @@
 			power-domains = <&gcc MDSS_GDSC>;
 
 			clocks = <&gcc GCC_MDSS_AHB_CLK>,
-			         <&gcc GCC_MDSS_AXI_CLK>,
-			         <&gcc GCC_MDSS_VSYNC_CLK>,
-			         <&gcc GCC_MDSS_MDP_CLK>,
-			         <&gcc GCC_MDSS_BYTE0_CLK>,
-			         <&gcc GCC_MDSS_PCLK0_CLK>,
-			         <&gcc GCC_MDSS_ESC0_CLK>;
+					 <&gcc GCC_MDSS_AXI_CLK>,
+					 <&gcc GCC_MDSS_VSYNC_CLK>,
+					 <&gcc GCC_MDSS_MDP_CLK>,
+					 <&gcc GCC_MDSS_BYTE0_CLK>,
+					 <&gcc GCC_MDSS_PCLK0_CLK>,
+					 <&gcc GCC_MDSS_ESC0_CLK>;
 		};
 	};
 
@@ -67,11 +69,13 @@
 	};
 
 	reserved-memory {
+		/delete-node/memory@85b00000;
 		qseecom_mem: qseecom@84a00000 {
 			reg = <0x0 0x84a00000 0x0 0x1900000>;
 			no-map;
 		};
 
+		/delete-node/memory@90001000;
 		cont_splash_mem: cont-splash@90001000 {
 			reg = <0x0 0x90001000 0x0 (1080 * 2160 * 3)>;
 			no-map;
@@ -276,6 +280,9 @@
 
 &pmi8950_fg {
 	monitored-battery = <&battery>;
+	power-supplies = <&pmi8950_smbcharger>;
+
+	status = "okay";
 };
 
 &pmi8950_smbcharger {
@@ -430,6 +437,9 @@
 };
 
 &sdhc_1 {
+	vmmc-supply = <&pm8953_l8>;
+	vqmmc-supply = <&pm8953_l5>;
+
 	status = "okay";
 };
 
