@@ -27,6 +27,16 @@
 		};
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		key-volume-up {
+			label = "volume_up";
+			gpios = <&tlmm 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+	};
+
 	reserved-memory {
 		qseecom_mem: qseecom@84300000 {
 			reg = <0x0 0x84300000 0x0 0x2000000>;
@@ -46,6 +56,33 @@
 		regulator-always-on;
 		regulator-boot-on;
 	};
+};
+
+&dsi0 {
+	panel@0 {
+		compatible = "tianma,tl057fvxp01";
+		reg = <0>;
+
+		backlight = <&pmi8950_wled>;
+		vsp-supply = <&lab_vreg>;
+		vsn-supply = <&ibb_vreg>;
+		reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pmx_mdss_default>;
+		pinctrl-1 = <&pmx_mdss_sleep>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dsi0_out {
+	remote-endpoint = <&panel_in>;
+	data-lanes = <0 1 2 3>;
 };
 
 &hsusb_phy {
@@ -75,6 +112,13 @@
 	};
 };
 
+&iris {
+	vddxo-supply = <&pm8953_l7>;
+	vddrfa-supply = <&pm8953_l19>;
+	vddpa-supply = <&pm8953_l9>;
+	vdddig-supply = <&pm8953_l5>;
+};
+
 &pm8953_resin {
 	linux,code = <KEY_VOLUMEDOWN>;
 	status = "okay";
@@ -86,6 +130,12 @@
 	qcom,cabc;
 
 	status = "okay";
+};
+
+&pronto {
+	status = "okay";
+
+	vddpx-supply = <&pm8953_l5>;
 };
 
 &rpm_requests {
@@ -227,6 +277,21 @@
 
 &tlmm {
 	gpio-reserved-ranges = <95 5>, <111 1>, <126 1>;
+
+	pmx_mdss_default: pmx-mdss-default-state {
+		pins = "gpio61", "gpio59";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-state {
+		pins = "gpio61", "gpio59";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
 
 	ts_int_active: ts-int-active-state {
 		pins = "gpio65";

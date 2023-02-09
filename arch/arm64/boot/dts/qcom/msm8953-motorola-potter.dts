@@ -96,10 +96,6 @@
 	};
 };
 
-&atc_leds {
-	status = "okay";
-};
-
 &dsi0 {
 	status = "okay";
 
@@ -191,16 +187,12 @@
 };
 
 &pmi8950_wled {
-	status = "okay";
-
-	/* Don't copy-paste! See pmi8950.dtsi */
-
 	qcom,current-limit-microamp = <25000>;
-	qcom,enabled-strings = <0 1 2>;
 	qcom,num-strings = <3>;
-
+	qcom,external-pfet;
 	qcom,cabc;
-	qcom,eternal-pfet;
+
+	status = "okay";
 };
 
 &pronto {
@@ -384,7 +376,7 @@
 		bias-pull-up;
 	};
 
-	pmx_mdss_default: pmx-mdss-default-pins {
+	pmx_mdss_default: pmx-mdss-default-state {
 		pins = "gpio61";
 		function = "gpio";
 		drive-strength = <8>;
@@ -392,7 +384,7 @@
 		output-high;
 	};
 
-	pmx_mdss_sleep: pmx-mdss-sleep-pins {
+	pmx_mdss_sleep: pmx-mdss-sleep-state {
 		pins = "gpio61";
 		function = "gpio";
 		drive-strength = <2>;
@@ -400,20 +392,20 @@
 	};
 
 
-	nfc_irq_default: nfc-irq-pins {
+	nfc_irq_default: nfc-irq-state {
 		pins = "gpio17";
 		bias-pull-down;
 		drive-strength = <2>;
 	};
 
-	nfc_pwr_default: nfc-pwr-pins {
+	nfc_pwr_default: nfc-pwr-state {
 		pins = "gpio16";
 		bias-pull-down;
 		output-low;
 		drive-strength = <2>;
 	};
 
-	nfc_firm_default: nfc-firm-pins {
+	nfc_firm_default: nfc-firm-state {
 		pins = "gpio62";
 		bias-pull-down;
 		output-low;

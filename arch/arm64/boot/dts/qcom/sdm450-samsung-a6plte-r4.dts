@@ -7,6 +7,13 @@
 #include "pm8953.dtsi"
 #include <dt-bindings/leds/common.h>
 
+/delete-node/ &adsp_fw_mem;
+/delete-node/ &mba_mem;
+/delete-node/ &mpss_mem;
+/delete-node/ &qseecom_mem;
+/delete-node/ &venus_mem;
+/delete-node/ &wcnss_fw_mem;
+
 / {
 	model = "Samsung A6-Plus LTE Rev.4";
 	compatible = "samsung,a6plte", "qcom,sdm450";
@@ -57,13 +64,13 @@
 	gpio-keys {
 		compatible = "gpio-keys";
 
-		volume-up {
+		key-volume-up {
 			label = "Volume Up";
 			gpios = <&tlmm 85 GPIO_ACTIVE_LOW>;
 			linux,code = <KEY_VOLUMEUP>;
 		};
 
-		cover {
+		event-hall-sensor {
 			label = "Hall Effect Sensor";
 			gpios = <&tlmm 44 GPIO_ACTIVE_LOW>;
 			linux,input-type = <EV_SW>;
@@ -151,7 +158,6 @@
 			reg = <0x0 0x8d600000 0x0 0x1800000>;
 		};
 
-		/delete-node/memory@8e700000;
 		wcnss_fw_mem: memory@8ee00000 {
 			reg = <0x0 0x8ee00000 0x0 0x700000>;
 			no-map;
@@ -466,7 +472,7 @@
 	remote-endpoint = <&panel_in>;
 };
 
-&dsi_phy0 {
+&dsi0_phy {
 	vcca-supply = <&pm8953_l3>;
 };
 
@@ -661,7 +667,6 @@
 
 		interrupt-parent = <&tlmm>;
 		interrupts = <42 IRQ_TYPE_EDGE_RISING>;
-
 		mount-matrix = "-1",  "0",  "0",
 			        "0", "-1",  "0",
 			        "0",  "0", "-1";
@@ -869,13 +874,13 @@
 	/* Fingerprint sensor at SPI4 (BLSP1 QUP4) */
 	gpio-reserved-ranges = <12 4>;
 
-	charger_int_default: charger-int-pins {
+	charger_int_default: charger-int-state {
 		pins = "gpio60";
 		function = "gpio";
 		bias-disable;
 	};
 
-	expander_reset_deasserted: expander-reset-pins {
+	expander_reset_deasserted: expander-reset-state {
 		pins = "gpio33";
 		function = "gpio";
 		drive-strength = <2>;
@@ -883,21 +888,21 @@
 		output-high;
 	};
 
-	panel_active: panel-default-pins {
+	panel_active: panel-default-state {
 		pins = "gpio35", "gpio93";
 		function = "gpio";
 		drive-strength = <8>;
 		output-high;
 	};
 
-	panel_sleep: panel-sleep-pins {
+	panel_sleep: panel-sleep-state {
 		pins = "gpio35", "gpio93";
 		function = "gpio";
 		drive-strength = <2>;
 		bias-disable;
 	};
 
-	quat_tlmm_default: quat-tlmm-pins {
+	quat_tlmm_default: quat-tlmm-state {
 		pins = "gpio135", "gpio136", "gpio137", "gpio138";
 		function = "sec_mi2s";
 		drive-strength = <8>;
