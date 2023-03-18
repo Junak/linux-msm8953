@@ -28,6 +28,45 @@
 	};
 };
 
+&dsi0 {
+	vdda-supply = <&pm8953_s3>;
+	vddio-supply = <&pm8953_l6>;
+	status = "okay";
+
+	panel: panel@0 {
+		reg = <0>;
+
+		backlight = <&pmi8950_wled>;
+
+		reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&pmx_mdss_default &mdss_te_default>;
+		pinctrl-1 = <&pmx_mdss_sleep &mdss_te_default>;
+
+		vsp-supply = <&lab_vreg>;
+		vsn-supply = <&ibb_vreg>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&dsi0_out>;
+			};
+		};
+	};
+};
+
+&dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&dsi0_phy {
+	vddio-supply = <&pm8953_l6>;
+	vcca-supply = <&pm8953_l3>;
+
+	status = "okay";
+};
+
 &hsusb_phy {
 	vdd-supply = <&pm8953_l3>;
 	vdda-pll-supply = <&pm8953_l7>;
@@ -127,6 +166,10 @@
 
 		status = "disabled";
 	};
+};
+
+&mdss {
+	status = "okay";
 };
 
 &pm8953_resin {
@@ -283,14 +326,13 @@
 	status = "okay";
 };
 &tlmm {
-
 	ts_int_active: ts-int-active-state {
 		pins = "gpio65";
 		function = "gpio";
 		drive-strength = <8>;
 		bias-pull-up;
 	};
-	
+
 	ts_int_suspend: ts-int-suspend-state {
 		pins = "gpio65";
 		function = "gpio";
@@ -298,6 +340,21 @@
 		bias-pull-down;
 	};
 
+	pmx_mdss_default: pmx-mdss-default-state {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		output-high;
+	};
+
+	pmx_mdss_sleep: pmx-mdss-sleep-state {
+		pins = "gpio61";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+	
 	ts_reset_active: ts-reset-active-state {
 		pins = "gpio64";
 		function = "gpio";
