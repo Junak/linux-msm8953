@@ -93,6 +93,10 @@
 	touchscreen-size-y = <1920>;
 };
 
+&panel {
+	compatible = "xiaomi,mido-panel";
+};
+
 &sdhc_2 {
 	cd-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
 };
