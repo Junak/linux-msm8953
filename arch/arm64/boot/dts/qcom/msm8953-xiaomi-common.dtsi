@@ -161,7 +161,7 @@
 
 		reset-gpios = <&tlmm 64 GPIO_ACTIVE_LOW>;
 
-		iovcc-supply = <&pm8953_l5>;
+		iovcc-supply = <&pm8953_l6>;
 		vcc-supply = <&pm8953_l10>;
 
 		status = "disabled";
@@ -242,7 +242,6 @@
 		pm8953_l6: l6 {
 			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
-			regulator-always-on;
 		};
 
 		pm8953_l7: l7 {
@@ -263,7 +262,6 @@
 		pm8953_l10: l10 {
 			regulator-min-microvolt = <2850000>;
 			regulator-max-microvolt = <2850000>;
-			regulator-always-on;
 		};
 
 		pm8953_l11: l11 {
