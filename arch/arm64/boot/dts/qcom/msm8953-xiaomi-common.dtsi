@@ -10,6 +10,10 @@
 	chassis-type = "handset";
 	qcom,msm-id = <293 0>;
 
+	battery: battery {
+		compatible = "simple-battery";
+	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 
@@ -174,6 +178,17 @@
 
 &pm8953_resin {
 	linux,code = <KEY_VOLUMEDOWN>;
+	status = "okay";
+};
+
+&pmi8950_fg {
+	monitored-battery = <&battery>;
+	power-supplies = <&pmi8950_smbcharger>;
+	status = "okay";
+};
+
+&pmi8950_smbcharger {
+	monitored-battery = <&battery>;
 	status = "okay";
 };
 
