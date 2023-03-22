@@ -95,6 +95,10 @@
 	touchscreen-size-y = <2280>;
 };
 
+&panel {
+	compatible = "xiaomi,daisy-panel";
+};
+
 &sdhc_2 {
 	cd-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
 };
