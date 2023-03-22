@@ -172,6 +172,15 @@
 	};
 };
 
+&iris {
+	vddxo-supply = <&pm8953_l7>;
+	vddrfa-supply = <&pm8953_l19>;
+	vddpa-supply = <&pm8953_l9>;
+	vdddig-supply = <&pm8953_l5>;
+
+	status = "okay";
+};
+
 &mdss {
 	status = "okay";
 };
@@ -197,6 +206,11 @@
 	qcom,ovp-millivolt = <29600>;
 	qcom,num-strings = <2>;
 
+	status = "okay";
+};
+
+&pronto {
+	vddpx-supply = <&pm8953_l5>;
 	status = "okay";
 };
 
