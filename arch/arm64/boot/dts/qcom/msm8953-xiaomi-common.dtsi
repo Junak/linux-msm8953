@@ -181,7 +181,17 @@
 	status = "okay";
 };
 
+&lpass {
+	status = "okay";
+};
+
 &mdss {
+	status = "okay";
+};
+
+&modem {
+	pll-supply = <&pm8953_l7>;
+
 	status = "okay";
 };
 
