@@ -1954,8 +1954,10 @@
 				 <&xo_board>;
 			clock-names = "iface", "bus", "mem", "xo";
 
-			power-domains = <&rpmpd MSM8953_VDDCX>, <&rpmpd MSM8953_VDDMX>;
-			power-domain-names = "cx", "mx";
+			power-domains = <&rpmpd MSM8953_VDDCX>,
+					<&rpmpd MSM8953_VDDMX>,
+					<&rpmpd MSM8953_VDDMD>;
+			power-domain-names = "cx", "mx", "mss";
 
 			qcom,smem-states = <&modem_smp2p_out 0>;
 			qcom,smem-state-names = "stop";
