@@ -100,6 +100,8 @@
 	vdda-supply = <&pm8953_s3>;
 	vddio-supply = <&pm8953_l6>;
 
+	status = "okay";
+
 	panel: panel@0 {
 		compatible = "tianma,622-v0";
 		reg = <0>;
@@ -129,6 +131,8 @@
 
 &dsi0_phy {
 	vcca-supply = <&pm8953_l3>;
+
+	status = "okay";
 };
 
 &hsusb_phy {
@@ -196,6 +200,10 @@
 };
 
 &lpass {
+	status = "okay";
+};
+
+&mdss {
 	status = "okay";
 };
 
