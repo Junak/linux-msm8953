@@ -30,7 +30,7 @@
 	battery: battery {
 		compatible = "simple-battery";
 
-		constant-charge-current-max-microamp = <1800000>;
+		constant-charge-current-max-microamp = <800000>;
 		voltage-max-design-microvolt = <4350000>;
 		charge-term-current-microamp = <300000>;
 	};
@@ -58,6 +58,7 @@
 				 <&gcc GCC_MDSS_BYTE0_CLK>,
 				 <&gcc GCC_MDSS_PCLK0_CLK>,
 				 <&gcc GCC_MDSS_ESC0_CLK>;
+			status = "disabled";
 		};
 	};
 
@@ -131,17 +132,12 @@
 			no-map;
 		};
 
-		memory@85b00000 {
+		qseecom@85b00000 {
 			reg = <0x0 0x85b00000 0x0 0x600000>;
 			no-map;
 		};
 
-		memory@90001000 {
-			reg = <0x0 0x90001000 0x0 (1080 * 2220 * 3)>;
-			no-map;
-		};
-
-		memory@86100000 {
+		ramoops@86100000 {
 			compatible = "ramoops";
 			reg = <0 0x86100000 0 0x100000>;
 
@@ -151,25 +147,29 @@
 			record-size = <0x40000>;
 		};
 
-		mpss_mem: memory@86c00000 {
+		mpss_mem: mpss@86c00000 {
 			reg = <0x0 0x86c00000 0x0 0x6400000>;
+			no-map;
 		};
 
-		adsp_fw_mem: memory@8d600000  {
+		adsp_fw_mem: adsp@8d600000  {
 			reg = <0x0 0x8d600000 0x0 0x1800000>;
+			no-map;
 		};
 
-		wcnss_fw_mem: memory@8ee00000 {
+		wcnss_fw_mem: wcnss@8ee00000 {
 			reg = <0x0 0x8ee00000 0x0 0x700000>;
 			no-map;
 		};
 
-		venus_mem: memory@91400000 {
+		venus_mem: venus@91400000 {
 			reg = <0x0 0x91400000 0x0 0x500000>;
+			no-map;
 		};
 
-		mba_mem: memory@92000000 {
+		mba_mem: mba@92000000 {
 			reg = <0x0 0x92000000 0x0 0x50000>;
+			no-map;
 		};
 	};
 
@@ -650,6 +650,7 @@
 		pinctrl-0 = <&expander_reset_deasserted>;
 		pinctrl-names = "default";
 
+		reset-gpios = <&tlmm 33 GPIO_ACTIVE_LOW>;
 		vcc-supply = <&pm8953_l5>;
 
 		gpio-controller;
