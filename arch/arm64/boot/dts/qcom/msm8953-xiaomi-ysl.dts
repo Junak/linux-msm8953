@@ -116,6 +116,10 @@
 	compatible = "qcom,wcn3620";
 };
 
+&panel {
+	compatible = "xiaomi,ysl-panel";
+};
+
 &sdhc_2 {
 	cd-gpios = <&tlmm 133 GPIO_ACTIVE_HIGH>;
 };
