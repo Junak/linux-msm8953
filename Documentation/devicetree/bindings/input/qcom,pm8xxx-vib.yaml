@@ -11,10 +11,18 @@ maintainers:
 
 properties:
   compatible:
-    enum:
-      - qcom,pm8058-vib
-      - qcom,pm8916-vib
-      - qcom,pm8921-vib
+    oneOf:
+      - enum:
+          - qcom,pm8058-vib
+          - qcom,pm8916-vib
+          - qcom,pm8921-vib
+      - items:
+          - enum:
+              - qcom,pmi632-vib
+              - qcom,pm7250b-vib
+              - qcom,pm7325b-vib
+              - qcom,pm7550b-vib
+          - const: qcom,spmi-vib-gen2
 
   reg:
     maxItems: 1
