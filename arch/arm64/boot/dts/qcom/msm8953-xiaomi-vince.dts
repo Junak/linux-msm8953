@@ -154,6 +154,10 @@
 	status = "okay";
 };
 
+&spi_6 {
+	status = "okay";
+};
+
 &tlmm {
 	gpio-reserved-ranges = <0 4>, <16 4>, <135 4>;
 

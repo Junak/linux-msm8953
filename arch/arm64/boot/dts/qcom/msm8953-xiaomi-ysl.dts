@@ -147,6 +147,10 @@
 	status = "okay";
 };
 
+&spi_5 {
+	status = "okay";
+};
+
 &wcd_codec {
 	qcom,micbias2-ext-cap;
 };
