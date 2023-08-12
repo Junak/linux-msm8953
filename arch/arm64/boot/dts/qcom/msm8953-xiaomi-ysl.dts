@@ -13,6 +13,11 @@
 	compatible = "xiaomi,ysl", "qcom,msm8953";
 	qcom,board-id = <8 0>;
 
+	aliases {
+		mmc0 = &sdhc_1;
+		mmc1 = &sdhc_2;
+	};
+
 	speaker_amp: audio-amplifier {
 		compatible = "awinic,aw8738";
 		mode-gpios = <&tlmm 139 GPIO_ACTIVE_HIGH>;
@@ -66,12 +71,6 @@
 			reg = <0x0 0x90001000 0x0 (720 * 1440 * 3)>;
 			no-map;
 		};
-
-		ramoops@9ff00000 {
-			compatible = "ramoops";
-			reg = <0x0 0x9ff00000 0x0 0x00100000>;
-			console-size = <0x100000>;
-		};
 	};
 
 	i2c-gpio {
@@ -98,10 +97,6 @@
 
 &aw2013_led {
 	status = "okay";
-
-	led@0 {
-		color = <LED_COLOR_ID_RED>;
-	};
 };
 
 &battery {
@@ -125,6 +120,15 @@
 
 &panel {
 	compatible = "xiaomi,ysl-panel";
+};
+
+&pm8953_l6 {
+	regulator-always-on;
+};
+
+&pm8953_l10 {
+	regulator-min-microvolt = <2800000>;
+	regulator-always-on;
 };
 
 &sdhc_2 {
