@@ -154,6 +154,10 @@
 	status = "okay";
 };
 
+&tas2557_codec {
+	status = "okay";
+};
+
 &tlmm {
 	gpio-reserved-ranges = <0 4>, <16 4>, <135 4>;
 

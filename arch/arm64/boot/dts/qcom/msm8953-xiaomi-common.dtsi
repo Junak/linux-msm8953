@@ -112,6 +112,17 @@
 			color = <LED_COLOR_ID_WHITE>;
 		};
 	};
+
+	tas2557_codec: audio-codec@4c {
+		compatible = "ti,tas2557";
+		reg = <0x4c>;
+		status = "disabled";
+
+		ti,tas2557-reset-gpio = <&tlmm 86 0>;
+		ti,tas2557-addr = <0x4c>;
+
+		#sound-dai-cells = <0>;
+	};
 };
 
 &i2c_3 {
