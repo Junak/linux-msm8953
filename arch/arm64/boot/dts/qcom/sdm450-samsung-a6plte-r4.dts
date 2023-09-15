@@ -125,7 +125,8 @@
 	};
 
 	reserved-memory {
-		memory@82800000 {
+		/* Additional memory used by Samsung firmware modifications */
+		tz-apps@82800000 {
 			reg = <0x0 0x82800000 0x0 0x2800000>;
 			no-map;
 		};
@@ -479,12 +480,12 @@
 };
 
 &hsusb_phy {
-	status = "okay";
-
 	vdd-supply = <&pm8953_l3>;
 	vdda-pll-supply = <&pm8953_l7>;
 	vdda-phy-dpdm-supply = <&pm8953_l13>;
 	otg-supply = <&otg_vbus>;
+
+	status = "okay";
 };
 
 &i2c_2 {
@@ -502,6 +503,9 @@
 
 		touchscreen-size-x = <4096>;
 		touchscreen-size-y = <4096>;
+
+		pinctrl-0 = <&ts_int_default>;
+		pinctrl-names = "default";
 	};
 };
 
@@ -640,8 +644,8 @@
 		compatible = "nxp,pcal6416";
 		reg = <0x20>;
 
-		pinctrl-names = "default";
 		pinctrl-0 = <&expander_reset_deasserted>;
+		pinctrl-names = "default";
 
 		vcc-supply = <&pm8953_l5>;
 
@@ -674,6 +678,9 @@
 			        "0",  "0", "-1";
 
 		vdd-supply = <&sensors_vdd>;
+
+		pinctrl-0 = <&accel_int_default>;
+		pinctrl-names = "default";
 	};
 };
 
@@ -701,8 +708,8 @@
 };
 
 &pm8953_resin {
-	status = "okay";
 	linux,code = <KEY_VOLUMEDOWN>;
+	status = "okay";
 };
 
 &q6afedai {
@@ -826,9 +833,9 @@
 
 	cd-gpios = <&tlmm 133 GPIO_ACTIVE_LOW>;
 
-	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&sdc2_clk_on &sdc2_cmd_on &sdc2_data_on &sdc2_cd_off>;
 	pinctrl-1 = <&sdc2_clk_off &sdc2_cmd_off &sdc2_data_off &sdc2_cd_off>;
+	pinctrl-names = "default", "sleep";
 
 	vmmc-supply = <&pm8953_l11>;
 	vqmmc-supply = <&pm8953_l12>;
@@ -863,6 +870,13 @@
 	/* Fingerprint sensor at SPI4 (BLSP1 QUP4) */
 	gpio-reserved-ranges = <12 4>;
 
+	accel_int_default: accel-int-default-state {
+		pins = "gpio42";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	charger_int_default: charger-int-state {
 		pins = "gpio60";
 		function = "gpio";
@@ -895,6 +909,13 @@
 		pins = "gpio135", "gpio136", "gpio137", "gpio138";
 		function = "sec_mi2s";
 		drive-strength = <8>;
+		bias-disable;
+	};
+
+	ts_int_default: ts-int-default-state {
+		pins = "gpio59";
+		function = "gpio";
+		drive-strength = <2>;
 		bias-disable;
 	};
 };
