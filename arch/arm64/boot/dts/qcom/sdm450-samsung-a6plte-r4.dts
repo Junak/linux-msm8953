@@ -569,6 +569,9 @@
 
 		interrupt-parent = <&tlmm>;
 		interrupts = <63 IRQ_TYPE_LEVEL_HIGH>;
+
+		pinctrl-0 = <&muic_int_default>;
+		pinctrl-names = "default";
 	};
 
 	pmic@49 {
@@ -578,8 +581,8 @@
 		charger: sm5708-charger {
 			compatible = "siliconmitus,sm5708-charger";
 
-			pinctrl-names = "default";
 			pinctrl-0 = <&charger_int_default>;
+			pinctrl-names = "default";
 
 			interrupt-parent = <&tlmm>;
 			interrupts = <60 IRQ_TYPE_NONE>;
@@ -599,7 +602,7 @@
 		};
 
 		led-controller {
-			compatible = "siliconmitus,sm5708-fleds";
+			compatible = "siliconmitus,sm5708-fled";
 
 			flash-boost-supply = <&fled_boost>;
 
@@ -608,7 +611,6 @@
 
 			rear_flash: led@0 {
 				reg = <0>;
-				label = "rear-flash";
 				function = LED_FUNCTION_FLASH;
 				color = <LED_COLOR_ID_WHITE>;
 				flash-max-timeout-us = <400000>;
@@ -618,7 +620,6 @@
 
 			front_flash: led@1 {
 				reg = <1>;
-				label = "front-flash";
 				function = LED_FUNCTION_FLASH;
 				color = <LED_COLOR_ID_WHITE>;
 				flash-max-timeout-us = <400000>;
@@ -666,6 +667,9 @@
 		interrupts = <62 IRQ_TYPE_LEVEL_HIGH>;
 
 		power-supplies = <&charger>;
+
+		pinctrl-0 = <&fg_alert_default>;
+		pinctrl-names = "default";
 	};
 };
 
@@ -898,6 +902,20 @@
 		output-high;
 	};
 
+	fg_alert_default: fg-alert-default-state {
+		pins = "gpio62";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	muic_int_default: muic-int-default-state {
+		pins = "gpio63";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
 	pmx_mdss_default: pmx-mdss-default-state {
 		pins = "gpio50";
 		function = "gpio";
@@ -932,8 +950,8 @@
 };
 
 &usb3 {
-	status = "okay";
 	extcon = <&extcon0>, <&extcon0>;
+	status = "okay";
 };
 
 &usb3_dwc3 {
