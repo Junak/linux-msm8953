@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
+/*
+ * Copyright (c) 2023, Barnabas Czeman
+ */
 /dts-v1/;
 
 #include "msm8953-xiaomi-common.dtsi"
