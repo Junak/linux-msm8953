@@ -556,7 +556,6 @@
 		second-boost-trip-lvl = <5>;
 
 		#sound-dai-cells = <0>;
-		status = "okay";
 	};
 };
 
@@ -853,13 +852,18 @@
 };
 
 &sound_card {
-	status = "okay";
-
 	model = "samsung-a2015";
 
-	pinctrl-names = "default", "sleep";
+	audio-routing =
+		"AMIC1", "MIC BIAS External1",
+		"AMIC2", "MIC BIAS Internal2",
+		"AMIC3", "MIC BIAS External1";
+
 	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act &quat_tlmm_default>;
-	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_act &quat_tlmm_default>;
+	pinctrl-1 = <&cdc_pdm_lines_sus &cdc_pdm_lines_2_sus &cdc_pdm_comp_lines_sus &quat_tlmm_default>;
+	pinctrl-names = "default", "sleep";
+
+	status = "okay";
 
 	quaternary-mi2s-dai-link {
 		link-name = "Quaternary MI2S";
@@ -904,6 +908,13 @@
 
 	fg_alert_default: fg-alert-default-state {
 		pins = "gpio62";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
+	};
+
+	jack_default: jack-default-state {
+		pins = "gpio48";
 		function = "gpio";
 		drive-strength = <2>;
 		bias-disable;
@@ -960,19 +971,22 @@
 };
 
 &wcd_codec {
-	status = "okay";
-
 	jack-gpios = <&tlmm 48 GPIO_ACTIVE_LOW>;
 
 	qcom,micbias-lvl = <2800>;
 	qcom,micbias1-ext-cap;
 	qcom,micbias2-ext-cap;
-	qcom,mbhc-vthreshold-low = <150 237 450 500 600>;
-	qcom,mbhc-vthreshold-high = <150 237 450 500 600>;
+	qcom,mbhc-vthreshold-low = <150 225 450 500 600>;
+	qcom,mbhc-vthreshold-high = <150 225 450 500 600>;
 
 	vdd-cdc-io-supply = <&pm8953_l5>;
 	vdd-cdc-tx-rx-cx-supply = <&pm8953_s4>;
 	vdd-micbias-supply = <&pm8953_l13>;
+
+	pinctrl-0 = <&jack_default>;
+	pinctrl-names = "default";
+
+	status = "okay";
 };
 
 &wcnss {
