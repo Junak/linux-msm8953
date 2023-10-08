@@ -158,6 +158,12 @@
 	touchscreen-size-y = <1920>;
 };
 
+&gcc {
+	/* HACK: This helps for tissot to boot, */
+	/* it should be removed when proper fix is landed. */
+	/delete-property/ power-domains;
+};
+
 &max98927_codec {
 	status = "okay";
 
