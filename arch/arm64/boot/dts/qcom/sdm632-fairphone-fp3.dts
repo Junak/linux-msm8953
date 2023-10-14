@@ -56,6 +56,9 @@
 
 		reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
 
+		pinctrl-0 = <&mdss_te_default>;
+		pinctrl-names = "default";
+
 		// Downstream:
 		// lab-supply = <&lcdb_ldo_vreg>;
 		// ibb-supply = <&lcdb_ncp_vreg>;
