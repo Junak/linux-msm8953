@@ -7,7 +7,7 @@
 #include <linux/gpio/consumer.h>
 #include <linux/module.h>
 #include <linux/of.h>
-#include <linux/pinctrl/consumer.h>
+#include <linux/regulator/consumer.h>
 
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_modes.h>
@@ -15,14 +15,6 @@
 #include <drm/drm_probe_helper.h>
 
 #include <video/mipi_display.h>
-
-#define s6e3fa7_write_generic(dsi, suffix, seq...) do {	\
-		static const u8 d[] = { seq };				\
-		int ret;						\
-		ret = mipi_dsi_generic_write(dsi, d, ARRAY_SIZE(d));	\
-		if (ret < 0)						\
-			return ret;					\
-	} while (0)
 
 #define to_s6e3fa7_drv(drm_panel) \
 	container_of(drm_panel, struct s6e3fa7_drv, panel)
@@ -35,12 +27,15 @@
 #define FP_SHIFT	    22
 #define VREG0_REF_6P5 ((int) (6.5 * (2 << 21)))
 #define GAMMA_CMD_LEN	    34
+#define NUM_VREGS	    2
 
 struct s6e3fa7_drv {
+	struct device *dev;
 	struct drm_panel panel;
 	struct gpio_desc *reset;
 	struct mipi_dsi_device *dsi;
-	bool bl_inited;
+	struct regulator_bulk_data vregs[NUM_VREGS];
+	bool bl_inited, vregs_enabled;
 
 	/* calibration values */
 	u8 elvss_params[2], irc_params[2];
@@ -989,9 +984,6 @@ static int s6e3fa7_update_status(struct backlight_device *bl)
 	u8 *gamma_cmd;
 	int ret, i;
 
-	if (!(dsi->mode_flags & MIPI_DSI_MODE_LPM))
-		return 0;
-
 	if (!drv->bl_inited) {
 		u8 mtp_data[32];
 
@@ -1110,15 +1102,18 @@ static int s6e3fa7_prepare(struct drm_panel *panel)
 {
 	struct s6e3fa7_drv *drv = to_s6e3fa7_drv(panel);
 	struct mipi_dsi_device *dsi = drv->dsi;
-	struct device *dev = &drv->dsi->dev;
 	int ret;
 
-	if (dsi->mode_flags & MIPI_DSI_MODE_LPM)
-		return 0;
+	if (!drv->vregs_enabled) {
+		ret = regulator_bulk_enable(NUM_VREGS, drv->vregs);
+		if (ret) {
+			dev_err(drv->dev, "Failed to enable regulators: %d\n", ret);
+			return ret;
+		}
 
-	dsi->mode_flags |= MIPI_DSI_MODE_LPM;
+		drv->vregs_enabled = true;
+	}
 
-	pinctrl_pm_select_default_state(dev);
 
 	gpiod_set_value_cansleep(drv->reset, 0);
 	usleep_range(10000, 11000);
@@ -1129,37 +1124,62 @@ static int s6e3fa7_prepare(struct drm_panel *panel)
 
 	ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
 	if (ret < 0) {
-		dev_err(dev, "Failed to exit sleep mode: %d\n", ret);
-		dsi->mode_flags &= ~MIPI_DSI_MODE_LPM;
+		dev_err(drv->dev, "Failed to exit sleep mode: %d\n", ret);
 		return ret;
 	}
 
 	msleep(20);
 
-	s6e3fa7_write_generic(dsi, 0x35, 0x00);  // TE Vsync On
-	s6e3fa7_write_generic(dsi, LEVEL1_ON);
-	s6e3fa7_write_generic(dsi, 0xcc, 0x4c); // PCD Setting
-	s6e3fa7_write_generic(dsi, 0xed, 0x44); // ERR_FG
-	s6e3fa7_write_generic(dsi, 0xb9, 0x00, 0x00, 0x14, // TSP SYNC
+	mipi_dsi_generic_write_seq(dsi, 0x35, 0x00);  // TE Vsync On
+	mipi_dsi_generic_write_seq(dsi, LEVEL1_ON);
+	mipi_dsi_generic_write_seq(dsi, 0xcc, 0x4c); // PCD Setting
+	mipi_dsi_generic_write_seq(dsi, 0xed, 0x44); // ERR_FG
+	mipi_dsi_generic_write_seq(dsi, 0xb9, 0x00, 0x00, 0x14, // TSP SYNC
 			0x00, 0x18, 0x00, 0x00, 0x00, 0x00,
 			0x11, 0x01, 0x02, 0x40, 0x02, 0x40);
-	s6e3fa7_write_generic(dsi, 0xc5, 0x09, 0x10, 0xc8, // FFC SYNC
+	mipi_dsi_generic_write_seq(dsi, 0xc5, 0x09, 0x10, 0xc8, // FFC SYNC
 			0x21, 0x67, 0x11, 0x26, 0xd4);
-	s6e3fa7_write_generic(dsi, 0xf4, 0xbb, 0x1e, // AVC 2.0
+	mipi_dsi_generic_write_seq(dsi, 0xf4, 0xbb, 0x1e, // AVC 2.0
 			0x19, 0x3a, 0x9f, 0x0f, 0x09, 0xc0,
 			0x00, 0xb4, 0x37, 0x70, 0x79, 0x69);
-	s6e3fa7_write_generic(dsi, 0xb0, 0x0e); // SAVE 5C enable
-	s6e3fa7_write_generic(dsi, 0xf2, 0x80);
-	s6e3fa7_write_generic(dsi, LEVEL1_OFF);
+	mipi_dsi_generic_write_seq(dsi, 0xb0, 0x0e); // SAVE 5C enable
+	mipi_dsi_generic_write_seq(dsi, 0xf2, 0x80);
+	mipi_dsi_generic_write_seq(dsi, LEVEL1_OFF);
+
 	s6e3fa7_update_status(drv->panel.backlight);
 
-	msleep(80);
+	usleep_range(10000, 11000);
+	return 0;
+}
 
-	ret = mipi_dsi_dcs_set_display_on(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display on: %d\n", ret);
-		return ret;
-	}
+static int s6e3fa7_enable(struct drm_panel *panel)
+{
+	struct s6e3fa7_drv *drv = to_s6e3fa7_drv(panel);
+	int ret;
+
+	ret = mipi_dsi_dcs_set_display_on(drv->dsi);
+	if (ret < 0)
+		dev_err(drv->dev, "Failed to set display on: %d\n", ret);
+
+	return ret;
+}
+
+static int s6e3fa7_disable(struct drm_panel *panel)
+{
+	struct s6e3fa7_drv *drv = to_s6e3fa7_drv(panel);
+	int ret;
+
+	ret = mipi_dsi_dcs_set_display_off(drv->dsi);
+	if (ret < 0)
+		dev_err(drv->dev, "Failed to set display off: %d\n", ret);
+
+	msleep(10);
+
+	ret = mipi_dsi_dcs_enter_sleep_mode(drv->dsi);
+	if (ret < 0)
+		dev_err(drv->dev, "Failed to enter sleep mode: %d\n", ret);
+
+	msleep(120);
 
 	return 0;
 }
@@ -1167,28 +1187,21 @@ static int s6e3fa7_prepare(struct drm_panel *panel)
 static int s6e3fa7_unprepare(struct drm_panel *panel)
 {
 	struct s6e3fa7_drv *drv = to_s6e3fa7_drv(panel);
-	struct mipi_dsi_device *dsi = drv->dsi;
 	int ret;
 
-	if ((~dsi->mode_flags) & MIPI_DSI_MODE_LPM)
-		return 0;
-
-	dsi->mode_flags &= ~MIPI_DSI_MODE_LPM;
-
-	ret = mipi_dsi_dcs_set_display_on(dsi);
-	if (ret < 0)
-		dev_err(&dsi->dev, "Failed to set display off: %d\n", ret);
-
-	msleep(20);
-
-	ret = mipi_dsi_dcs_enter_sleep_mode(dsi);
-	if (ret < 0)
-		dev_err(&dsi->dev, "Failed to enter sleep mode: %d\n", ret);
-
-	msleep(120);
-
 	gpiod_set_value_cansleep(drv->reset, 1);
-	pinctrl_pm_select_sleep_state(&drv->dsi->dev);
+
+
+	if (drv->vregs_enabled) {
+		ret = regulator_bulk_disable(NUM_VREGS, drv->vregs);
+		if (ret) {
+			dev_err(drv->dev,
+				"Failed to disable regulators: %d\n", ret);
+			return ret;
+		}
+
+		drv->vregs_enabled = false;
+	}
 
 	return 0;
 }
@@ -1216,6 +1229,8 @@ static int s6e3fa7_get_modes(struct drm_panel *panel,
 
 static const struct drm_panel_funcs s6e3fa7_panel_funcs = {
 	.prepare = s6e3fa7_prepare,
+	.enable = s6e3fa7_enable,
+	.disable = s6e3fa7_disable,
 	.unprepare = s6e3fa7_unprepare,
 	.get_modes = s6e3fa7_get_modes
 };
@@ -1243,11 +1258,19 @@ static int s6e3fa7_probe(struct mipi_dsi_device *dsi)
 
 	mipi_dsi_set_drvdata(dsi, drv);
 
+	drv->dev = &dsi->dev;
 	drv->dsi = dsi;
+	drv->vregs[0 % NUM_VREGS].supply = "vdd";
+	drv->vregs[1 % NUM_VREGS].supply = "vddr";
 	dsi->lanes = 4;
 	dsi->format = MIPI_DSI_FMT_RGB888;
 	dsi->mode_flags = MIPI_DSI_MODE_VIDEO_BURST |
+			  MIPI_DSI_MODE_LPM |
 			  MIPI_DSI_CLOCK_NON_CONTINUOUS;
+
+	ret = devm_regulator_bulk_get(dev, NUM_VREGS, drv->vregs);
+	if (ret)
+		return ret;
 
 	drv->reset = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_HIGH);
 	if (IS_ERR(drv->reset))
@@ -1256,6 +1279,8 @@ static int s6e3fa7_probe(struct mipi_dsi_device *dsi)
 
 	drm_panel_init(&drv->panel, dev, &s6e3fa7_panel_funcs,
 			DRM_MODE_CONNECTOR_DSI);
+
+	drv->panel.prepare_prev_first = true;
 
 	bl_dev = devm_backlight_device_register(dev, dev_name(dev), dev, drv,
 			&s6e3fa7_bl_ops, &s6e3fa7_bl_props);
