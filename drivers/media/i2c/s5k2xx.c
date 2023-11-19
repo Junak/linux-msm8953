@@ -16,6 +16,7 @@
 #include <media/v4l2-fwnode.h>
 
 #define S5K2XX_MCLK			24000000
+#define S5K3L8_MCLK			19200000
 #define S5K2XX_DATA_LANES		4
 #define S5K2XX_MAX_COLOR_DEPTH		10
 #define S5K2XX_MAX_COLOR_VAL		(BIT(S5K2XX_MAX_COLOR_DEPTH) - 1)
@@ -118,6 +119,7 @@ struct s5k2xx_data {
 	const struct s5k2xx_mode *modes;
 	size_t num_modes;
 	const struct reg_sequence *init_regs;
+	const u32 mclk;
 	u32 num_init_regs;
 };
 
@@ -251,6 +253,7 @@ static struct s5k2xx_data s5k2p6sx_data = {
 	.num_modes = ARRAY_SIZE(s5k2p6_modes),
 	.init_regs = s5k2p6_init,
 	.num_init_regs = ARRAY_SIZE(s5k2p6_init),
+	.mclk = S5K2XX_MCLK,
 };
 
 static const struct reg_sequence s5k2x7_init[] = {
@@ -561,6 +564,7 @@ static struct s5k2xx_data s5k2x7sp_data = {
 	.num_modes = ARRAY_SIZE(s5k2x7_modes),
 	.init_regs = s5k2x7_init,
 	.num_init_regs = ARRAY_SIZE(s5k2x7_init),
+	.mclk = S5K2XX_MCLK,
 };
 
 static const struct reg_sequence s5k3l8_init[] = {
@@ -703,6 +707,7 @@ static struct s5k2xx_data s5k3l8_data = {
 	.num_modes = ARRAY_SIZE(s5k3l8_modes),
 	.init_regs = s5k3l8_init,
 	.num_init_regs = ARRAY_SIZE(s5k3l8_init),
+	.mclk = S5K3L8_MCLK,
 };
 
 struct s5k2xx {
@@ -1057,7 +1062,7 @@ static int s5k2xx_power_on(struct device *dev)
 	}
 
 	if (s5k2xx->mclk) {
-		ret = clk_set_rate(s5k2xx->mclk, S5K2XX_MCLK);
+		ret = clk_set_rate(s5k2xx->mclk, s5k2xx->data->mclk);
 		if (ret) {
 			dev_err(dev, "can't set clock frequency");
 			return ret;
@@ -1283,7 +1288,7 @@ static int s5k2xx_check_hwcfg(struct s5k2xx *s5k2xx, struct device *dev)
 		return ret;
 	}
 
-	if (mclk != S5K2XX_MCLK) {
+	if (mclk != s5k2xx->data->mclk) {
 		dev_err(dev, "external clock %d is not supported", mclk);
 		return -EINVAL;
 	}
