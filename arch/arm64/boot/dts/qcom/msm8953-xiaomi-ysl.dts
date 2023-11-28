@@ -22,9 +22,9 @@
 	};
 
 	speaker_amp: audio-amplifier {
-		compatible = "awinic,aw8738";
+		compatible = "awinic,aw87318", "awinic,aw8738";
 		mode-gpios = <&tlmm 139 GPIO_ACTIVE_HIGH>;
-		awinic,mode = <5>;
+		awinic,mode = <2>;
 		sound-name-prefix = "Speaker Amp";
 	};
 
@@ -117,8 +117,7 @@
 };
 
 &wcnss_iris {
-	/* Device has a WCN3615 */
-	compatible = "qcom,wcn3620";
+	compatible = "qcom,wnc3615", "qcom,wcn3620";
 };
 
 &panel {
@@ -142,10 +141,6 @@
 	model = "xiaomi-ysl";
 
 	aux-devs = <&speaker_amp>;
-	audio-routing =
-		"AMIC1", "MIC BIAS External1",
-		"AMIC2", "MIC BIAS External2",
-		"AMIC3", "MIC BIAS External1";
 
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&cdc_pdm_lines_act &cdc_pdm_lines_2_act &cdc_pdm_comp_lines_act>;
@@ -160,6 +155,8 @@
 
 &wcd_codec {
 	qcom,micbias2-ext-cap;
+	qcom,mbhc-vthreshold-high = <100 200 450 500 500>;
+	qcom,mbhc-vthreshold-low = <100 200 450 500 500>;
 };
 
 &tlmm {
