@@ -1118,7 +1118,7 @@ static int s5k2xx_set_format(struct v4l2_subdev *sd,
 	mutex_lock(&s5k2xx->lock);
 	s5k2xx_assign_pad_format(mode, &fmt->format);
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
-		*v4l2_subdev_get_try_format(sd, sd_state, fmt->pad) = fmt->format;
+		*v4l2_subdev_state_get_format(sd_state, fmt->pad) = fmt->format;
 	} else {
 		s5k2xx->cur_mode = mode;
 		__v4l2_ctrl_s_ctrl(s5k2xx->link_freq, mode->link_freq_index);
@@ -1153,7 +1153,7 @@ static int s5k2xx_get_format(struct v4l2_subdev *sd,
 
 	mutex_lock(&s5k2xx->lock);
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		fmt->format = *v4l2_subdev_get_try_format(&s5k2xx->sd, sd_state,
+		fmt->format = *v4l2_subdev_state_get_format(sd_state,
 							  fmt->pad);
 	else
 		s5k2xx_assign_pad_format(s5k2xx->cur_mode, &fmt->format);
@@ -1201,7 +1201,7 @@ static int s5k2xx_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 
 	mutex_lock(&s5k2xx->lock);
 	s5k2xx_assign_pad_format(&s5k2xx->data->modes[0],
-				v4l2_subdev_get_try_format(sd, fh->state, 0));
+				v4l2_subdev_state_get_format(fh->state, 0));
 	mutex_unlock(&s5k2xx->lock);
 
 	return 0;
