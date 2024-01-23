@@ -124,6 +124,23 @@
 	voltage-max-design-microvolt = <4380000>;
 };
 
+&i2c_3 {
+	status = "disabled";
+
+	touchscreen@62 {
+		compatible = "novatek,nt36525-i2c";
+		reg = <0x62>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
+
+		vio-supply = <&pm8953_l6>;
+		vdd-supply = <&pm8953_l10>;
+
+		reset-gpios = <&tlmm 64 GPIO_ACTIVE_HIGH>;
+	};
+};
+
 &panel {
 	compatible = "xiaomi,vince-panel";
 };
