@@ -212,7 +212,7 @@
 };
 
 &rmi4_ts {
-	status = "okay";
+	status = "disabled";
 };
 
 &sound_card {
