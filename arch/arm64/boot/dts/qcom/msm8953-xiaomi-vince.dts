@@ -157,7 +157,6 @@
 		reg = <0x36>;
 
 		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
-		clock-rates = <24000000>;
 
 		pinctrl-0 = <&cam_sensor_front_default>;
 		pinctrl-names = "default";
