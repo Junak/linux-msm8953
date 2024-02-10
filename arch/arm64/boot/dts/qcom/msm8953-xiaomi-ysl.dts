@@ -96,6 +96,15 @@
 					"0", "0", "-1";
 		};
 	};
+
+	cam_front_vdig: cam_front_vdig {
+		compatible = "regulator-fixed";
+		regulator-name = "cam_front_vdig";
+		regulator-max-microvolt = <1050000>;
+		regulator-min-microvolt = <1050000>;
+		enable-active-high;
+		gpio = <&tlmm 39 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &aw2013_led {
@@ -107,6 +116,54 @@
 	constant-charge-current-max-microamp = <1000000>;
 	voltage-min-design-microvolt = <3400000>;
 	voltage-max-design-microvolt = <4400000>;
+};
+
+&camss {
+	status = "okay";
+	vdda-supply = <&pm8953_s3>;
+
+	ports {
+		port@2 {
+			reg = <2>;
+			csiphy2_ep: endpoint {
+				clock-lanes = <7>;
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&front_cam_ep>;
+			};
+		};
+	};
+};
+
+&cci {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cci0_default>,
+		    <&cci1_default>,
+		    <&camss_mclk0_default>,
+		    <&camss_mclk1_default>;
+
+	status = "okay";
+};
+
+&cci_i2c0 {
+	camera-sensor@2d { // Front camera
+		compatible = "samsung,s5k3p8sp";
+		reg = <0x2d>;
+		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+		clock-frequency = <24000000>;
+		reset-gpios = <&tlmm 129 GPIO_ACTIVE_LOW>;
+		dvdd-supply = <&cam_front_vdig>;
+		avdd-supply = <&pm8953_l22>;
+		vio-supply = <&pm8953_l6>;
+		rotation = <90>;
+		orientation = <1>;
+
+		port {
+			front_cam_ep: endpoint {
+				data-lanes = <0 1 2 3>;
+				remote-endpoint = <&csiphy2_ep>;
+			};
+		};
+	};
 };
 
 &ft5406_ts {
@@ -124,13 +181,8 @@
 	compatible = "xiaomi,ysl-panel";
 };
 
-&pm8953_l6 {
-	regulator-always-on;
-};
-
 &pm8953_l10 {
 	regulator-min-microvolt = <2800000>;
-	regulator-always-on;
 };
 
 &sdhc_2 {
