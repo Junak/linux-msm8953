@@ -140,6 +140,7 @@ static int auo720_enable(struct drm_panel *panel)
 	struct device *dev = &ctx->dsi->dev;
 	int ret;
 
+	auo720_off(ctx);
 	ret = auo720_on(ctx);
 	if (ret < 0) {
 		dev_err(dev, "Failed to initialize panel: %d\n", ret);
