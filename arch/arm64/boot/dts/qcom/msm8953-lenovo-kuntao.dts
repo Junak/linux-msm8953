@@ -3,6 +3,8 @@
 /dts-v1/;
 
 #include "msm8953.dtsi"
+#include "pm8953.dtsi"
+#include "pmi8950.dtsi"
 
 /delete-node/ &qseecom_mem;
 
@@ -53,6 +55,26 @@
 			pmsg-size = <0x2000>;
 		};
 	};
+};
+
+&mdss_dsi0 {
+    panel@0 {
+        compatible = "smd,549-v0";
+        reg = <0>;
+
+        reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
+
+        port {
+            panel_in: endpoint {
+                remote-endpoint = <&mdss_dsi0_out>;
+            };
+        };
+    };
+};
+
+&mdss_dsi0_out {
+    data-lanes = <0 1 2 3>;
+    remote-endpoint = <&panel_in>;
 };
 
 &sdhc_1 {
