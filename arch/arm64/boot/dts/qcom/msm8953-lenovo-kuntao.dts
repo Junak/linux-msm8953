@@ -40,6 +40,25 @@
 		};
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_key_default>;
+
+		homepage {
+			label = "Home";
+			gpios = <&tlmm 47 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_HOMEPAGE>;
+		};
+
+		key-volume-up {
+			label = "Volume Up";
+			gpios = <&tlmm 85 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_VOLUMEUP>;
+		};
+	};
+
 	reserved-memory {
 		qseecom_mem: qseecom@84a00000 {
 			reg = <0x0 0x84a00000 0x0 0x1900000>;
@@ -72,11 +91,22 @@
 	status = "okay";
 };
 
+&mdss {
+	status = "okay";
+};
+
 &mdss_dsi0 {
-    panel@0 {
+	vdda-supply = <&pm8953_s3>;
+	vddio-supply = <&pm8953_l6>;
+
+	status = "okay";
+
+    panel: panel@0 {
         compatible = "smd,549-v0";
         reg = <0>;
 
+        elvdd-supply = <&lab_vreg>;
+        elvss-supply = <&ibb_vreg>;
         reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
 
         port {
@@ -90,6 +120,12 @@
 &mdss_dsi0_out {
     data-lanes = <0 1 2 3>;
     remote-endpoint = <&panel_in>;
+};
+
+&mdss_dsi0_phy {
+	vcca-supply = <&pm8953_l3>;
+
+	status = "okay";
 };
 
 &pm8953_resin {
