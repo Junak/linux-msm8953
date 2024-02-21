@@ -10,8 +10,6 @@
 #include <linux/of.h>
 #include <linux/regulator/consumer.h>
 
-#include <video/mipi_display.h>
-
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_modes.h>
 #include <drm/drm_panel.h>
@@ -19,7 +17,7 @@
 struct smd_549_v0 {
 	struct drm_panel panel;
 	struct mipi_dsi_device *dsi;
-	struct regulator_bulk_data supplies[2];
+	struct regulator_bulk_data supplies[4];
 	struct gpio_desc *reset_gpio;
 	bool prepared;
 };
@@ -64,24 +62,13 @@ static int smd_549_v0_on(struct smd_549_v0 *ctx)
 	}
 	msleep(20);
 
-	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set tear on: %d\n", ret);
-		return ret;
-	}
-
+	dsi_dcs_write_seq(dsi, 0x35, 0x00);
 	dsi_generic_write_seq(dsi, 0xfc, 0x5a, 0x5a);
 	dsi_generic_write_seq(dsi, 0xf4, 0x00, 0x01);
 	dsi_generic_write_seq(dsi, 0xfc, 0xa5, 0xa5);
-
-	ret = mipi_dsi_dcs_set_display_brightness(dsi, 0x0000);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display brightness: %d\n", ret);
-		return ret;
-	}
-
-	dsi_dcs_write_seq(dsi, MIPI_DCS_WRITE_POWER_SAVE, 0x00);
-	dsi_dcs_write_seq(dsi, MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x20);
+	dsi_dcs_write_seq(dsi, 0x51, 0x00);
+	dsi_dcs_write_seq(dsi, 0x55, 0x00);
+	dsi_dcs_write_seq(dsi, 0x53, 0x20);
 	dsi_generic_write_seq(dsi, 0xf0, 0x5a, 0x5a);
 	dsi_dcs_write_seq(dsi, 0xed, 0xbe);
 	dsi_dcs_write_seq(dsi, 0x57, 0x40);
@@ -273,8 +260,10 @@ static int smd_549_v0_probe(struct mipi_dsi_device *dsi)
 	if (!ctx)
 		return -ENOMEM;
 
-	ctx->supplies[0].supply = "elvdd";
-	ctx->supplies[1].supply = "elvss";
+	ctx->supplies[0].supply = "vci";
+	ctx->supplies[1].supply = "vio";
+	ctx->supplies[2].supply = "elvdd";
+	ctx->supplies[3].supply = "elvss";
 	ret = devm_regulator_bulk_get(dev, ARRAY_SIZE(ctx->supplies),
 				      ctx->supplies);
 	if (ret < 0)

@@ -81,6 +81,32 @@
 		regulator-always-on;
 		regulator-boot-on;
 	};
+
+	vci_disp: vci-disp-regulator {
+		compatible = "regulator-fixed";
+        enable-active-high;
+		regulator-name = "vci_disp";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		vin-supply = <&vph_pwr>;
+		gpio = <&tlmm 96 GPIO_ACTIVE_HIGH>;
+		startup-delay-us = <300>;
+        regulator-always-on;
+        regulator-boot-on;
+	};
+
+	vio_disp: vio-disp-regulator {
+		compatible = "regulator-fixed";
+        enable-active-high;
+		regulator-name = "vio_disp";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		vin-supply = <&pm8953_l6>;
+		gpio = <&tlmm 33 GPIO_ACTIVE_HIGH>;
+		startup-delay-us = <300>;
+        regulator-always-on;
+        regulator-boot-on;
+	};
 };
 
 &hsusb_phy {
@@ -96,18 +122,25 @@
 };
 
 &mdss_dsi0 {
-	vdda-supply = <&pm8953_s3>;
-	vddio-supply = <&pm8953_l6>;
-
+	pinctrl-0 = <&mdss_te_default>;
+	pinctrl-names = "default";
 	status = "okay";
 
     panel: panel@0 {
         compatible = "smd,549-v0";
         reg = <0>;
 
-        elvdd-supply = <&lab_vreg>;
-        elvss-supply = <&ibb_vreg>;
+		backlight = <&pmi8950_wled>;
         reset-gpios = <&tlmm 61 GPIO_ACTIVE_LOW>;
+
+        pinctrl-names = "default", "sleep";
+        pinctrl-0 = <&pmx_mdss_default>;
+        pinctrl-1 = <&pmx_mdss_sleep>;
+
+		vci-supply = <&vci_disp>;
+		vio-supply = <&vio_disp>;
+		elvdd-supply = <&lab_vreg>;
+		elvss-supply = <&ibb_vreg>;
 
         port {
             panel_in: endpoint {
@@ -131,6 +164,11 @@
 &pm8953_resin {
 	linux,code = <KEY_VOLUMEDOWN>;
 	status = "okay";
+};
+
+&pmi8950_wled {
+    qcom,switching-freq = <800>;
+    status = "okay";
 };
 
 &rpm_requests {
@@ -276,6 +314,21 @@
 
 &tlmm {
 	gpio-reserved-ranges = <0 4>, <135 4>;
+
+    pmx_mdss_default: pmx-mdss-default-state {
+        pins = "gpio61";
+        function = "gpio";
+        drive-strength = <8>;
+        bias-disable;
+        output-high;
+    };
+
+    pmx_mdss_sleep: pmx-mdss-sleep-state {
+        pins = "gpio61";
+        function = "gpio";
+        drive-strength = <2>;
+        bias-pull-down;
+    };
 };
 
 &wcnss {
