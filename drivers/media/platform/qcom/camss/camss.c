@@ -221,6 +221,7 @@ static const struct camss_subdev_resources vfe_res_8x53[] = {
 		.reg = { "vfe0" },
 		.interrupt = { "vfe0" },
 		.line_num = 3,
+		.has_pd = true,
 		.ops = &vfe_ops_4_1,
 	},
 
@@ -241,6 +242,7 @@ static const struct camss_subdev_resources vfe_res_8x53[] = {
 		.reg = { "vfe1" },
 		.interrupt = { "vfe1" },
 		.line_num = 3,
+		.has_pd = true,
 		.ops = &vfe_ops_4_1,
 	}
 };
