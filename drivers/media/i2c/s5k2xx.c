@@ -66,6 +66,7 @@ static const char * const s5k2xx_supply_names[] = { "avdd", "dvdd", "vio", "aux"
 #define S5K2XX_NUM_SUPPLIES		ARRAY_SIZE(s5k2xx_supply_names)
 #define S5K2XX_LINK_FREQ_562MHZ 562000000
 #define S5K2XX_LINK_FREQ_580MHZ 580500000
+#define S5K2XX_LINK_FREQ_600MHZ 600000000
 #define S5K2XX_LINK_FREQ_720MHZ 720000000
 #define S5K2XX_LINK_FREQ_678MHZ 678000000
 #define S5K2XX_LINK_FREQ_1050MHZ 1050000000
@@ -73,6 +74,7 @@ static const char * const s5k2xx_supply_names[] = { "avdd", "dvdd", "vio", "aux"
 enum {
 	S5K2XX_LINK_FREQ_562MHZ_INDEX,
 	S5K2XX_LINK_FREQ_580MHZ_INDEX,
+	S5K2XX_LINK_FREQ_600MHZ_INDEX,
 	S5K2XX_LINK_FREQ_678MHZ_INDEX,
 	S5K2XX_LINK_FREQ_720MHZ_INDEX,
 	S5K2XX_LINK_FREQ_1050MHZ_INDEX,
@@ -81,6 +83,7 @@ enum {
 static const s64 link_freq_menu_items[] = {
 	S5K2XX_LINK_FREQ_562MHZ,
 	S5K2XX_LINK_FREQ_580MHZ,
+	S5K2XX_LINK_FREQ_600MHZ,
 	S5K2XX_LINK_FREQ_678MHZ,
 	S5K2XX_LINK_FREQ_720MHZ,
 	S5K2XX_LINK_FREQ_1050MHZ,
@@ -561,6 +564,103 @@ static struct s5k2xx_data s5k2x7sp_data = {
 	.num_modes = ARRAY_SIZE(s5k2x7_modes),
 	.init_regs = s5k2x7_init,
 	.num_init_regs = ARRAY_SIZE(s5k2x7_init),
+};
+
+static const struct reg_sequence s5k3p8sp_init[] = {
+	{0x6028, 0x2000},
+	{0x602A, 0x2F38},
+	{0x6F12, 0x0088},
+	{0x6F12, 0x0D70},
+	{0x0202, 0x0200},
+	{0x0200, 0x0618},
+	{0x3604, 0x0002},
+	{0x3606, 0x0103},
+	{0xF496, 0x0048},
+	{0xF470, 0x0020},
+	{0xF43A, 0x0015},
+	{0xF484, 0x0006},
+	{0xF440, 0x00AF},
+	{0xF442, 0x44C6},
+	{0xF408, 0xFFF7},
+	{0x3664, 0x0019},
+	{0xF494, 0x1010},
+	{0x367A, 0x0100},
+	{0x362A, 0x0104},
+	{0x362E, 0x0404},
+	{0x32B2, 0x0008},
+	{0x3286, 0x0003},
+	{0x328A, 0x0005},
+	{0xF47C, 0x001F},
+	{0xF62E, 0x00C5},
+	{0xF630, 0x00CD},
+	{0xF632, 0x00DD},
+	{0xF634, 0x00E5},
+	{0xF636, 0x00F5},
+	{0xF638, 0x00FD},
+	{0xF63a, 0x010D},
+	{0xF63C, 0x0115},
+	{0xF63E, 0x0125},
+	{0xF640, 0x012D},
+	{0x3070, 0x0000},
+	{0x0B0E, 0x0000},
+	{0x31C0, 0x00C8},
+	{0x1006, 0x0004},
+};
+
+static const struct reg_sequence s5k3p8sp_mode_4608x3456_regs[] = {
+	{0x6028, 0x2000},
+	{0x0136, 0x1800},
+	{0x0304, 0x0006},
+	{0x0306, 0x0069},
+	{0x0302, 0x0001},
+	{0x0300, 0x0003},
+	{0x030C, 0x0004},
+	{0x030E, 0x0071},
+	{0x030A, 0x0001},
+	{0x0308, 0x0008},
+	{0x0344, 0x0018},
+	{0x0346, 0x0018},
+	{0x0348, 0x1217},
+	{0x034A, 0x0D97},
+	{0x034C, 0x1200},
+	{0x034E, 0x0D80},
+	{0x0408, 0x0000},
+	{0x0900, 0x0011},
+	{0x0380, 0x0001},
+	{0x0382, 0x0001},
+	{0x0384, 0x0001},
+	{0x0386, 0x0001},
+	{0x0400, 0x0000},
+	{0x0404, 0x0010},
+	{0x0342, 0x1400},
+	{0x0340, 0x0E3B},
+	{0x602A, 0x1704},
+	{0x6F12, 0x8010},
+	{0x317A, 0x0130},
+	{0x31A4, 0x0102},
+};
+
+static const struct s5k2xx_mode s5k3p8sp_modes[] = {
+	{
+		.width = 4608,
+		.height = 3456,
+		.fps = 30,
+		.fll_def = 3643,
+		.fll_min = 3643,
+		.llp = 5120,
+		.link_freq_index = S5K2XX_LINK_FREQ_600MHZ_INDEX,
+		.regs = s5k3p8sp_mode_4608x3456_regs,
+		.num_regs = ARRAY_SIZE(s5k3p8sp_mode_4608x3456_regs),
+	}
+};
+
+static struct s5k2xx_data s5k3p8sp_data = {
+	.model = "s5k3p8sp",
+	.chip_id = 0x3108,
+	.modes = s5k3p8sp_modes,
+	.num_modes = ARRAY_SIZE(s5k3p8sp_modes),
+	.init_regs = s5k3p8sp_init,
+	.num_init_regs = ARRAY_SIZE(s5k3p8sp_init),
 };
 
 static const struct reg_sequence s5k3l8_init[] = {
@@ -1446,6 +1546,7 @@ static const struct dev_pm_ops s5k2xx_pm_ops = {
 
 static const struct of_device_id s5k2xx_of_match[] = {
 	{ .compatible = "samsung,s5k3l8", &s5k3l8_data },
+	{ .compatible = "samsung,s5k3p8sp", &s5k3p8sp_data },
 	{ .compatible = "samsung,s5k2p6sx", &s5k2p6sx_data },
 	{ .compatible = "samsung,s5k2x7sp", &s5k2x7sp_data },
 	{ /* sentinel */ }
