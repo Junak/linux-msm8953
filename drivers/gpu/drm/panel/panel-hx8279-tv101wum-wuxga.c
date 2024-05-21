@@ -522,7 +522,7 @@ static int hx8279_tv101wum_wuxga_probe(struct mipi_dsi_device *dsi)
 	return 0;
 }
 
-static int hx8279_tv101wum_wuxga_remove(struct mipi_dsi_device *dsi)
+static void hx8279_tv101wum_wuxga_remove(struct mipi_dsi_device *dsi)
 {
 	struct hx8279_tv101wum_wuxga *ctx = mipi_dsi_get_drvdata(dsi);
 	int ret;
@@ -532,8 +532,6 @@ static int hx8279_tv101wum_wuxga_remove(struct mipi_dsi_device *dsi)
 		dev_err(&dsi->dev, "Failed to detach from DSI host: %d\n", ret);
 
 	drm_panel_remove(&ctx->panel);
-
-	return 0;
 }
 
 static const struct of_device_id hx8279_tv101wum_wuxga_of_match[] = {
