@@ -165,6 +165,10 @@
 
 };
 
+&mdss {
+    status = "okay";
+};
+
 &mdss_dsi0 {
 	status = "okay";
 
@@ -198,6 +202,7 @@
 };
 
 &mdss_dsi0_phy {
+    	status = "okay";
 	vcca-supply = <&pm8953_l3>;
 };
 
