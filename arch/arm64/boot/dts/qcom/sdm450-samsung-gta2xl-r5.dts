@@ -233,6 +233,10 @@
     status = "okay";
 };
 
+&wcnss_fw_mem {
+    status = "okay";
+};
+
 &wcnss_iris {
 	compatible = "qcom,wcn3660b";
 	vddxo-supply = <&pm8953_l7>;
