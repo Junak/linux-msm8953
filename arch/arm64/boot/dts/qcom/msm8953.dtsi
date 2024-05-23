@@ -832,8 +832,8 @@
 			no-map;
 		};
 
-		wcnss_fw_mem: wcnss@8e600000 {
-			reg = <0x0 0x8e600000 0x0 0x700000>;
+		wcnss_fw_mem: wcnss@8e700000 {
+			reg = <0x0 0x8e700000 0x0 0x700000>;
 			no-map;
 		};
 
