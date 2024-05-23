@@ -241,10 +241,6 @@
 	vdddig-supply = <&pm8953_l5>;
 };
 
-&wcnss_mem {
-	status = "okay";
-};
-
 &lpass {
 	status = "okay";
 };
