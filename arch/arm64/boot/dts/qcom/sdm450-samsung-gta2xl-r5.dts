@@ -179,7 +179,7 @@
 	vddio-supply = <&pm8953_l6>;
 
 	panel@0 {
-		compatible = "mdss,hx8279-tv101wum-wuxga";
+		compatible = "boe,tv101wum-nl6";
 		reg = <0>;
 
 		pinctrl-names = "default", "sleep";
