@@ -229,6 +229,10 @@
 	};
 };
 
+&wcnss {
+    status = "okay";
+};
+
 &wcnss_iris {
 	vddxo-supply = <&pm8953_l7>;
 	vddrfa-supply = <&pm8953_l19>;
