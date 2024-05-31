@@ -114,16 +114,6 @@
 		    reg = <0 0x85B00000 0 0x200000>;
 		};
 
-		modem_shared_mem: modem_shared_mem_region@0x93000000 {
-			no-map;
-			reg = <0x0 0x93000000 0x0 0x6000000>;
-		};
-
-		modem_mem: modem_region@86c00000 {
-			no-map-fixup;
-			reg = <0x0 0x86c00000 0x0 0x6a00000>;
-		};
-
 		/delete-node/ adsp@8d600000;
 		adsp_fw_mem: adsp@8d600000 {
     			no-map;
