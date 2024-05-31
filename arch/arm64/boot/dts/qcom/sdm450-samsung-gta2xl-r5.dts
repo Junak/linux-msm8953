@@ -59,29 +59,112 @@
 	};
 
 	reserved-memory {
-		tzapp_region@82800000 {
-			reg = <0x0 0x82800000 0x0 0x2800000>;
+		/* CONFIG_SEC_DEBUG reserves 8MB */
+		sec_debug_region: sec_debug_region@0 {
+			compatible = "removed-dma-pool";
 			no-map;
+			reg = <0x0 0x85000000 0x0 0x00800000>;
+		};
+		
+		/* sec_debug_low_region reserves 4MB
+		   This region is reserved if only debuglevel low */
+		sec_debug_low_region: sec_debug_low_region@0 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x85000000 0x0 0x00400000>;
 		};
 
-		tima_region@85b00000 {
-			reg = <0x0 0x85b00000 0x0 0x600000>;
+		lk_mem: lk_region@0 {
+			linux,reserve-contiguous-region;
+			linux,reserve-region;
+			linux,remove-completely;
 			no-map;
+			reg = <0x0 0x8F600000 0x0 0x00300000>;
+			label = "lk_mem";
 		};
 
-		splash_region@90001000 {
-			reg = <0x0 0x90001000 0x0 (1080 * 2220 * 3)>;
+		ss_plog@85D00000 {
+			compatible = "ss_plog";
 			no-map;
+			reg = <0x0 0x85D00000 0x0 0x00400000>;
 		};
 
 		ramoops@86100000 {
 			compatible = "ramoops";
 			reg = <0 0x86100000 0 0x100000>;
-
+			record-size = <0x40000>;
 			console-size = <0x40000>;
 			ftrace-size = <0x40000>;
 			pmsg-size = <0x40000>;
-			record-size = <0x40000>;
+		};
+
+		other_ext_mem: other_ext_region@0 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x86300000 0x0 0x500000>;
+		};
+
+		tzapp_mem: tzapp_region@0 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x82800000 0x0 0x2800000>;
+		};
+
+		/*to reserve 2MB for TIMA */
+		tima_mem: tima_region@0x85B00000 {
+		    compatible = "removed-dma-pool";
+		    no-map;
+		    reg = <0 0x85B00000 0 0x200000>;
+		};
+
+		modem_shared_mem: modem_shared_mem_region@0x93000000 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x93000000 0x0 0x6000000>;
+		};
+
+		/delete-node/ modem_region@0;
+		modem_mem: modem_region@0 {
+			compatible = "removed-dma-pool";
+			no-map-fixup;
+			reg = <0x0 0x86c00000 0x0 0x6a00000>;
+		};
+
+		/delete-node/ adsp_fw_region@0;
+		adsp_fw_mem: adsp_fw_region@0 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x8d600000 0x0 0x1800000>;
+		};
+
+		/delete-node/ wcnss_fw_region@0;
+		wcnss_fw_mem: wcnss_fw_region@0 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x8ee00000 0x0 0x700000>;
+		};
+
+		/delete-node/ qseecom_region@0;
+		qseecom_mem: qseecom_region@0 {
+			compatible = "shared-dma-pool";
+			reusable;
+			alignment = <0 0x400000>;
+			size = <0 0x1C00000>;
+		};
+
+		/delete-node/ secure_region@0;
+		secure_mem: secure_region@0 {
+			compatible = "shared-dma-pool";
+			reusable;
+			alignment = <0 0x400000>;
+			size = <0 0xb400000>;
+		};
+
+		/delete-node/ venus_region@0;
+		venus_mem: venus_region@0 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x82000000 0x0 0x500000>;
 		};
 	};
 
