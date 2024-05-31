@@ -130,12 +130,6 @@
 			reg = <0x0 0x86c00000 0x0 0x6a00000>;
 		};
 
-		/delete-node/ &adsp_fw_mem;
-		adsp_fw_mem: adsp@8d600000 {
-    			reg = <0x0 0x8d600000 0x0 0x1800000>;
-    			no-map;
-		};
-
 		/delete-node/ &qseecom_mem;
 		qseecom_mem: qseecom@85b00000 {
 			reg = <0x0 0x85b00000 0x0 0x1c00000>;
