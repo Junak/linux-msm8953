@@ -130,12 +130,22 @@
 			reg = <0x0 0x86c00000 0x0 0x6a00000>;
 		};
 
-		/delete-node/ secure_region@0;
-		secure_mem: secure_region@0 {
-			compatible = "shared-dma-pool";
-			reusable;
-			alignment = <0 0x400000>;
-			size = <0 0xb400000>;
+		/delete-node/ &adsp_fw_mem;
+		adsp_fw_mem: adsp@8d600000 {
+    			reg = <0x0 0x8d600000 0x0 0x1800000>;
+    			no-map;
+		};
+
+		/delete-node/ &qseecom_mem;
+		qseecom_mem: qseecom@85b00000 {
+			reg = <0x0 0x85b00000 0x0 0x1c00000>;
+			no-map;
+		};
+
+		/delete-node/ &venus_mem;
+		venus_mem: venus@91400000 {
+			reg = <0x0 0x91400000 0x0 0x500000>;
+			no-map;
 		};
 	};
 
