@@ -59,34 +59,13 @@
 	};
 
 	reserved-memory {
-		/* CONFIG_SEC_DEBUG reserves 8MB */
-		sec_debug_region: sec_debug_region@0 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0x0 0x85000000 0x0 0x00800000>;
-		};
-		
-		/* sec_debug_low_region reserves 4MB
-		   This region is reserved if only debuglevel low */
-		sec_debug_low_region: sec_debug_low_region@0 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0x0 0x85000000 0x0 0x00400000>;
-		};
-
-		lk_mem: lk_region@0 {
+		lk_mem: lk_region@8F600000 {
 			linux,reserve-contiguous-region;
 			linux,reserve-region;
 			linux,remove-completely;
 			no-map;
 			reg = <0x0 0x8F600000 0x0 0x00300000>;
 			label = "lk_mem";
-		};
-
-		ss_plog@85D00000 {
-			compatible = "ss_plog";
-			no-map;
-			reg = <0x0 0x85D00000 0x0 0x00400000>;
 		};
 
 		ramoops@86100000 {
@@ -98,7 +77,7 @@
 			pmsg-size = <0x40000>;
 		};
 
-		other_ext_mem: other_ext_region@0 {
+		other_ext_mem: other_ext_region@86300000 {
 			no-map;
 			reg = <0x0 0x86300000 0x0 0x500000>;
 		};
@@ -108,10 +87,11 @@
 			reg = <0x0 0x82800000 0x0 0x2800000>;
 		};
 
-		/*to reserve 2MB for TIMA */
-		tima_mem: tima_region@0x85B00000 {
-		    no-map;
-		    reg = <0 0x85B00000 0 0x200000>;
+		/delete-node/ wcnss@8e700000;
+		wcnss_fw_mem:  wcnss@8ee00000 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x8ee00000 0x0 0x700000>;
 		};
 
 		/delete-node/ adsp@8d600000;
