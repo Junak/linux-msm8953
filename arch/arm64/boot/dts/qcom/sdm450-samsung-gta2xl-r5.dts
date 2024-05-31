@@ -179,7 +179,7 @@
 	vddio-supply = <&pm8953_l6>;
 
 	panel@0 {
-		compatible = "samsung,hx8279-tv101wum-wuxga";
+		compatible = "";
 		reg = <0>;
 
 		pinctrl-0 = <&panel_active>;
