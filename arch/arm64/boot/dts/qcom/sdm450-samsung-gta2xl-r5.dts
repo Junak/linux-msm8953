@@ -130,41 +130,12 @@
 			reg = <0x0 0x86c00000 0x0 0x6a00000>;
 		};
 
-		/delete-node/ adsp_fw_region@0;
-		adsp_fw_mem: adsp_fw_region@0 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0x0 0x8d600000 0x0 0x1800000>;
-		};
-
-		/delete-node/ wcnss_fw_region@0;
-		wcnss_fw_mem: wcnss_fw_region@0 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0x0 0x8ee00000 0x0 0x700000>;
-		};
-
-		/delete-node/ qseecom_region@0;
-		qseecom_mem: qseecom_region@0 {
-			compatible = "shared-dma-pool";
-			reusable;
-			alignment = <0 0x400000>;
-			size = <0 0x1C00000>;
-		};
-
 		/delete-node/ secure_region@0;
 		secure_mem: secure_region@0 {
 			compatible = "shared-dma-pool";
 			reusable;
 			alignment = <0 0x400000>;
 			size = <0 0xb400000>;
-		};
-
-		/delete-node/ venus_region@0;
-		venus_mem: venus_region@0 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0x0 0x82000000 0x0 0x500000>;
 		};
 	};
 
