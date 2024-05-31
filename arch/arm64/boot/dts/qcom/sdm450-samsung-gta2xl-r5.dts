@@ -77,11 +77,6 @@
 			pmsg-size = <0x40000>;
 		};
 
-		other_ext_mem: other_ext_region@86300000 {
-			no-map;
-			reg = <0x0 0x86300000 0x0 0x500000>;
-		};
-
 		tzapp_mem: tzapp_region@82800000 {
 			no-map;
 			reg = <0x0 0x82800000 0x0 0x2800000>;
@@ -98,12 +93,6 @@
 		adsp_fw_mem: adsp@8d600000 {
     			no-map;
     			reg = <0x0 0x8d600000 0x0 0x1800000>;
-		};
-
-		/delete-node/ qseecom@85b00000;
-		qseecom_mem: qseecom@85b00000 {
-			no-map;
-			reg = <0x0 0x85b00000 0x0 0x1c00000>;
 		};
 
 		/delete-node/ venus@91400000;
