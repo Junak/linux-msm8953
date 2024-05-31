@@ -124,19 +124,19 @@
 			reg = <0x0 0x86c00000 0x0 0x6a00000>;
 		};
 
-		/delete-node/ &adsp_fw_mem;
+		/delete-node/ adsp@8d600000;
 		adsp_fw_mem: adsp@8d600000 {
     			no-map;
     			reg = <0x0 0x8d600000 0x0 0x1800000>;
 		};
 
-		/delete-node/ &qseecom_mem;
+		/delete-node/ qseecom@85b00000;
 		qseecom_mem: qseecom@85b00000 {
 			no-map;
 			reg = <0x0 0x85b00000 0x0 0x1c00000>;
 		};
 
-		/delete-node/ &venus_mem;
+		/delete-node/ venus@91400000;
 		venus_mem: venus@91400000 {
 			no-map;
 			reg = <0x0 0x91400000 0x0 0x500000>;
