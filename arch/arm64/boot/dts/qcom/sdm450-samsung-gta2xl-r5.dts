@@ -246,7 +246,7 @@
 };
 
 &wcnss {
-    status = "okay";
+	status = "okay";
 };
 
 &wcnss_fw_mem {
