@@ -241,7 +241,7 @@
 		vcc-supply = <&pm8953_l5>;
 
 		gpio-controller;
-	#gpio-cells = <2>;
+		#gpio-cells = <2>;
 	};
 };
 
