@@ -250,7 +250,7 @@
 };
 
 &wcnss_fw_mem {
-    status = "okay";
+	status = "okay";
 };
 
 &wcnss_iris {
