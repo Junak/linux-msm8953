@@ -84,7 +84,6 @@
 
 		/delete-node/ wcnss@8e700000;
 		wcnss_fw_mem:  wcnss@8ee00000 {
-			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x8ee00000 0x0 0x700000>;
 		};
