@@ -716,7 +716,7 @@ static void ili7807d_djn_53_remove(struct mipi_dsi_device *dsi)
 }
 
 static const struct of_device_id ili7807d_djn_53_of_match[] = {
-	{ .compatible = "tenor,ili7807d_djn" }, // FIXME
+	{ .compatible = "10or,g-ili7807d-djn" }, // FIXME
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, ili7807d_djn_53_of_match);
