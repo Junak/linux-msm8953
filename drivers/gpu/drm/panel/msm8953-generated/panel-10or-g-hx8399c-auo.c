@@ -281,7 +281,7 @@ static void hx8399c_auo_53_remove(struct mipi_dsi_device *dsi)
 }
 
 static const struct of_device_id hx8399c_auo_53_of_match[] = {
-	{ .compatible = "tenor,hx8399c_auo" }, // FIXME
+	{ .compatible = "10or,g-hx8399c-auo" }, // FIXME
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, hx8399c_auo_53_of_match);

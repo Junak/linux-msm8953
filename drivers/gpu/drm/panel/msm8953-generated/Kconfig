@@ -5,6 +5,19 @@ menu "MSM8953 panel drivers generated with linux-mdss-dsi-panel-driver-generator
 config DRM_PANEL_MSM8953_GENERATED
 	tristate "Select all generated MSM8953 panel drivers by default"
 
+config DRM_PANEL_10OR_G_HX8399C_AUO
+	tristate "10or G HX8399C AUO"
+	default DRM_PANEL_MSM8953_GENERATED
+
+config DRM_PANEL_10OR_G_ILI7807D_DJN_AUO
+	tristate "10or G ILI7807D DJN AUO"
+	default DRM_PANEL_MSM8953_GENERATED
+
+config DRM_PANEL_10OR_G_ILI7807D_DJN
+	tristate "10or G ILI7807D DJN"
+	default DRM_PANEL_MSM8953_GENERATED
+
+
 config DRM_PANEL_BOE_BS052FHM_A00_6C01
 	tristate "Boe BS052FHM A00 6C01"
 	default DRM_PANEL_MSM8953_GENERATED
@@ -107,18 +120,6 @@ config DRM_PANEL_MOTOROLA_ALI_TIANMA
 
 config DRM_PANEL_OFILM_622_V0
 	tristate "Ofilm 622 V0"
-	default DRM_PANEL_MSM8953_GENERATED
-
-config DRM_PANEL_TENOR_HX8399C_AUO
-	tristate "Tenor HX8399C_AUO"
-	default DRM_PANEL_MSM8953_GENERATED
-
-config DRM_PANEL_TENOR_ILI7807D_DJN_AUO
-	tristate "Tenor ILI7807D_DJN_AUO"
-	default DRM_PANEL_MSM8953_GENERATED
-
-config DRM_PANEL_TENOR_ILI7807D_DJN
-	tristate "Tenor ILI7807D_DJN"
 	default DRM_PANEL_MSM8953_GENERATED
 
 config DRM_PANEL_TIANMA_622_V0

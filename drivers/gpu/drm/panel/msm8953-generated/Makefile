@@ -1,3 +1,6 @@
+obj-$(CONFIG_DRM_PANEL_10OR_G_HX8399C_AUO) += panel-10or-g-hx8399c-auo.o
+obj-$(CONFIG_DRM_PANEL_10OR_G_ILI7807D_DJN_AUO) += panel-10or-g-ili7807d-djn-auo.o
+obj-$(CONFIG_DRM_PANEL_10OR_G_ILI7807D_DJN) += panel-10or-g-ili7807d-djn.o
 obj-$(CONFIG_DRM_PANEL_BOE_BS052FHM_A00_6C01) += panel-boe-bs052fhm-a00-6c01.o
 obj-$(CONFIG_DRM_PANEL_CSOT_622_V0) += panel-csot-622-v0.o
 obj-$(CONFIG_DRM_PANEL_FAIRPHONE_FP3_HX83112B) += panel-fairphone-fp3-hx83112b.o
@@ -24,9 +27,6 @@ obj-$(CONFIG_DRM_PANEL_MDSS_R63350) += panel-mdss-r63350.o
 obj-$(CONFIG_DRM_PANEL_MOTOROLA_ALI_BOE) += panel-motorola-ali-boe.o
 obj-$(CONFIG_DRM_PANEL_MOTOROLA_ALI_TIANMA) += panel-motorola-ali-tianma.o
 obj-$(CONFIG_DRM_PANEL_OFILM_622_V0) += panel-ofilm-622-v0.o
-obj-$(CONFIG_DRM_PANEL_TENOR_HX8399C_AUO) += panel-tenor-hx8399c_auo.o
-obj-$(CONFIG_DRM_PANEL_TENOR_ILI7807D_DJN_AUO) += panel-tenor-ili7807d_djn_auo.o
-obj-$(CONFIG_DRM_PANEL_TENOR_ILI7807D_DJN) += panel-tenor-ili7807d_djn.o
 obj-$(CONFIG_DRM_PANEL_TIANMA_622_V0) += panel-tianma-622-v0.o
 obj-$(CONFIG_DRM_PANEL_TIANMA_TL052VDXP02) += panel-tianma-tl052vdxp02.o
 obj-$(CONFIG_DRM_PANEL_XIAOMI_AUO_R61322) += panel-xiaomi-auo-r61322.o
