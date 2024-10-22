@@ -633,6 +633,24 @@
 		reg = <0 0 0 0>;
 	};
 
+	mpm: interrupt-controller@601d4 {
+		compatible = "qcom,mpm";
+		qcom,rpm-msg-ram = <&apss_mpm>;
+		interrupts = <GIC_SPI 171 IRQ_TYPE_EDGE_RISING>;
+		mboxes = <&apcs 1>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+		#power-domain-cells = <0>;
+		interrupt-parent = <&intc>;
+		qcom,mpm-pin-count = <96>;
+		qcom,mpm-pin-map = <2 184>,  /* tsens_upper_lower_int */
+				   <37 220>, /* qmp_usb3_lfps_rxterm_irq -> ss_phy_irq */
+				   <49 136>, /* qusb2phy_dpse_hv -> hs_phy_irq*/
+				   <53 72>, /* mdss_irq */
+				   <58 136>, /* qusb2phy_dmse_hv -> hs_phy_irq*/
+				   <88 190>; /* ee0_krait_hlos_spmi_periph_irq */
+	};
+
 	pmu {
 		compatible = "arm,cortex-a53-pmu";
 		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_HIGH)>;
@@ -694,11 +712,13 @@
 		CLUSTER0_PD: power-domain-cluster0 {
 			#power-domain-cells = <0>;
 			domain-idle-states = <&CLUSTER_RET>, <&CLUSTER_GDHS>, <&CLUSTER_PC>;
+			power-domains = <&mpm>;
 		};
 
 		CLUSTER1_PD: power-domain-cluster1 {
 			#power-domain-cells = <0>;
 			domain-idle-states = <&CLUSTER_RET>, <&CLUSTER_GDHS>, <&CLUSTER_PC>;
+			power-domains = <&mpm>;
 		};
 	};
 
@@ -956,8 +976,15 @@
 		compatible = "simple-bus";
 
 		rpm_msg_ram: sram@60000 {
-			compatible = "qcom,rpm-msg-ram";
+			compatible = "qcom,rpm-msg-ram", "mmio-sram";
 			reg = <0x00060000 0x8000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0 0x00060000 0x8000>;
+
+			apss_mpm: sram@1d4 {
+				reg = <0x1d4 0x48>;
+			};
 		};
 
 		hsusb_phy: phy@79000 {
@@ -1012,8 +1039,8 @@
 			reg = <0x004a9000 0x1000>, /* TM */
 			      <0x004a8000 0x1000>; /* SROT */
 			#qcom,sensors = <16>;
-			interrupts = <GIC_SPI 184 IRQ_TYPE_LEVEL_HIGH>,
-				     <GIC_SPI 314 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts-extended = <&mpm 2 IRQ_TYPE_LEVEL_HIGH>,
+					      <&intc GIC_SPI 314 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "uplow", "critical";
 			#thermal-sensor-cells = <1>;
 		};
@@ -1052,6 +1079,7 @@
 			interrupts = <GIC_SPI 208 IRQ_TYPE_LEVEL_HIGH>;
 			gpio-controller;
 			gpio-ranges = <&tlmm 0 0 142>;
+			wakeup-parent = <&mpm>;
 			#gpio-cells = <2>;
 			interrupt-controller;
 			#interrupt-cells = <2>;
@@ -2176,7 +2204,7 @@
 			      <0x0200a000 0x2100>;
 			reg-names = "core", "chnls", "obsrvr", "intr", "cnfg";
 			interrupt-names = "periph_irq";
-			interrupts = <GIC_SPI 190 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts-extended = <&mpm 88 IRQ_TYPE_LEVEL_HIGH>;
 			qcom,ee = <0>;
 			qcom,channel = <0>;
 			interrupt-controller;
@@ -2247,8 +2275,8 @@
 			#size-cells = <1>;
 			ranges;
 
-			interrupts = <GIC_SPI 136 IRQ_TYPE_LEVEL_HIGH>,
-				     <GIC_SPI 220 IRQ_TYPE_LEVEL_HIGH>;
+			interrupts-extended = <&mpm 49 IRQ_TYPE_LEVEL_HIGH>,
+					      <&mpm 37 IRQ_TYPE_LEVEL_HIGH>;
 			interrupt-names = "hs_phy_irq", "ss_phy_irq";
 
 			clocks = <&gcc GCC_USB_PHY_CFG_AHB_CLK>,
