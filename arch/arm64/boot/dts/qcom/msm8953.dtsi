@@ -2870,9 +2870,11 @@
 				    "quin-iomux";
 
 			audio-routing =
+#if 0
 				"AMIC1", "MIC BIAS External1",
 				"AMIC2", "MIC BIAS External2",
 				"AMIC3", "MIC BIAS External1",
+#endif
 				"MM_DL1", "MultiMedia1 Playback",
 				"MM_DL3", "MultiMedia3 Playback",
 				"MM_DL4", "MultiMedia4 Playback",
@@ -2915,6 +2917,7 @@
 				};
 			};
 
+#if 0
 			primary-mi2s-dai-link {
 				link-name = "Primary MI2S";
 				cpu {
@@ -2944,6 +2947,7 @@
 					sound-dai = <&lpass_codec 1>, <&wcd_codec 1>;
 				};
 			};
+#endif
 		};
 
 		lpass_codec: codec@c0f0000 {
