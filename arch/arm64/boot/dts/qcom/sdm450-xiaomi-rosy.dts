@@ -208,5 +208,5 @@
 };
 
 &zap_shader {
-	firmware-name = "qcom/msm8953/samsung/a6plte/a506_zap.mdt";
+	firmware-name = "qcom/msm8953/xiaomi/rosy/a506_zap.mdt";
 };
